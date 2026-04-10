@@ -1,0 +1,833 @@
+Command: C:\Espressif\python_env\idf5.5_py3.11_env\Scripts\python.exe C:\Espressif\frameworks\esp-idf-v5.5.3\tools/idf_monitor.py -p COM5 -b 115200 --toolchain-prefix riscv32-esp-elf- --target esp32c6 --revision 0 --decode-panic backtrace C:\Users\joyce\OneDrive\Documents\C6-Firmware\build\westshore_remote_id.elf C:\Users\joyce\OneDrive\Documents\C6-Firmware\build\bootloader\bootloader.elf --force-color -m 'C:\Espressif\python_env\idf5.5_py3.11_env\Scripts\python.exe' 'C:\Espressif\frameworks\esp-idf-v5.5.3\tools\idf.py' '-p' 'COM5'
+ESP-ROM:esp32c6-20220919
+Build:Sep 19 2022
+rst:0x15 (USB_UART_HPSYS),boot:0xc (SPI_FAST_FLASH_BOOT)
+Saved PC:0x4080b244
+SPIWP:0xee
+mode:DIO, clock div:2
+load:0x40875730,len:0x1734
+load:0x4086b910,len:0xe78
+load:0x4086e610,len:0x31a8
+entry 0x4086b91a
+[0;32mI (23) boot: ESP-IDF v5.5.3 2nd stage bootloader[0m
+[0;32mI (23) boot: compile time Apr  5 2026 21:49:06[0m
+[0;32mI (23) boot: chip revision: v0.2[0m
+[0;32mI (24) boot: efuse block revision: v0.3[0m
+[0;32mI (24) boot.esp32c6: SPI Speed      : 80MHz[0m
+[0;32mI (24) boot.esp32c6: SPI Mode       : DIO[0m
+[0;32mI (24) boot.esp32c6: SPI Flash Size : 4MB[0m
+[0;32mI (25) boot: Enabling RNG early entropy source...[0m
+[0;32mI (25) boot: Partition Table:[0m
+[0;32mI (25) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (26) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (26) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (27) boot:  2 otadata          OTA data         01 00 00010000 00002000[0m
+[0;32mI (27) boot:  3 ota_0            OTA app          00 10 00020000 001c0000[0m
+[0;32mI (28) boot:  4 ota_1            OTA app          00 11 001e0000 001c0000[0m
+[0;32mI (28) boot:  5 storage          Unknown data     01 82 003a0000 00060000[0m
+[0;32mI (29) boot: End of partition table[0m
+[0;32mI (29) esp_image: segment 0: paddr=00020020 vaddr=42100020 size=3ddc8h (253384) map[0m
+[0;32mI (77) esp_image: segment 1: paddr=0005ddf0 vaddr=40800000 size=02228h (  8744) load[0m
+[0;32mI (79) esp_image: segment 2: paddr=00060020 vaddr=42000020 size=fcd28h (1035560) map[0m
+[0;32mI (271) esp_image: segment 3: paddr=0015cd50 vaddr=40802228 size=1fabch (129724) load[0m
+[0;32mI (299) esp_image: segment 4: paddr=0017c814 vaddr=40821cf0 size=03a58h ( 14936) load[0m
+[0;32mI (310) boot: Loaded app from partition at offset 0x20000[0m
+[0;32mI (310) boot: Disabling RNG early entropy source...[0m
+[0;32mI (311) cpu_start: Unicore app[0m
+[0;32mI (320) cpu_start: Pro cpu start user code[0m
+[0;32mI (320) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (320) app_init: Application information:[0m
+[0;32mI (320) app_init: Project name:     westshore_remote_id[0m
+[0;32mI (321) app_init: App version:      1[0m
+[0;32mI (321) app_init: Compile time:     Apr  5 2026 22:43:51[0m
+[0;32mI (321) app_init: ELF file SHA256:  583939c0f...[0m
+[0;32mI (321) app_init: ESP-IDF:          v5.5.3[0m
+[0;32mI (322) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (322) efuse_init: Max chip rev:     v0.99 [0m
+[0;32mI (322) efuse_init: Chip rev:         v0.2[0m
+[0;32mI (322) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (323) heap_init: At 4082F6B0 len 0004CF60 (307 KiB): RAM[0m
+[0;32mI (323) heap_init: At 4087C610 len 00002F54 (11 KiB): RAM[0m
+[0;32mI (323) heap_init: At 50000000 len 00003FE8 (15 KiB): RTCRAM[0m
+[0;32mI (324) spi_flash: detected chip: gd[0m
+[0;32mI (324) spi_flash: flash io: dio[0m
+[0;32mI (325) sleep_gpio: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (325) sleep_gpio: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (326) main_task: Started on CPU0[0m
+[0;32mI (326) main_task: Calling app_main()[0m
+[0;32mI (337) LED: LED initialised on GPIO4[0m
+[0;32mI (339) NVS_CFG: Config loaded (mode=0 ch=1-13 bl=0 upload=on ssid='TheFastStinkyKid')[0m
+[0;32mI (340) MAIN: ===========================================[0m
+[0;32mI (340) MAIN:  AirAware X1 — Remote ID Sensor Node v1.1[0m
+[0;32mI (340) MAIN:  ESP32-C6  |  IDF v5.5.3[0m
+[0;32mI (340) MAIN: ===========================================[0m
+[0;32mI (340) MAIN:  Mode:     BLE relay[0m
+[0;32mI (340) MAIN:  Channels: 1-13[0m
+[0;32mI (341) MAIN:  Upload:   enabled  SSID: 'TheFastStinkyKid'[0m
+[0;32mI (341) MAIN:  Node:     Test Node[0m
+[0;32mI (341) OUTPUT: Output task running on UART0 (TX=GPIO16, 115200 baud)[0m
+[0;32mI (342) WIFI_SCAN: Config AP SSID: AirAware-X1-2661[0m
+[0;32mI (344) pp: pp rom version: 5b8dcfa[0m
+[0;32mI (344) net80211: net80211 rom version: 5b8dcfa[0m
+[0;32mI (346) wifi:wifi driver task: 40843488, prio:23, stack:6656, core=0[0m
+[0;32mI (351) wifi:wifi firmware version: 4df78f2[0m
+[0;32mI (351) wifi:wifi certification version: v7.0[0m
+[0;32mI (351) wifi:config NVS flash: enabled[0m
+[0;32mI (351) wifi:config nano formatting: disabled[0m
+[0;32mI (351) wifi:mac_version:HAL_MAC_ESP32AX_761,ut_version:N, band mode:0x1[0m
+[0;32mI (352) wifi:Init data frame dynamic rx buffer num: 8[0m
+[0;32mI (352) wifi:Init static rx mgmt buffer num: 5[0m
+[0;32mI (352) wifi:Init management short buffer num: 32[0m
+[0;32mI (352) wifi:Init static tx buffer num: 4[0m
+[0;32mI (353) wifi:Init static tx FG buffer num: 2[0m
+[0;32mI (353) wifi:Init static rx buffer size: 1700 (rxctrl:92, csi:512)[0m
+[0;32mI (353) wifi:Init static rx buffer num: 4[0m
+[0;32mI (353) wifi:Init dynamic rx buffer num: 8[0m
+[0;32mI (354) wifi_init: rx ba win: 6[0m
+[0;32mI (354) wifi_init: accept mbox: 6[0m
+[0;32mI (354) wifi_init: tcpip mbox: 32[0m
+[0;32mI (354) wifi_init: udp mbox: 6[0m
+[0;32mI (354) wifi_init: tcp mbox: 6[0m
+[0;32mI (354) wifi_init: tcp tx win: 5760[0m
+[0;32mI (355) wifi_init: tcp rx win: 5760[0m
+[0;32mI (355) wifi_init: tcp mss: 1440[0m
+[0;32mI (355) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (355) wifi_init: WiFi RX IRAM OP enabled[0m
+[0;32mI (355) wifi_init: WiFi SLP IRAM OP enabled[0m
+[0;32mI (496) phy_init: phy_version 343,b513b46,Nov 14 2025,16:34:12[0m
+[0;33mW (558) wifi:ACK_TAB0   :0x   90a0b, QAM16:0x9 (24Mbps), QPSK:0xa (12Mbps), BPSK:0xb (6Mbps)[0m
+[0;33mW (558) wifi:CTS_TAB0   :0x   90a0b, QAM16:0x9 (24Mbps), QPSK:0xa (12Mbps), BPSK:0xb (6Mbps)[0m
+[0;33mW (559) wifi:(agc)0x600a7128:0xd216d9e0, min.avgNF:0xce->0xd2(dB), RCalCount:0x16c, min.RRssi:0x9e0(-98.00)[0m
+[0;32mI (560) wifi:11ax coex: WDEVAX_PTI0(0x55777555), WDEVAX_PTI1(0x00003377).[0m
+
+[0;32mI (560) wifi:mode : sta (98:a3:16:7d:26:60) + softAP (98:a3:16:7d:26:61)[0m
+[0;32mI (561) wifi:enable tsf[0m
+[0;33mW (561) wifi:11ax/11ac mode can not work under phy bw 40M, the sta 2G phymode changed to 11N[0m
+[0;32mI (564) wifi:Total power save buffer number: 2[0m
+[0;32mI (565) wifi:Init max length of beacon: 752/752[0m
+[0;32mI (565) wifi:Init max length of beacon: 752/752[0m
+[0;32mI (567) esp_netif_lwip: DHCP server started on interface WIFI_AP_DEF with IP: 192.168.4.1[0m
+[0;32mI (567) CFG_SRV: Starting HTTP config server on http://192.168.4.1[0m
+[0;32mI (569) CFG_SRV: Config server ready (non-blocking)[0m
+[0;32mI (569) wifi:ic_enable_sniffer[0m
+[0;32mI (570) WIFI_SCAN: Scanner started — AP 'AirAware-X1-2661', ch 1-13, 500ms dwell[0m
+[0;32mI (571) WIFI_SCAN: Config portal: connect to 'AirAware-X1-2661' → http://192.168.4.1[0m
+[0;32mI (1071) BLE_INIT: Using main XTAL as clock source, chip ver: 2[0m
+[0;32mI (1071) BLE_INIT: ble controller commit:[17fdc66][0m
+[0;32mI (1076) BLE_INIT: Bluetooth MAC: 98:a3:16:7d:26:62[0m
+[0;32mI (1084) phy: libbtbb version: c493933, Nov 14 2025, 16:34:25[0m
+[0;32mI (1089) BLE_RELAY: BLE host synced — configuring extended advertiser[0m
+[0;32mI (1089) BLE_RELAY: Extended advertiser configured OK[0m
+[0;32mI (1089) BLE_RELAY: Relay task running[0m
+[0;32mI (1090) BLE_RELAY: BLE relay initializing[0m
+[0;32mI (1090) UPLOADER: Uploader task started (interval=10s)[0m
+[0;32mI (1090) UPLOADER: WiFi uploader started (interval=10s queue=100)[0m
+[0;32mI (1090) MAIN: System ready[0m
+[0;32mI (1090) MAIN:   Wi-Fi scanner:  ch 1-13, 500ms dwell[0m
+[0;32mI (1090) MAIN:   BLE relay:      active[0m
+[0;32mI (1091) MAIN:   Cloud upload:   active[0m
+[0;32mI (1091) MAIN:   Config portal:  AirAware-X1-XXXX → http://192.168.4.1[0m
+[0;32mI (1140) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (3229) WIFI_SCAN: ODID frame! RSSI=-51 len=79[0m
+[0;32mI (3229) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (3229) BLE_RELAY: Operator location saved: lat=41.398666 lon=-81.805817[0m
+[0;32mI (3549) WIFI_SCAN: ODID frame! RSSI=-51 len=79[0m
+[0;32mI (3549) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (3980) BLE_RELAY: Relay: airborne=0 lat=41.398724 lon=-81.805801 op_lat=41.398668 op_lon=-81.805816[0m
+[0;32mI (4830) BLE_RELAY: Relay: airborne=0 lat=41.398724 lon=-81.805801 op_lat=41.398668 op_lon=-81.805816[0m
+[0;32mI (5680) BLE_RELAY: Relay: airborne=0 lat=41.398724 lon=-81.805801 op_lat=41.398668 op_lon=-81.805816[0m
+[0;32mI (6530) BLE_RELAY: Relay: airborne=0 lat=41.398724 lon=-81.805801 op_lat=41.398668 op_lon=-81.805816[0m
+[0;32mI (7380) BLE_RELAY: Relay: airborne=0 lat=41.398724 lon=-81.805801 op_lat=41.398668 op_lon=-81.805816[0m
+[0;32mI (8230) BLE_RELAY: Relay: airborne=0 lat=41.398724 lon=-81.805801 op_lat=41.398668 op_lon=-81.805816[0m
+[0;32mI (9080) BLE_RELAY: Relay: airborne=0 lat=41.398724 lon=-81.805801 op_lat=41.398668 op_lon=-81.805816[0m
+[0;32mI (9629) WIFI_SCAN: ODID frame! RSSI=-39 len=79[0m
+[0;32mI (9629) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (9669) WIFI_SCAN: ODID frame! RSSI=-48 len=79[0m
+[0;32mI (9669) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (9830) BLE_RELAY: Relay: airborne=1 lat=41.398720 lon=-81.805794 op_lat=41.398671 op_lon=-81.805807[0m
+[0;32mI (9949) WIFI_SCAN: ODID frame! RSSI=-42 len=79[0m
+[0;32mI (9949) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (10630) BLE_RELAY: Relay: airborne=1 lat=41.398720 lon=-81.805794 op_lat=41.398671 op_lon=-81.805807[0m
+[0;32mI (11150) UPLOADER: Upload cycle: 5 detections queued[0m
+[0;32mI (11480) BLE_RELAY: Relay: airborne=1 lat=41.398720 lon=-81.805794 op_lat=41.398671 op_lon=-81.805807[0m
+[0;32mI (11700) wifi:ic_disable_sniffer[0m
+[0;33mW (11800) wifi:(itwt)itwt_stop_process![0m
+[0;32mI (12300) UPLOADER: Connecting to WiFi: 'TheFastStinkyKid'[0m
+[0;32mI (12330) BLE_RELAY: Relay: airborne=1 lat=41.398720 lon=-81.805794 op_lat=41.398671 op_lon=-81.805807[0m
+[0;32mI (13180) BLE_RELAY: Relay: airborne=1 lat=41.398720 lon=-81.805794 op_lat=41.398671 op_lon=-81.805807[0m
+[0;32mI (14030) BLE_RELAY: Relay: airborne=1 lat=41.398720 lon=-81.805794 op_lat=41.398671 op_lon=-81.805807[0m
+[0;32mI (14378) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (14378) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (14379) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (14387) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (14398) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (14398) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (14399) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (14399) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (14400) wifi:(trc)phytype:CBW20-SGI, snr:63, maxRate:144, highestRateIdx:0[0m
+[0;33mW (14400) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (14400) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:63, ampduState:wait operational[0m
+[0;32mI (14401) wifi:ifidx:0, rssi:-35, nf:-98, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (14401) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (14436) wifi:connected with TheFastStinkyKid, aid = 18, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (14436) wifi:security: WPA2-PSK, phy:bgn, rssi:-35, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (14437) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (14437) wifi:pm start, type:1, aid:0x12, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (14437) wifi:dp: 1, bi: 102400, li: 3, scale listen interval from 307200 us to 307200 us[0m
+[0;32mI (14438) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (14438) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:1, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (14439) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:2, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (14439) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:3, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (14443) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[1;31mE (14444) wifi:CCMP replay detected: A1=98:a3:16:7d:26:60 A2=cc:ab:2c:7d:19:e4 PN=1, RSC=2 seq=26400[0m
+[0;33mW (14447) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0000005[0m
+[0;32mI (14535) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;32mI (14980) BLE_RELAY: Relay: airborne=1 lat=41.398720 lon=-81.805794 op_lat=41.398671 op_lon=-81.805807[0m
+[0;32mI (15830) BLE_RELAY: Relay: airborne=1 lat=41.398720 lon=-81.805794 op_lat=41.398671 op_lon=-81.805807[0m
+[0;32mI (16473) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (16473) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;33mW (16483) wifi:<ba-add>idx:1, ifx:0, tid:3, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0003005[0m
+[0;33mW (16509) wifi:<ba-add>idx:2, ifx:0, tid:2, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0002005[0m
+[0;32mI (16509) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:4, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (16512) wifi:[ADDBA]RX addba response, status:0, tid:0/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;32mI (16680) BLE_RELAY: Relay: airborne=1 lat=41.398720 lon=-81.805794 op_lat=41.398671 op_lon=-81.805807[0m
+[0;32mI (16895) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/detections → 200 OK[0m
+[0;32mI (16897) UPLOADER: Uploaded 5 detections[0m
+[0;32mI (17203) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/nodes/heartbeat → 200 OK[0m
+[0;32mI (17205) wifi:state: run -> init (0x0)[0m
+[0;32mI (17205) wifi:teardown, set twt_inactive_time_secs:6, sp_count:0[0m
+[0;32mI (17206) wifi:pm stop, total sleep time: 1769748 us / 2768300 us[0m
+
+[0;32mI (17206) wifi:<ba-del>idx:0, tid:0[0m
+[0;32mI (17206) wifi:<ba-del>idx:2, tid:2[0m
+[0;32mI (17206) wifi:<ba-del>idx:1, tid:3[0m
+[0;32mI (17207) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (17221) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (17221) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (17222) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (17229) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (17237) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (17237) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (17238) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (17238) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (17239) wifi:(trc)phytype:CBW20-SGI, snr:64, maxRate:144, highestRateIdx:0[0m
+[0;33mW (17239) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (17239) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:64, ampduState:wait operational[0m
+[0;32mI (17240) wifi:ifidx:0, rssi:-34, nf:-98, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (17240) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (17276) wifi:connected with TheFastStinkyKid, aid = 58, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (17277) wifi:security: WPA2-PSK, phy:bgn, rssi:-34, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (17277) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (17277) wifi:pm start, type:1, aid:0x3a, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (17278) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (17278) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:5, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (17279) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:6, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (17279) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:7, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (17284) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[1;31mE (17285) wifi:CCMP replay detected: A1=98:a3:16:7d:26:60 A2=cc:ab:2c:7d:19:e4 PN=1, RSC=2 seq=27232[0m
+[0;33mW (17287) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0000005[0m
+[0;32mI (17300) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;32mI (17533) BLE_RELAY: Relay: airborne=1 lat=41.398720 lon=-81.805794 op_lat=41.398671 op_lon=-81.805807[0m
+[0;32mI (18290) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (18290) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;32mI (18383) BLE_RELAY: Relay: airborne=1 lat=41.398720 lon=-81.805794 op_lat=41.398671 op_lon=-81.805807[0m
+[0;32mI (18810) wifi:ic_enable_sniffer[0m
+[0;32mI (18810) UPLOADER: Upload cycle done, scanner resumed[0m
+[0;33mW (18831) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;32mI (19233) BLE_RELAY: Relay: airborne=1 lat=41.398720 lon=-81.805794 op_lat=41.398671 op_lon=-81.805807[0m
+[0;33mW (19331) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (19659) wifi:<ba-add>idx:1, ifx:0, tid:3, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0003005[0m
+[0;32mI (20083) BLE_RELAY: Relay: airborne=1 lat=41.398720 lon=-81.805794 op_lat=41.398671 op_lon=-81.805807[0m
+[0;33mW (20831) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;32mI (20933) BLE_RELAY: Relay: airborne=1 lat=41.398720 lon=-81.805794 op_lat=41.398671 op_lon=-81.805807[0m
+[0;33mW (21331) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;32mI (21783) BLE_RELAY: Relay: airborne=1 lat=41.398720 lon=-81.805794 op_lat=41.398671 op_lon=-81.805807[0m
+[0;33mW (21831) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (22331) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;32mI (22633) BLE_RELAY: Relay: airborne=1 lat=41.398720 lon=-81.805794 op_lat=41.398671 op_lon=-81.805807[0m
+[0;33mW (22831) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (23331) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;32mI (23483) BLE_RELAY: Relay: airborne=1 lat=41.398720 lon=-81.805794 op_lat=41.398671 op_lon=-81.805807[0m
+[0;33mW (23831) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (24331) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;32mI (24333) BLE_RELAY: Relay: airborne=1 lat=41.398720 lon=-81.805794 op_lat=41.398671 op_lon=-81.805807[0m
+[0;32mI (24675) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:8, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (24678) wifi:[ADDBA]RX addba response, status:0, tid:0/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;33mW (24831) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;32mI (25083) BLE_RELAY: Drone no frames — stopping relay[0m
+[0;32mI (25083) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (25133) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;33mW (25331) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (25831) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (27331) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (27831) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (28331) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (28831) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (29331) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (29831) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (30331) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (30831) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (31331) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (31831) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (32331) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (33831) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (34331) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (34831) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (35331) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (35831) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (36331) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (36831) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (37331) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (37831) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (38331) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (38831) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (40331) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (40831) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;32mI (41210) UPLOADER: Upload cycle: 0 detections queued[0m
+[0;32mI (41760) wifi:ic_disable_sniffer[0m
+[0;32mI (41860) wifi:state: run -> init (0x0)[0m
+[0;32mI (41860) wifi:teardown, set twt_inactive_time_secs:6, sp_count:0[0m
+[0;32mI (41861) wifi:pm stop, total sleep time: 20636902 us / 24582945 us[0m
+
+[0;32mI (41861) wifi:<ba-del>idx:0, tid:0[0m
+[0;32mI (41862) wifi:<ba-del>idx:1, tid:3[0m
+[0;32mI (41862) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (41877) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (41877) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (41878) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (41886) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (41892) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (41893) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (41893) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (41894) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (41894) wifi:(trc)phytype:CBW20-SGI, snr:65, maxRate:144, highestRateIdx:0[0m
+[0;33mW (41894) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (41895) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:65, ampduState:wait operational[0m
+[0;32mI (41895) wifi:ifidx:0, rssi:-34, nf:-99, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (41896) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (41932) wifi:connected with TheFastStinkyKid, aid = 25, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (41933) wifi:security: WPA2-PSK, phy:bgn, rssi:-34, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (41933) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (41934) wifi:pm start, type:1, aid:0x19, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (41934) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (41935) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:9, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (41935) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:10, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (41936) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:11, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (41941) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[1;31mE (41942) wifi:CCMP replay detected: A1=98:a3:16:7d:26:60 A2=cc:ab:2c:7d:19:e4 PN=1, RSC=2 seq=35840[0m
+[0;33mW (41946) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0000005[0m
+[0;32mI (41978) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;32mI (42365) UPLOADER: Connecting to WiFi: 'TheFastStinkyKid'[0m
+[0;33mW (42365) wifi:sta is connected, disconnect before connecting to new ap[0m
+[0;32mI (42950) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (42950) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;32mI (42999) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:12, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;33mW (43000) wifi:<ba-add>idx:1, ifx:0, tid:3, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0003005[0m
+[0;32mI (43005) wifi:[ADDBA]RX addba response, status:0, tid:0/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;32mI (43235) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/nodes/heartbeat → 200 OK[0m
+[0;32mI (43236) wifi:state: run -> init (0x0)[0m
+[0;32mI (43237) wifi:teardown, set twt_inactive_time_secs:6, sp_count:0[0m
+[0;32mI (43237) wifi:pm stop, total sleep time: 791793 us / 1303177 us[0m
+
+[0;32mI (43238) wifi:<ba-del>idx:0, tid:0[0m
+[0;32mI (43238) wifi:<ba-del>idx:1, tid:3[0m
+[0;32mI (43239) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (43252) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (43252) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (43252) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (43260) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (43271) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (43271) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (43272) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (43272) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (43273) wifi:(trc)phytype:CBW20-SGI, snr:65, maxRate:144, highestRateIdx:0[0m
+[0;33mW (43273) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (43273) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:65, ampduState:wait operational[0m
+[0;32mI (43274) wifi:ifidx:0, rssi:-34, nf:-99, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (43274) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (43311) wifi:connected with TheFastStinkyKid, aid = 39, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (43312) wifi:security: WPA2-PSK, phy:bgn, rssi:-34, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (43312) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (43312) wifi:pm start, type:1, aid:0x27, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (43313) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (43314) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:13, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (43314) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:14, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (43315) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:15, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (43317) wifi:[ADDBA]RX addba response, status:0, tid:0/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;32mI (43319) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;33mW (43322) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:2, win:64, cur_ssn:2), CONF:0xc0000005[0m
+[0;32mI (43412) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;32mI (44325) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (44325) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;32mI (44842) wifi:ic_enable_sniffer[0m
+[0;32mI (44842) UPLOADER: Upload cycle done, scanner resumed[0m
+[0;33mW (44882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (45382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (45882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (46382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (46588) wifi:<ba-add>idx:1, ifx:0, tid:3, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0003005[0m
+[0;33mW (46882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (47382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (47882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (48382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (48882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (50382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (50882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (51382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (51882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (52382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (52882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (53382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (53882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (54382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (54882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (55382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (56882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (57382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (57882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (58382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (58882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (59382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (59882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (60382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (60882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (61382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (61882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (63382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (63882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (64382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (64882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (65382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (65882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (66382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (66882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (67382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (67882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (68382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (69882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (70382) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (70882) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;32mI (71245) UPLOADER: Upload cycle: 0 detections queued[0m
+[0;32mI (71795) wifi:ic_disable_sniffer[0m
+[0;32mI (71895) wifi:state: run -> init (0x0)[0m
+[0;32mI (71895) wifi:teardown, set twt_inactive_time_secs:6, sp_count:0[0m
+[0;32mI (71896) wifi:pm stop, total sleep time: 23334070 us / 28582735 us[0m
+
+[0;32mI (71896) wifi:<ba-del>idx:0, tid:0[0m
+[0;32mI (71896) wifi:<ba-del>idx:1, tid:3[0m
+[0;32mI (71897) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (71911) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (71911) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (71911) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (71920) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (71927) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (71927) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (71927) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (71928) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (71928) wifi:(trc)phytype:CBW20-SGI, snr:65, maxRate:144, highestRateIdx:0[0m
+[0;33mW (71928) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (71929) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:65, ampduState:wait operational[0m
+[0;32mI (71929) wifi:ifidx:0, rssi:-34, nf:-99, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (71930) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (71972) wifi:connected with TheFastStinkyKid, aid = 10, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (71973) wifi:security: WPA2-PSK, phy:bgn, rssi:-34, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (71974) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (71974) wifi:pm start, type:1, aid:0xa, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (71974) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (71975) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:16, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (71975) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:17, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (71976) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:18, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (71984) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;32mI (71985) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[1;31mE (71987) wifi:CCMP replay detected: A1=98:a3:16:7d:26:60 A2=cc:ab:2c:7d:19:e4 PN=1, RSC=2 seq=44864[0m
+[0;33mW (71989) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0000005[0m
+[0;32mI (72399) UPLOADER: Connecting to WiFi: 'TheFastStinkyKid'[0m
+[0;33mW (72399) wifi:sta is connected, disconnect before connecting to new ap[0m
+[0;32mI (72994) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (72994) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;32mI (73007) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:19, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;33mW (73010) wifi:<ba-add>idx:1, ifx:0, tid:3, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0003005[0m
+[0;32mI (73011) wifi:[ADDBA]RX addba response, status:0, tid:0/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;32mI (73208) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/nodes/heartbeat → 200 OK[0m
+[0;32mI (73209) wifi:state: run -> init (0x0)[0m
+[0;32mI (73210) wifi:teardown, set twt_inactive_time_secs:6, sp_count:0[0m
+[0;32mI (73211) wifi:pm stop, total sleep time: 783020 us / 1236455 us[0m
+
+[0;32mI (73211) wifi:<ba-del>idx:0, tid:0[0m
+[0;32mI (73211) wifi:<ba-del>idx:1, tid:3[0m
+[0;32mI (73212) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (73226) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (73227) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (73227) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (73234) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (73241) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (73241) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (73241) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (73242) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (73242) wifi:(trc)phytype:CBW20-SGI, snr:66, maxRate:144, highestRateIdx:0[0m
+[0;33mW (73242) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (73243) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:66, ampduState:wait operational[0m
+[0;32mI (73243) wifi:ifidx:0, rssi:-33, nf:-99, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (73243) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (73285) wifi:connected with TheFastStinkyKid, aid = 36, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (73285) wifi:security: WPA2-PSK, phy:bgn, rssi:-33, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (73286) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (73286) wifi:pm start, type:1, aid:0x24, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (73286) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (73287) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:20, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (73288) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:21, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (73288) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:22, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (73293) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[1;31mE (73294) wifi:CCMP replay detected: A1=98:a3:16:7d:26:60 A2=cc:ab:2c:7d:19:e4 PN=1, RSC=2 seq=45264[0m
+[0;33mW (73296) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:2, win:64, cur_ssn:2), CONF:0xc0000005[0m
+[0;32mI (73312) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;32mI (74300) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (74300) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;32mI (74650) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:23, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;33mW (74651) wifi:<ba-add>idx:1, ifx:0, tid:3, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0003005[0m
+[0;32mI (74653) wifi:[ADDBA]RX addba response, status:0, tid:0/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;32mI (74815) wifi:ic_enable_sniffer[0m
+[0;32mI (74815) UPLOADER: Upload cycle done, scanner resumed[0m
+[0;33mW (74832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (75332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (75832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (76332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (76832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (77332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (77832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (78332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (79832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (80332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (80832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (81332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (81832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (82332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (82832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (83332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (83832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (84332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (84832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (86332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (86832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (87332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (87832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (88332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (88832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (89332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (89832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (90332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (90832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (91332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (92832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (93332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (93832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (94332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (94832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (95332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (95832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (96332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (96832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (97332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (97832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (99332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (99832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (100332) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (100832) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;32mI (101316) UPLOADER: Upload cycle: 0 detections queued[0m
+[0;32mI (101866) wifi:ic_disable_sniffer[0m
+[0;32mI (101966) wifi:state: run -> init (0x0)[0m
+[0;32mI (101967) wifi:teardown, set twt_inactive_time_secs:6, sp_count:0[0m
+[0;32mI (101967) wifi:pm stop, total sleep time: 22773960 us / 28680477 us[0m
+
+[0;32mI (101967) wifi:<ba-del>idx:0, tid:0[0m
+[0;32mI (101968) wifi:<ba-del>idx:1, tid:3[0m
+[0;32mI (101968) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (101983) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (101984) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (101984) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (101992) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (101999) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (102000) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (102000) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (102000) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (102001) wifi:(trc)phytype:CBW20-SGI, snr:64, maxRate:144, highestRateIdx:0[0m
+[0;33mW (102001) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (102001) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:64, ampduState:wait operational[0m
+[0;32mI (102002) wifi:ifidx:0, rssi:-35, nf:-99, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (102002) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (102045) wifi:connected with TheFastStinkyKid, aid = 17, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (102046) wifi:security: WPA2-PSK, phy:bgn, rssi:-35, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (102046) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (102047) wifi:pm start, type:1, aid:0x11, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (102047) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (102048) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:24, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (102048) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:25, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (102049) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:26, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (102054) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[1;31mE (102055) wifi:CCMP replay detected: A1=98:a3:16:7d:26:60 A2=cc:ab:2c:7d:19:e4 PN=1, RSC=2 seq=55856[0m
+[0;33mW (102059) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0000005[0m
+[0;32mI (102088) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;32mI (102470) UPLOADER: Connecting to WiFi: 'TheFastStinkyKid'[0m
+[0;33mW (102470) wifi:sta is connected, disconnect before connecting to new ap[0m
+[0;32mI (103062) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (103062) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;32mI (103108) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:27, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;33mW (103115) wifi:<ba-add>idx:1, ifx:0, tid:3, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0003005[0m
+[0;32mI (103116) wifi:[ADDBA]RX addba response, status:0, tid:0/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;32mI (103314) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/nodes/heartbeat → 200 OK[0m
+[0;32mI (103316) wifi:state: run -> init (0x0)[0m
+[0;32mI (103316) wifi:teardown, set twt_inactive_time_secs:6, sp_count:0[0m
+[0;32mI (103317) wifi:pm stop, total sleep time: 811634 us / 1269501 us[0m
+
+[0;32mI (103317) wifi:<ba-del>idx:0, tid:0[0m
+[0;32mI (103317) wifi:<ba-del>idx:1, tid:3[0m
+[0;32mI (103318) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (103334) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (103334) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (103335) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (103342) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (103349) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (103349) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (103349) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (103350) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (103350) wifi:(trc)phytype:CBW20-SGI, snr:62, maxRate:144, highestRateIdx:0[0m
+[0;33mW (103350) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (103351) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:62, ampduState:wait operational[0m
+[0;32mI (103351) wifi:ifidx:0, rssi:-37, nf:-99, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (103352) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (103393) wifi:connected with TheFastStinkyKid, aid = 46, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (103393) wifi:security: WPA2-PSK, phy:bgn, rssi:-37, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (103394) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (103394) wifi:pm start, type:1, aid:0x2e, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (103394) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (103395) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:28, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (103396) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:29, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (103396) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:30, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (103399) wifi:[ADDBA]RX addba response, status:0, tid:0/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;32mI (103400) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;33mW (103403) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0000005[0m
+[0;32mI (103418) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;32mI (104407) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (104407) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;32mI (104921) wifi:ic_enable_sniffer[0m
+[0;32mI (104921) UPLOADER: Upload cycle done, scanner resumed[0m
+[0;33mW (104935) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (105435) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (105935) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (106435) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (106935) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (107435) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (107935) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (109435) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (109935) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (110435) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (110935) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (111435) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (111935) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (112435) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (112935) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (113435) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (113935) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (114435) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (115935) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (116435) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (116935) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (117436) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (117936) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (118436) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (118936) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (119436) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (119936) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (120436) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (120936) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (122436) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (122936) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (123436) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (123936) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (124436) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (124936) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (125436) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (125936) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (126436) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (126936) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (127436) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (128936) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+

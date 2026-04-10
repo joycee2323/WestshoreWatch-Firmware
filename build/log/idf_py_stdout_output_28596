@@ -1,0 +1,230 @@
+Command: C:\Espressif\python_env\idf5.5_py3.11_env\Scripts\python.exe C:\Espressif\frameworks\esp-idf-v5.5.3\tools/idf_monitor.py -p COM5 -b 115200 --toolchain-prefix riscv32-esp-elf- --target esp32c6 --revision 0 --decode-panic backtrace C:\Users\joyce\OneDrive\Documents\C6-Firmware\build\westshore_remote_id.elf C:\Users\joyce\OneDrive\Documents\C6-Firmware\build\bootloader\bootloader.elf --force-color -m 'C:\Espressif\python_env\idf5.5_py3.11_env\Scripts\python.exe' 'C:\Espressif\frameworks\esp-idf-v5.5.3\tools\idf.py' '-p' 'COM5'
+ESP-ROM:esp32c6-20220919
+Build:Sep 19 2022
+rst:0x15 (USB_UART_HPSYS),boot:0xc (SPI_FAST_FLASH_BOOT)
+Saved PC:0x4080b244
+SPIWP:0xee
+mode:DIO, clock div:2
+load:0x40875730,len:0x1734
+load:0x4086b910,len:0xe78
+load:0x4086e610,len:0x31a8
+entry 0x4086b91a
+[0;32mI (23) boot: ESP-IDF v5.5.3 2nd stage bootloader[0m
+[0;32mI (23) boot: compile time Apr  5 2026 21:49:06[0m
+[0;32mI (23) boot: chip revision: v0.2[0m
+[0;32mI (23) boot: efuse block revision: v0.3[0m
+[0;32mI (24) boot.esp32c6: SPI Speed      : 80MHz[0m
+[0;32mI (24) boot.esp32c6: SPI Mode       : DIO[0m
+[0;32mI (24) boot.esp32c6: SPI Flash Size : 4MB[0m
+[0;32mI (25) boot: Enabling RNG early entropy source...[0m
+[0;32mI (25) boot: Partition Table:[0m
+[0;32mI (25) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (26) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (26) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (27) boot:  2 otadata          OTA data         01 00 00010000 00002000[0m
+[0;32mI (27) boot:  3 ota_0            OTA app          00 10 00020000 001c0000[0m
+[0;32mI (28) boot:  4 ota_1            OTA app          00 11 001e0000 001c0000[0m
+[0;32mI (28) boot:  5 storage          Unknown data     01 82 003a0000 00060000[0m
+[0;32mI (29) boot: End of partition table[0m
+[0;32mI (29) esp_image: segment 0: paddr=00020020 vaddr=42100020 size=3d9e4h (252388) map[0m
+[0;32mI (77) esp_image: segment 1: paddr=0005da0c vaddr=40800000 size=0260ch (  9740) load[0m
+[0;32mI (79) esp_image: segment 2: paddr=00060020 vaddr=42000020 size=fb0f4h (1028340) map[0m
+[0;32mI (269) esp_image: segment 3: paddr=0015b11c vaddr=4080260c size=1f6d8h (128728) load[0m
+[0;32mI (297) esp_image: segment 4: paddr=0017a7fc vaddr=40821cf0 size=03a58h ( 14936) load[0m
+[0;32mI (309) boot: Loaded app from partition at offset 0x20000[0m
+[0;32mI (309) boot: Disabling RNG early entropy source...[0m
+[0;32mI (310) cpu_start: Unicore app[0m
+[0;32mI (318) cpu_start: Pro cpu start user code[0m
+[0;32mI (319) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (319) app_init: Application information:[0m
+[0;32mI (319) app_init: Project name:     westshore_remote_id[0m
+[0;32mI (319) app_init: App version:      1[0m
+[0;32mI (319) app_init: Compile time:     Apr  5 2026 22:43:51[0m
+[0;32mI (320) app_init: ELF file SHA256:  da24856dd...[0m
+[0;32mI (320) app_init: ESP-IDF:          v5.5.3[0m
+[0;32mI (320) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (320) efuse_init: Max chip rev:     v0.99 [0m
+[0;32mI (320) efuse_init: Chip rev:         v0.2[0m
+[0;32mI (321) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (321) heap_init: At 4082F6A0 len 0004CF70 (307 KiB): RAM[0m
+[0;32mI (321) heap_init: At 4087C610 len 00002F54 (11 KiB): RAM[0m
+[0;32mI (322) heap_init: At 50000000 len 00003FE8 (15 KiB): RTCRAM[0m
+[0;32mI (322) spi_flash: detected chip: gd[0m
+[0;32mI (323) spi_flash: flash io: dio[0m
+[0;32mI (323) sleep_gpio: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (323) sleep_gpio: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (324) main_task: Started on CPU0[0m
+[0;32mI (324) main_task: Calling app_main()[0m
+[0;32mI (334) LED: LED initialised on GPIO4[0m
+[0;32mI (337) NVS_CFG: Config loaded (mode=0 ch=1-13 bl=0 upload=on ssid='TheFastStinkyKid')[0m
+[0;32mI (337) MAIN: ===========================================[0m
+[0;32mI (337) MAIN:  AirAware X1 — Remote ID Sensor Node v1.1[0m
+[0;32mI (337) MAIN:  ESP32-C6  |  IDF v5.5.3[0m
+[0;32mI (338) MAIN: ===========================================[0m
+[0;32mI (338) MAIN:  Mode:     BLE relay[0m
+[0;32mI (338) MAIN:  Channels: 1-13[0m
+[0;32mI (338) MAIN:  Upload:   enabled  SSID: 'TheFastStinkyKid'[0m
+[0;32mI (338) MAIN:  Node:     Test Node[0m
+[0;32mI (339) OUTPUT: Output task running on UART0 (TX=GPIO16, 115200 baud)[0m
+[0;32mI (339) WIFI_SCAN: Config AP SSID: AirAware-X1-2661[0m
+[0;32mI (341) pp: pp rom version: 5b8dcfa[0m
+[0;32mI (342) net80211: net80211 rom version: 5b8dcfa[0m
+[0;32mI (343) wifi:wifi driver task: 408433f0, prio:23, stack:6656, core=0[0m
+[0;32mI (348) wifi:wifi firmware version: 4df78f2[0m
+[0;32mI (348) wifi:wifi certification version: v7.0[0m
+[0;32mI (348) wifi:config NVS flash: enabled[0m
+[0;32mI (348) wifi:config nano formatting: disabled[0m
+[0;32mI (348) wifi:mac_version:HAL_MAC_ESP32AX_761,ut_version:N, band mode:0x1[0m
+[0;32mI (349) wifi:Init data frame dynamic rx buffer num: 8[0m
+[0;32mI (349) wifi:Init static rx mgmt buffer num: 5[0m
+[0;32mI (349) wifi:Init management short buffer num: 32[0m
+[0;32mI (349) wifi:Init static tx buffer num: 4[0m
+[0;32mI (350) wifi:Init static tx FG buffer num: 2[0m
+[0;32mI (350) wifi:Init static rx buffer size: 1700 (rxctrl:92, csi:512)[0m
+[0;32mI (350) wifi:Init static rx buffer num: 4[0m
+[0;32mI (350) wifi:Init dynamic rx buffer num: 8[0m
+[0;32mI (351) wifi_init: rx ba win: 6[0m
+[0;32mI (351) wifi_init: accept mbox: 6[0m
+[0;32mI (351) wifi_init: tcpip mbox: 32[0m
+[0;32mI (351) wifi_init: udp mbox: 6[0m
+[0;32mI (351) wifi_init: tcp mbox: 6[0m
+[0;32mI (351) wifi_init: tcp tx win: 5760[0m
+[0;32mI (352) wifi_init: tcp rx win: 5760[0m
+[0;32mI (352) wifi_init: tcp mss: 1440[0m
+[0;32mI (352) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (352) wifi_init: WiFi RX IRAM OP enabled[0m
+[0;32mI (352) wifi_init: WiFi SLP IRAM OP enabled[0m
+[0;32mI (353) phy_init: phy_version 343,b513b46,Nov 14 2025,16:34:12[0m
+[0;33mW (406) wifi:ACK_TAB0   :0x   90a0b, QAM16:0x9 (24Mbps), QPSK:0xa (12Mbps), BPSK:0xb (6Mbps)[0m
+[0;33mW (407) wifi:CTS_TAB0   :0x   90a0b, QAM16:0x9 (24Mbps), QPSK:0xa (12Mbps), BPSK:0xb (6Mbps)[0m
+[0;33mW (407) wifi:(agc)0x600a7128:0xd20d5800, min.avgNF:0xce->0xd2(dB), RCalCount:0xd5, min.RRssi:0x800(-128.00)[0m
+[0;32mI (408) wifi:11ax coex: WDEVAX_PTI0(0x55777555), WDEVAX_PTI1(0x00003377).[0m
+
+[0;32mI (409) wifi:mode : sta (98:a3:16:7d:26:60) + softAP (98:a3:16:7d:26:61)[0m
+[0;32mI (409) wifi:enable tsf[0m
+[0;33mW (409) wifi:11ax/11ac mode can not work under phy bw 40M, the sta 2G phymode changed to 11N[0m
+[0;32mI (410) wifi:Total power save buffer number: 2[0m
+[0;32mI (410) wifi:Init max length of beacon: 752/752[0m
+[0;32mI (411) wifi:Init max length of beacon: 752/752[0m
+[0;32mI (412) esp_netif_lwip: DHCP server started on interface WIFI_AP_DEF with IP: 192.168.4.1[0m
+[0;32mI (412) CFG_SRV: Starting HTTP config server on http://192.168.4.1[0m
+[0;32mI (414) CFG_SRV: Config server ready (non-blocking)[0m
+[0;32mI (414) wifi:ic_enable_sniffer[0m
+[0;32mI (415) WIFI_SCAN: Scanner started — AP 'AirAware-X1-2661', ch 1-13, 500ms dwell[0m
+[0;32mI (416) WIFI_SCAN: Config portal: connect to 'AirAware-X1-2661' → http://192.168.4.1[0m
+[0;32mI (916) BLE_INIT: Using main XTAL as clock source, chip ver: 2[0m
+[0;32mI (916) BLE_INIT: ble controller commit:[17fdc66][0m
+[0;32mI (921) BLE_INIT: Bluetooth MAC: 98:a3:16:7d:26:62[0m
+[0;32mI (929) phy: libbtbb version: c493933, Nov 14 2025, 16:34:25[0m
+[0;32mI (934) BLE_RELAY: BLE host synced — configuring extended advertiser[0m
+[0;32mI (934) BLE_RELAY: Extended advertiser configured OK[0m
+[0;32mI (934) BLE_RELAY: Relay task running[0m
+[0;32mI (935) BLE_RELAY: BLE relay initializing[0m
+[0;32mI (935) UPLOADER: Uploader task started (interval=10s)[0m
+[0;32mI (935) UPLOADER: WiFi uploader started (interval=10s queue=100)[0m
+[0;32mI (935) MAIN: System ready[0m
+[0;32mI (935) MAIN:   Wi-Fi scanner:  ch 1-13, 500ms dwell[0m
+[0;32mI (935) MAIN:   BLE relay:      active[0m
+[0;32mI (935) MAIN:   Cloud upload:   active[0m
+[0;32mI (936) MAIN:   Config portal:  AirAware-X1-XXXX → http://192.168.4.1[0m
+[0;32mI (984) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (30935) UPLOADER: Upload cycle: 0 detections queued[0m
+[0;32mI (31485) wifi:ic_disable_sniffer[0m
+[0;33mW (31585) wifi:(itwt)itwt_stop_process![0m
+[0;32mI (32085) UPLOADER: Connecting to WiFi: 'TheFastStinkyKid'[0m
+[0;32mI (34162) wifi:ap channel adjust o:10,0 n:9,0[0m
+[0;32mI (34163) wifi:new:<9,0>, old:<10,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (34164) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (34164) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (34174) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (34181) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (34181) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (34181) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (34182) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (34182) wifi:(trc)phytype:CBW20-SGI, snr:49, maxRate:144, highestRateIdx:0[0m
+[0;33mW (34183) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (34183) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:49, ampduState:wait operational[0m
+[0;32mI (34184) wifi:ifidx:0, rssi:-50, nf:-99, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (34184) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (34225) wifi:connected with TheFastStinkyKid, aid = 48, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (34226) wifi:security: WPA2-PSK, phy:bgn, rssi:-50, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (34227) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (34227) wifi:pm start, type:1, aid:0x30, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (34227) wifi:dp: 1, bi: 102400, li: 3, scale listen interval from 307200 us to 307200 us[0m
+[0;32mI (34228) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (34228) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:1, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (34229) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:2, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (34229) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:3, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (34234) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[1;31mE (34236) wifi:CCMP replay detected: A1=98:a3:16:7d:26:60 A2=cc:ab:2c:7d:19:e4 PN=1, RSC=2 seq=55104[0m
+[0;33mW (34238) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0000005[0m
+[0;32mI (34261) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;32mI (35242) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (35242) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;33mW (35284) wifi:<ba-add>idx:1, ifx:0, tid:3, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0003005[0m
+[0;32mI (35290) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:4, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;33mW (35291) wifi:<ba-add>idx:2, ifx:0, tid:2, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0002005[0m
+[0;32mI (35294) wifi:[ADDBA]RX addba response, status:0, tid:0/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;32mI (35488) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/nodes/heartbeat → 200 OK[0m
+[0;32mI (35489) wifi:state: run -> init (0x0)[0m
+[0;32mI (35490) wifi:teardown, set twt_inactive_time_secs:6, sp_count:0[0m
+[0;32mI (35490) wifi:pm stop, total sleep time: 764812 us / 1263179 us[0m
+
+[0;32mI (35491) wifi:<ba-del>idx:0, tid:0[0m
+[0;32mI (35491) wifi:<ba-del>idx:2, tid:2[0m
+[0;32mI (35491) wifi:<ba-del>idx:1, tid:3[0m
+[0;32mI (35492) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (35594) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (35595) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (35595) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (35604) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (35614) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (35614) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (35615) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (35615) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (35615) wifi:(trc)phytype:CBW20-SGI, snr:49, maxRate:144, highestRateIdx:0[0m
+[0;33mW (35616) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (35616) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:49, ampduState:wait operational[0m
+[0;32mI (35617) wifi:ifidx:0, rssi:-50, nf:-99, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (35617) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (35652) wifi:connected with TheFastStinkyKid, aid = 39, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (35653) wifi:security: WPA2-PSK, phy:bgn, rssi:-50, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (35654) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (35654) wifi:pm start, type:1, aid:0x27, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (35654) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (35655) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:5, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (35655) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:6, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (35656) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:7, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (35660) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[1;31mE (35663) wifi:CCMP replay detected: A1=98:a3:16:7d:26:60 A2=cc:ab:2c:7d:19:e4 PN=1, RSC=2 seq=55776[0m
+[0;33mW (35666) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0000005[0m
+[0;32mI (35695) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;32mI (36670) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (36670) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;32mI (37094) wifi:ic_enable_sniffer[0m
+[0;32mI (37094) UPLOADER: Upload cycle done, scanner resumed[0m
+[0;33mW (37118) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (38618) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (39118) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (39618) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (40118) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (40618) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (41118) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (41618) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (42118) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (42618) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+
+[0;33mW (43118) wifi:STA is scanning or connecting, or AP has connected with external STAs, cannot set channel[0m
+

@@ -1,0 +1,933 @@
+Command: C:\Espressif\python_env\idf5.5_py3.11_env\Scripts\python.exe C:\Espressif\frameworks\esp-idf-v5.5.3\tools/idf_monitor.py -p COM5 -b 115200 --toolchain-prefix riscv32-esp-elf- --target esp32c6 --revision 0 --decode-panic backtrace C:\Users\joyce\OneDrive\Documents\C6-Firmware\build\westshore_remote_id.elf C:\Users\joyce\OneDrive\Documents\C6-Firmware\build\bootloader\bootloader.elf --force-color -m 'C:\Espressif\python_env\idf5.5_py3.11_env\Scripts\python.exe' 'C:\Espressif\frameworks\esp-idf-v5.5.3\tools\idf.py' '-p' 'COM5'
+ESP-ROM:esp32c6-20220919
+Build:Sep 19 2022
+rst:0x15 (USB_UART_HPSYS),boot:0xc (SPI_FAST_FLASH_BOOT)
+Saved PC:0x4080b244
+SPIWP:0xee
+mode:DIO, clock div:2
+load:0x40875730,len:0x1734
+load:0x4086b910,len:0xe78
+load:0x4086e610,len:0x31a8
+entry 0x4086b91a
+[0;32mI (23) boot: ESP-IDF v5.5.3 2nd stage bootloader[0m
+[0;32mI (23) boot: compile time Apr  5 2026 21:49:06[0m
+[0;32mI (23) boot: chip revision: v0.2[0m
+[0;32mI (24) boot: efuse block revision: v0.3[0m
+[0;32mI (24) boot.esp32c6: SPI Speed      : 80MHz[0m
+[0;32mI (24) boot.esp32c6: SPI Mode       : DIO[0m
+[0;32mI (24) boot.esp32c6: SPI Flash Size : 4MB[0m
+[0;32mI (25) boot: Enabling RNG early entropy source...[0m
+[0;32mI (25) boot: Partition Table:[0m
+[0;32mI (25) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (26) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (26) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (27) boot:  2 otadata          OTA data         01 00 00010000 00002000[0m
+[0;32mI (27) boot:  3 ota_0            OTA app          00 10 00020000 001c0000[0m
+[0;32mI (28) boot:  4 ota_1            OTA app          00 11 001e0000 001c0000[0m
+[0;32mI (28) boot:  5 storage          Unknown data     01 82 003a0000 00060000[0m
+[0;32mI (29) boot: End of partition table[0m
+[0;32mI (29) esp_image: segment 0: paddr=00020020 vaddr=42100020 size=3ddc8h (253384) map[0m
+[0;32mI (77) esp_image: segment 1: paddr=0005ddf0 vaddr=40800000 size=02228h (  8744) load[0m
+[0;32mI (79) esp_image: segment 2: paddr=00060020 vaddr=42000020 size=fcd44h (1035588) map[0m
+[0;32mI (271) esp_image: segment 3: paddr=0015cd6c vaddr=40802228 size=1fabch (129724) load[0m
+[0;32mI (299) esp_image: segment 4: paddr=0017c830 vaddr=40821cf0 size=03a58h ( 14936) load[0m
+[0;32mI (310) boot: Loaded app from partition at offset 0x20000[0m
+[0;32mI (310) boot: Disabling RNG early entropy source...[0m
+[0;32mI (311) cpu_start: Unicore app[0m
+[0;32mI (320) cpu_start: Pro cpu start user code[0m
+[0;32mI (320) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (320) app_init: Application information:[0m
+[0;32mI (320) app_init: Project name:     westshore_remote_id[0m
+[0;32mI (321) app_init: App version:      1[0m
+[0;32mI (321) app_init: Compile time:     Apr  5 2026 22:43:51[0m
+[0;32mI (321) app_init: ELF file SHA256:  382ded20b...[0m
+[0;32mI (321) app_init: ESP-IDF:          v5.5.3[0m
+[0;32mI (322) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (322) efuse_init: Max chip rev:     v0.99 [0m
+[0;32mI (322) efuse_init: Chip rev:         v0.2[0m
+[0;32mI (322) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (323) heap_init: At 4082F6B0 len 0004CF60 (307 KiB): RAM[0m
+[0;32mI (323) heap_init: At 4087C610 len 00002F54 (11 KiB): RAM[0m
+[0;32mI (323) heap_init: At 50000000 len 00003FE8 (15 KiB): RTCRAM[0m
+[0;32mI (324) spi_flash: detected chip: gd[0m
+[0;32mI (324) spi_flash: flash io: dio[0m
+[0;32mI (325) sleep_gpio: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (325) sleep_gpio: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (326) main_task: Started on CPU0[0m
+[0;32mI (326) main_task: Calling app_main()[0m
+[0;32mI (337) LED: LED initialised on GPIO4[0m
+[0;32mI (339) NVS_CFG: Config loaded (mode=0 ch=1-13 bl=0 upload=on ssid='TheFastStinkyKid')[0m
+[0;32mI (340) MAIN: ===========================================[0m
+[0;32mI (340) MAIN:  AirAware X1 — Remote ID Sensor Node v1.1[0m
+[0;32mI (340) MAIN:  ESP32-C6  |  IDF v5.5.3[0m
+[0;32mI (340) MAIN: ===========================================[0m
+[0;32mI (340) MAIN:  Mode:     BLE relay[0m
+[0;32mI (340) MAIN:  Channels: 1-13[0m
+[0;32mI (340) MAIN:  Upload:   enabled  SSID: 'TheFastStinkyKid'[0m
+[0;32mI (341) MAIN:  Node:     Test Node[0m
+[0;32mI (341) OUTPUT: Output task running on UART0 (TX=GPIO16, 115200 baud)[0m
+[0;32mI (342) WIFI_SCAN: Config AP SSID: AirAware-X1-2661[0m
+[0;32mI (344) pp: pp rom version: 5b8dcfa[0m
+[0;32mI (344) net80211: net80211 rom version: 5b8dcfa[0m
+[0;32mI (346) wifi:wifi driver task: 40843488, prio:23, stack:6656, core=0[0m
+[0;32mI (351) wifi:wifi firmware version: 4df78f2[0m
+[0;32mI (351) wifi:wifi certification version: v7.0[0m
+[0;32mI (351) wifi:config NVS flash: enabled[0m
+[0;32mI (351) wifi:config nano formatting: disabled[0m
+[0;32mI (351) wifi:mac_version:HAL_MAC_ESP32AX_761,ut_version:N, band mode:0x1[0m
+[0;32mI (352) wifi:Init data frame dynamic rx buffer num: 8[0m
+[0;32mI (352) wifi:Init static rx mgmt buffer num: 5[0m
+[0;32mI (352) wifi:Init management short buffer num: 32[0m
+[0;32mI (352) wifi:Init static tx buffer num: 4[0m
+[0;32mI (353) wifi:Init static tx FG buffer num: 2[0m
+[0;32mI (353) wifi:Init static rx buffer size: 1700 (rxctrl:92, csi:512)[0m
+[0;32mI (353) wifi:Init static rx buffer num: 4[0m
+[0;32mI (353) wifi:Init dynamic rx buffer num: 8[0m
+[0;32mI (354) wifi_init: rx ba win: 6[0m
+[0;32mI (354) wifi_init: accept mbox: 6[0m
+[0;32mI (354) wifi_init: tcpip mbox: 32[0m
+[0;32mI (354) wifi_init: udp mbox: 6[0m
+[0;32mI (354) wifi_init: tcp mbox: 6[0m
+[0;32mI (354) wifi_init: tcp tx win: 5760[0m
+[0;32mI (355) wifi_init: tcp rx win: 5760[0m
+[0;32mI (355) wifi_init: tcp mss: 1440[0m
+[0;32mI (355) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (355) wifi_init: WiFi RX IRAM OP enabled[0m
+[0;32mI (355) wifi_init: WiFi SLP IRAM OP enabled[0m
+[0;32mI (496) phy_init: phy_version 343,b513b46,Nov 14 2025,16:34:12[0m
+[0;33mW (559) wifi:ACK_TAB0   :0x   90a0b, QAM16:0x9 (24Mbps), QPSK:0xa (12Mbps), BPSK:0xb (6Mbps)[0m
+[0;33mW (559) wifi:CTS_TAB0   :0x   90a0b, QAM16:0x9 (24Mbps), QPSK:0xa (12Mbps), BPSK:0xb (6Mbps)[0m
+[0;33mW (559) wifi:(agc)0x600a7128:0xd213f800, min.avgNF:0xce->0xd2(dB), RCalCount:0x13e, min.RRssi:0x800(-128.00)[0m
+[0;32mI (560) wifi:11ax coex: WDEVAX_PTI0(0x55777555), WDEVAX_PTI1(0x00003377).[0m
+
+[0;32mI (561) wifi:mode : sta (98:a3:16:7d:26:60) + softAP (98:a3:16:7d:26:61)[0m
+[0;32mI (562) wifi:enable tsf[0m
+[0;33mW (562) wifi:11ax/11ac mode can not work under phy bw 40M, the sta 2G phymode changed to 11N[0m
+[0;32mI (565) wifi:Total power save buffer number: 2[0m
+[0;32mI (565) wifi:Init max length of beacon: 752/752[0m
+[0;32mI (566) wifi:Init max length of beacon: 752/752[0m
+[0;32mI (567) esp_netif_lwip: DHCP server started on interface WIFI_AP_DEF with IP: 192.168.4.1[0m
+[0;32mI (568) CFG_SRV: Starting HTTP config server on http://192.168.4.1[0m
+[0;32mI (569) CFG_SRV: Config server ready (non-blocking)[0m
+[0;32mI (570) wifi:ic_enable_sniffer[0m
+[0;32mI (571) WIFI_SCAN: Scanner started — AP 'AirAware-X1-2661', ch 1-13, 500ms dwell[0m
+[0;32mI (571) WIFI_SCAN: Config portal: connect to 'AirAware-X1-2661' → http://192.168.4.1[0m
+[0;32mI (1071) BLE_INIT: Using main XTAL as clock source, chip ver: 2[0m
+[0;32mI (1072) BLE_INIT: ble controller commit:[17fdc66][0m
+[0;32mI (1077) BLE_INIT: Bluetooth MAC: 98:a3:16:7d:26:62[0m
+[0;32mI (1084) phy: libbtbb version: c493933, Nov 14 2025, 16:34:25[0m
+[0;32mI (1089) BLE_RELAY: BLE host synced — configuring extended advertiser[0m
+[0;32mI (1090) BLE_RELAY: Extended advertiser configured OK[0m
+[0;32mI (1090) BLE_RELAY: Relay task running[0m
+[0;32mI (1090) BLE_RELAY: BLE relay initializing[0m
+[0;32mI (1090) UPLOADER: Uploader task started (interval=10s)[0m
+[0;32mI (1091) UPLOADER: WiFi uploader started (interval=10s queue=100)[0m
+[0;32mI (1091) MAIN: System ready[0m
+[0;32mI (1091) MAIN:   Wi-Fi scanner:  ch 1-13, 500ms dwell[0m
+[0;32mI (1091) MAIN:   BLE relay:      active[0m
+[0;32mI (1091) MAIN:   Cloud upload:   active[0m
+[0;32mI (1091) MAIN:   Config portal:  AirAware-X1-XXXX → http://192.168.4.1[0m
+[0;32mI (1140) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (3335) WIFI_SCAN: ODID frame! RSSI=-58 len=79[0m
+[0;32mI (3336) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (3336) BLE_RELAY: Operator location saved: lat=41.398666 lon=-81.805794[0m
+[0;32mI (3375) WIFI_SCAN: ODID frame! RSSI=-53 len=79[0m
+[0;32mI (3376) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (4087) BLE_RELAY: Relay: airborne=0 lat=41.398735 lon=-81.805794 op_lat=41.398668 op_lon=-81.805794[0m
+[0;32mI (4937) BLE_RELAY: Relay: airborne=0 lat=41.398735 lon=-81.805794 op_lat=41.398668 op_lon=-81.805794[0m
+[0;32mI (5787) BLE_RELAY: Relay: airborne=0 lat=41.398735 lon=-81.805794 op_lat=41.398668 op_lon=-81.805794[0m
+[0;32mI (6637) BLE_RELAY: Relay: airborne=0 lat=41.398735 lon=-81.805794 op_lat=41.398668 op_lon=-81.805794[0m
+[0;32mI (7487) BLE_RELAY: Relay: airborne=0 lat=41.398735 lon=-81.805794 op_lat=41.398668 op_lon=-81.805794[0m
+[0;32mI (8337) BLE_RELAY: Relay: airborne=0 lat=41.398735 lon=-81.805794 op_lat=41.398668 op_lon=-81.805794[0m
+[0;32mI (9187) BLE_RELAY: Relay: airborne=0 lat=41.398735 lon=-81.805794 op_lat=41.398668 op_lon=-81.805794[0m
+[0;32mI (9735) WIFI_SCAN: ODID frame! RSSI=-49 len=79[0m
+[0;32mI (9736) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (9775) WIFI_SCAN: ODID frame! RSSI=-47 len=79[0m
+[0;32mI (9776) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (9937) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398667 op_lon=-81.805792[0m
+[0;32mI (10055) WIFI_SCAN: ODID frame! RSSI=-47 len=79[0m
+[0;32mI (10056) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (10737) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398667 op_lon=-81.805792[0m
+[0;32mI (11156) UPLOADER: Upload cycle: 5 detections queued[0m
+[0;32mI (11587) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398667 op_lon=-81.805792[0m
+[0;32mI (11706) wifi:ic_disable_sniffer[0m
+[0;33mW (11806) wifi:(itwt)itwt_stop_process![0m
+[0;32mI (12306) UPLOADER: Connecting to WiFi: 'TheFastStinkyKid'[0m
+[0;32mI (12437) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398667 op_lon=-81.805792[0m
+[0;32mI (13287) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398667 op_lon=-81.805792[0m
+[0;32mI (14137) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398667 op_lon=-81.805792[0m
+[0;32mI (14383) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (14384) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (14384) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (14396) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (14405) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (14405) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (14405) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (14406) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (14406) wifi:(trc)phytype:CBW20-SGI, snr:64, maxRate:144, highestRateIdx:0[0m
+[0;33mW (14407) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (14407) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:64, ampduState:wait operational[0m
+[0;32mI (14407) wifi:ifidx:0, rssi:-34, nf:-98, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (14408) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (14457) wifi:connected with TheFastStinkyKid, aid = 51, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (14458) wifi:security: WPA2-PSK, phy:bgn, rssi:-34, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (14459) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (14459) wifi:pm start, type:1, aid:0x33, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (14459) wifi:dp: 1, bi: 102400, li: 3, scale listen interval from 307200 us to 307200 us[0m
+[0;32mI (14460) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (14460) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:1, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (14461) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:2, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (14461) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:3, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (14463) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;32mI (14469) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[1;31mE (14470) wifi:CCMP replay detected: A1=98:a3:16:7d:26:60 A2=cc:ab:2c:7d:19:e4 PN=1, RSC=2 seq=27248[0m
+[0;33mW (14472) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0000005[0m
+[0;32mI (15087) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398667 op_lon=-81.805792[0m
+[0;32mI (15475) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (15475) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;33mW (15507) wifi:<ba-add>idx:1, ifx:0, tid:3, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0003005[0m
+[0;33mW (15511) wifi:<ba-add>idx:2, ifx:0, tid:2, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0002005[0m
+[0;32mI (15511) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:4, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (15515) wifi:[ADDBA]RX addba response, status:0, tid:0/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;32mI (15792) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/detections → 200 OK[0m
+[0;32mI (15793) UPLOADER: Uploaded 5 detections[0m
+[0;32mI (15937) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398667 op_lon=-81.805792[0m
+[0;32mI (15997) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/nodes/heartbeat → 200 OK[0m
+[0;32mI (15998) wifi:state: run -> init (0x0)[0m
+[0;32mI (15999) wifi:teardown, set twt_inactive_time_secs:6, sp_count:0[0m
+[0;32mI (15999) wifi:pm stop, total sleep time: 935343 us / 1539747 us[0m
+
+[0;32mI (16000) wifi:<ba-del>idx:0, tid:0[0m
+[0;32mI (16000) wifi:<ba-del>idx:2, tid:2[0m
+[0;32mI (16000) wifi:<ba-del>idx:1, tid:3[0m
+[0;32mI (16000) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (16787) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398667 op_lon=-81.805792[0m
+[0;32mI (17602) wifi:ic_enable_sniffer[0m
+[0;32mI (17602) UPLOADER: Upload cycle done, scanner resumed[0m
+[0;32mI (17637) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398667 op_lon=-81.805792[0m
+[0;32mI (18487) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398667 op_lon=-81.805792[0m
+[0;32mI (19337) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398667 op_lon=-81.805792[0m
+[0;32mI (20187) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398667 op_lon=-81.805792[0m
+[0;32mI (21037) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398667 op_lon=-81.805792[0m
+[0;32mI (21887) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398667 op_lon=-81.805792[0m
+[0;32mI (22215) WIFI_SCAN: ODID frame! RSSI=-49 len=79[0m
+[0;32mI (22216) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (22535) WIFI_SCAN: ODID frame! RSSI=-52 len=79[0m
+[0;32mI (22536) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (22637) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398659 op_lon=-81.805784[0m
+[0;32mI (23487) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398659 op_lon=-81.805784[0m
+[0;32mI (24337) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398659 op_lon=-81.805784[0m
+[0;32mI (25187) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398659 op_lon=-81.805784[0m
+[0;32mI (26037) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398659 op_lon=-81.805784[0m
+[0;32mI (26887) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398659 op_lon=-81.805784[0m
+[0;32mI (27737) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398659 op_lon=-81.805784[0m
+[0;32mI (28587) BLE_RELAY: Relay: airborne=1 lat=41.398724 lon=-81.805794 op_lat=41.398659 op_lon=-81.805784[0m
+[0;32mI (28935) WIFI_SCAN: ODID frame! RSSI=-59 len=79[0m
+[0;32mI (28936) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (28975) WIFI_SCAN: ODID frame! RSSI=-58 len=79[0m
+[0;32mI (28975) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (29337) BLE_RELAY: Relay: airborne=1 lat=41.398792 lon=-81.805779 op_lat=41.398659 op_lon=-81.805786[0m
+[0;32mI (30188) BLE_RELAY: Relay: airborne=1 lat=41.398792 lon=-81.805779 op_lat=41.398659 op_lon=-81.805786[0m
+[0;32mI (31038) BLE_RELAY: Relay: airborne=1 lat=41.398792 lon=-81.805779 op_lat=41.398659 op_lon=-81.805786[0m
+[0;32mI (31276) UPLOADER: Upload cycle: 4 detections queued[0m
+[0;32mI (31826) wifi:ic_disable_sniffer[0m
+[0;32mI (31888) BLE_RELAY: Relay: airborne=1 lat=41.398792 lon=-81.805779 op_lat=41.398659 op_lon=-81.805786[0m
+[0;33mW (31926) wifi:(itwt)itwt_stop_process![0m
+[0;32mI (32426) UPLOADER: Connecting to WiFi: 'TheFastStinkyKid'[0m
+[0;32mI (32435) wifi:ap channel adjust o:11,0 n:9,0[0m
+[0;32mI (32435) wifi:new:<9,0>, old:<11,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (32436) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (32437) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (32444) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (32453) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (32453) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (32453) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (32454) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (32454) wifi:(trc)phytype:CBW20-SGI, snr:62, maxRate:144, highestRateIdx:0[0m
+[0;33mW (32455) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (32455) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:62, ampduState:wait operational[0m
+[0;32mI (32455) wifi:ifidx:0, rssi:-36, nf:-98, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (32456) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (32503) wifi:connected with TheFastStinkyKid, aid = 48, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (32503) wifi:security: WPA2-PSK, phy:bgn, rssi:-36, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (32504) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (32504) wifi:pm start, type:1, aid:0x30, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (32505) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (32505) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:5, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (32506) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:6, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (32506) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:7, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (32509) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[1;31mE (32510) wifi:CCMP replay detected: A1=98:a3:16:7d:26:60 A2=cc:ab:2c:7d:19:e4 PN=1, RSC=2 seq=32368[0m
+[0;33mW (32516) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0000005[0m
+[0;32mI (32588) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;32mI (32740) BLE_RELAY: Relay: airborne=1 lat=41.398792 lon=-81.805779 op_lat=41.398659 op_lon=-81.805786[0m
+[0;32mI (33525) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (33525) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;32mI (33532) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:8, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;33mW (33534) wifi:<ba-add>idx:1, ifx:0, tid:3, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0003005[0m
+[0;32mI (33536) wifi:[ADDBA]RX addba response, status:0, tid:0/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;32mI (33591) BLE_RELAY: Relay: airborne=1 lat=41.398792 lon=-81.805779 op_lat=41.398659 op_lon=-81.805786[0m
+[0;32mI (33738) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/detections → 200 OK[0m
+[0;32mI (33739) UPLOADER: Uploaded 4 detections[0m
+[0;32mI (34129) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/nodes/heartbeat → 200 OK[0m
+[0;32mI (34131) wifi:state: run -> init (0x0)[0m
+[0;32mI (34132) wifi:teardown, set twt_inactive_time_secs:6, sp_count:0[0m
+[0;32mI (34132) wifi:pm stop, total sleep time: 995723 us / 1627417 us[0m
+
+[0;32mI (34133) wifi:<ba-del>idx:0, tid:0[0m
+[0;32mI (34133) wifi:<ba-del>idx:1, tid:3[0m
+[0;32mI (34133) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (34441) BLE_RELAY: Relay: airborne=1 lat=41.398792 lon=-81.805779 op_lat=41.398659 op_lon=-81.805786[0m
+[0;32mI (35291) BLE_RELAY: Relay: airborne=1 lat=41.398792 lon=-81.805779 op_lat=41.398659 op_lon=-81.805786[0m
+[0;32mI (35735) wifi:ic_enable_sniffer[0m
+[0;32mI (35735) UPLOADER: Upload cycle done, scanner resumed[0m
+[0;32mI (36141) BLE_RELAY: Relay: airborne=1 lat=41.398792 lon=-81.805779 op_lat=41.398659 op_lon=-81.805786[0m
+[0;32mI (36991) BLE_RELAY: Relay: airborne=1 lat=41.398792 lon=-81.805779 op_lat=41.398659 op_lon=-81.805786[0m
+[0;32mI (37841) BLE_RELAY: Relay: airborne=1 lat=41.398792 lon=-81.805779 op_lat=41.398659 op_lon=-81.805786[0m
+[0;32mI (38691) BLE_RELAY: Relay: airborne=1 lat=41.398792 lon=-81.805779 op_lat=41.398659 op_lon=-81.805786[0m
+[0;32mI (39495) WIFI_SCAN: ODID frame! RSSI=-72 len=79[0m
+[0;32mI (39496) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (39541) BLE_RELAY: Relay: airborne=1 lat=41.398792 lon=-81.805779 op_lat=41.398659 op_lon=-81.805786[0m
+[0;32mI (40341) BLE_RELAY: Relay: airborne=1 lat=41.398991 lon=-81.805748 op_lat=41.398660 op_lon=-81.805785[0m
+[0;32mI (41191) BLE_RELAY: Relay: airborne=1 lat=41.398991 lon=-81.805748 op_lat=41.398660 op_lon=-81.805785[0m
+[0;32mI (41296) UPLOADER: Upload cycle: 1 detections queued[0m
+[0;32mI (41846) wifi:ic_disable_sniffer[0m
+[0;33mW (41946) wifi:(itwt)itwt_stop_process![0m
+[0;32mI (42041) BLE_RELAY: Relay: airborne=1 lat=41.398991 lon=-81.805748 op_lat=41.398660 op_lon=-81.805785[0m
+[0;32mI (42446) UPLOADER: Connecting to WiFi: 'TheFastStinkyKid'[0m
+[0;32mI (42458) wifi:ap channel adjust o:10,0 n:9,0[0m
+[0;32mI (42459) wifi:new:<9,0>, old:<10,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (42460) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (42460) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (42467) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (42476) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (42476) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (42477) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (42477) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (42477) wifi:(trc)phytype:CBW20-SGI, snr:62, maxRate:144, highestRateIdx:0[0m
+[0;33mW (42478) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (42478) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:62, ampduState:wait operational[0m
+[0;32mI (42478) wifi:ifidx:0, rssi:-36, nf:-98, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (42479) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (42528) wifi:connected with TheFastStinkyKid, aid = 20, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (42529) wifi:security: WPA2-PSK, phy:bgn, rssi:-36, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (42530) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (42530) wifi:pm start, type:1, aid:0x14, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (42530) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (42531) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:9, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (42531) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:10, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (42532) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:11, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (42537) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[1;31mE (42538) wifi:CCMP replay detected: A1=98:a3:16:7d:26:60 A2=cc:ab:2c:7d:19:e4 PN=1, RSC=2 seq=36608[0m
+[0;33mW (42542) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0000005[0m
+[0;32mI (42630) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;32mI (42893) BLE_RELAY: Relay: airborne=1 lat=41.398991 lon=-81.805748 op_lat=41.398660 op_lon=-81.805785[0m
+[0;32mI (43550) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (43550) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;32mI (43557) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:12, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;33mW (43558) wifi:<ba-add>idx:1, ifx:0, tid:3, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0003005[0m
+[0;32mI (43560) wifi:[ADDBA]RX addba response, status:0, tid:0/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;32mI (43744) BLE_RELAY: Relay: airborne=1 lat=41.398991 lon=-81.805748 op_lat=41.398660 op_lon=-81.805785[0m
+[0;32mI (43960) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/detections → 200 OK[0m
+[0;32mI (43961) UPLOADER: Uploaded 1 detections[0m
+[0;32mI (44158) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/nodes/heartbeat → 200 OK[0m
+[0;32mI (44160) wifi:state: run -> init (0x0)[0m
+[0;32mI (44161) wifi:teardown, set twt_inactive_time_secs:6, sp_count:0[0m
+[0;32mI (44161) wifi:pm stop, total sleep time: 827387 us / 1631241 us[0m
+
+[0;32mI (44162) wifi:<ba-del>idx:0, tid:0[0m
+[0;32mI (44162) wifi:<ba-del>idx:1, tid:3[0m
+[0;32mI (44163) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (44594) BLE_RELAY: Relay: airborne=1 lat=41.398991 lon=-81.805748 op_lat=41.398660 op_lon=-81.805785[0m
+[0;32mI (45444) BLE_RELAY: Relay: airborne=1 lat=41.398991 lon=-81.805748 op_lat=41.398660 op_lon=-81.805785[0m
+[0;32mI (45764) wifi:ic_enable_sniffer[0m
+[0;32mI (45764) UPLOADER: Upload cycle done, scanner resumed[0m
+[0;32mI (46294) BLE_RELAY: Relay: airborne=1 lat=41.398991 lon=-81.805748 op_lat=41.398660 op_lon=-81.805785[0m
+[0;32mI (47144) BLE_RELAY: Relay: airborne=1 lat=41.398991 lon=-81.805748 op_lat=41.398660 op_lon=-81.805785[0m
+[0;32mI (47994) BLE_RELAY: Relay: airborne=1 lat=41.398991 lon=-81.805748 op_lat=41.398660 op_lon=-81.805785[0m
+[0;32mI (48844) BLE_RELAY: Relay: airborne=1 lat=41.398991 lon=-81.805748 op_lat=41.398660 op_lon=-81.805785[0m
+[0;32mI (49694) BLE_RELAY: Relay: airborne=1 lat=41.398991 lon=-81.805748 op_lat=41.398660 op_lon=-81.805785[0m
+[0;32mI (50544) BLE_RELAY: Relay: airborne=1 lat=41.398991 lon=-81.805748 op_lat=41.398660 op_lon=-81.805785[0m
+[0;32mI (51394) BLE_RELAY: Relay: airborne=1 lat=41.398991 lon=-81.805748 op_lat=41.398660 op_lon=-81.805785[0m
+[0;32mI (52244) BLE_RELAY: Relay: airborne=1 lat=41.398991 lon=-81.805748 op_lat=41.398660 op_lon=-81.805785[0m
+[0;32mI (53094) BLE_RELAY: Relay: airborne=1 lat=41.398991 lon=-81.805748 op_lat=41.398660 op_lon=-81.805785[0m
+[0;32mI (53944) BLE_RELAY: Relay: airborne=1 lat=41.398991 lon=-81.805748 op_lat=41.398660 op_lon=-81.805785[0m
+[0;32mI (54544) BLE_RELAY: Drone no frames — stopping relay[0m
+[0;32mI (54544) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (54594) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (56455) WIFI_SCAN: ODID frame! RSSI=-57 len=79[0m
+[0;32mI (56455) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (57256) BLE_RELAY: Relay: airborne=1 lat=41.398655 lon=-81.805862 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (58106) BLE_RELAY: Relay: airborne=1 lat=41.398655 lon=-81.805862 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (58956) BLE_RELAY: Relay: airborne=1 lat=41.398655 lon=-81.805862 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (59806) BLE_RELAY: Relay: airborne=1 lat=41.398655 lon=-81.805862 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (60656) BLE_RELAY: Relay: airborne=1 lat=41.398655 lon=-81.805862 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (61457) UPLOADER: Upload cycle: 1 detections queued[0m
+[0;32mI (61506) BLE_RELAY: Relay: airborne=1 lat=41.398655 lon=-81.805862 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (62007) wifi:ic_disable_sniffer[0m
+[0;33mW (62107) wifi:(itwt)itwt_stop_process![0m
+[0;32mI (62356) BLE_RELAY: Relay: airborne=1 lat=41.398655 lon=-81.805862 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (62607) UPLOADER: Connecting to WiFi: 'TheFastStinkyKid'[0m
+[0;32mI (62616) wifi:ap channel adjust o:3,0 n:9,0[0m
+[0;32mI (62616) wifi:new:<9,0>, old:<3,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (62617) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (62618) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (62627) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (62635) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (62636) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (62636) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (62636) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (62637) wifi:(trc)phytype:CBW20-SGI, snr:68, maxRate:144, highestRateIdx:0[0m
+[0;33mW (62637) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (62637) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:68, ampduState:wait operational[0m
+[0;32mI (62638) wifi:ifidx:0, rssi:-30, nf:-98, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (62638) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (62674) wifi:connected with TheFastStinkyKid, aid = 18, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (62674) wifi:security: WPA2-PSK, phy:bgn, rssi:-30, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (62675) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (62675) wifi:pm start, type:1, aid:0x12, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (62676) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (62676) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:13, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (62677) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:14, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (62677) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:15, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (62682) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[1;31mE (62685) wifi:CCMP replay detected: A1=98:a3:16:7d:26:60 A2=cc:ab:2c:7d:19:e4 PN=1, RSC=2 seq=62944[0m
+[0;33mW (62688) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0000005[0m
+[0;32mI (62694) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;32mI (63206) BLE_RELAY: Relay: airborne=1 lat=41.398655 lon=-81.805862 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (63696) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (63696) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;32mI (63714) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:16, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;33mW (63715) wifi:<ba-add>idx:1, ifx:0, tid:3, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0003005[0m
+[0;32mI (63720) wifi:[ADDBA]RX addba response, status:0, tid:0/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;32mI (63921) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/detections → 200 OK[0m
+[0;32mI (63923) UPLOADER: Uploaded 1 detections[0m
+[0;32mI (64058) BLE_RELAY: Relay: airborne=1 lat=41.398655 lon=-81.805862 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (64126) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/nodes/heartbeat → 200 OK[0m
+[0;32mI (64128) wifi:state: run -> init (0x0)[0m
+[0;32mI (64129) wifi:teardown, set twt_inactive_time_secs:6, sp_count:0[0m
+[0;32mI (64129) wifi:pm stop, total sleep time: 844301 us / 1453796 us[0m
+
+[0;32mI (64130) wifi:<ba-del>idx:0, tid:0[0m
+[0;32mI (64130) wifi:<ba-del>idx:1, tid:3[0m
+[0;32mI (64130) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (64908) BLE_RELAY: Relay: airborne=1 lat=41.398655 lon=-81.805862 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (65732) wifi:ic_enable_sniffer[0m
+[0;32mI (65732) UPLOADER: Upload cycle done, scanner resumed[0m
+[0;32mI (65758) BLE_RELAY: Relay: airborne=1 lat=41.398655 lon=-81.805862 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (66608) BLE_RELAY: Relay: airborne=1 lat=41.398655 lon=-81.805862 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (67015) WIFI_SCAN: ODID frame! RSSI=-76 len=79[0m
+[0;32mI (67015) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (67416) BLE_RELAY: Relay: airborne=1 lat=41.398373 lon=-81.806351 op_lat=41.398671 op_lon=-81.805792[0m
+[0;32mI (68266) BLE_RELAY: Relay: airborne=1 lat=41.398373 lon=-81.806351 op_lat=41.398671 op_lon=-81.805792[0m
+[0;32mI (69116) BLE_RELAY: Relay: airborne=1 lat=41.398373 lon=-81.806351 op_lat=41.398671 op_lon=-81.805792[0m
+[0;32mI (69966) BLE_RELAY: Relay: airborne=1 lat=41.398373 lon=-81.806351 op_lat=41.398671 op_lon=-81.805792[0m
+[0;32mI (70816) BLE_RELAY: Relay: airborne=1 lat=41.398373 lon=-81.806351 op_lat=41.398671 op_lon=-81.805792[0m
+[0;32mI (71517) UPLOADER: Upload cycle: 1 detections queued[0m
+[0;32mI (71666) BLE_RELAY: Relay: airborne=1 lat=41.398373 lon=-81.806351 op_lat=41.398671 op_lon=-81.805792[0m
+[0;32mI (72067) wifi:ic_disable_sniffer[0m
+[0;33mW (72167) wifi:(itwt)itwt_stop_process![0m
+[0;32mI (72516) BLE_RELAY: Relay: airborne=1 lat=41.398373 lon=-81.806351 op_lat=41.398671 op_lon=-81.805792[0m
+[0;32mI (72667) UPLOADER: Connecting to WiFi: 'TheFastStinkyKid'[0m
+[0;32mI (72676) wifi:ap channel adjust o:2,0 n:9,0[0m
+[0;32mI (72677) wifi:new:<9,0>, old:<2,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (72678) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (72678) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (72686) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (72695) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (72696) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (72696) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (72697) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (72697) wifi:(trc)phytype:CBW20-SGI, snr:68, maxRate:144, highestRateIdx:0[0m
+[0;33mW (72697) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (72698) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:68, ampduState:wait operational[0m
+[0;32mI (72698) wifi:ifidx:0, rssi:-30, nf:-98, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (72698) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (72739) wifi:connected with TheFastStinkyKid, aid = 58, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (72739) wifi:security: WPA2-PSK, phy:bgn, rssi:-30, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (72740) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (72740) wifi:pm start, type:1, aid:0x3a, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (72740) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (72741) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:17, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (72741) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:18, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (72742) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:19, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (72750) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[1;31mE (72751) wifi:CCMP replay detected: A1=98:a3:16:7d:26:60 A2=cc:ab:2c:7d:19:e4 PN=1, RSC=2 seq=2784[0m
+[0;33mW (72757) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0000005[0m
+[0;32mI (72830) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;32mI (73366) BLE_RELAY: Relay: airborne=1 lat=41.398373 lon=-81.806351 op_lat=41.398671 op_lon=-81.805792[0m
+[0;32mI (73763) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (73763) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;32mI (73770) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:20, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;33mW (73771) wifi:<ba-add>idx:1, ifx:0, tid:3, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0003005[0m
+[0;32mI (73773) wifi:[ADDBA]RX addba response, status:0, tid:0/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;32mI (73974) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/detections → 200 OK[0m
+[0;32mI (73975) UPLOADER: Uploaded 1 detections[0m
+[0;32mI (74159) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/nodes/heartbeat → 200 OK[0m
+[0;32mI (74161) wifi:state: run -> init (0x0)[0m
+[0;32mI (74162) wifi:teardown, set twt_inactive_time_secs:6, sp_count:0[0m
+[0;32mI (74162) wifi:pm stop, total sleep time: 883302 us / 1421599 us[0m
+
+[0;32mI (74163) wifi:<ba-del>idx:0, tid:0[0m
+[0;32mI (74163) wifi:<ba-del>idx:1, tid:3[0m
+[0;32mI (74163) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (74216) BLE_RELAY: Relay: airborne=1 lat=41.398373 lon=-81.806351 op_lat=41.398671 op_lon=-81.805792[0m
+[0;32mI (75066) BLE_RELAY: Relay: airborne=1 lat=41.398373 lon=-81.806351 op_lat=41.398671 op_lon=-81.805792[0m
+[0;32mI (75765) wifi:ic_enable_sniffer[0m
+[0;32mI (75765) UPLOADER: Upload cycle done, scanner resumed[0m
+[0;32mI (75916) BLE_RELAY: Relay: airborne=1 lat=41.398373 lon=-81.806351 op_lat=41.398671 op_lon=-81.805792[0m
+[0;32mI (76766) BLE_RELAY: Relay: airborne=1 lat=41.398373 lon=-81.806351 op_lat=41.398671 op_lon=-81.805792[0m
+[0;32mI (77575) WIFI_SCAN: ODID frame! RSSI=-80 len=79[0m
+[0;32mI (77575) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (77616) BLE_RELAY: Relay: airborne=1 lat=41.398373 lon=-81.806351 op_lat=41.398671 op_lon=-81.805792[0m
+[0;32mI (78417) BLE_RELAY: Relay: airborne=1 lat=41.398342 lon=-81.806396 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (79267) BLE_RELAY: Relay: airborne=1 lat=41.398342 lon=-81.806396 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (80117) BLE_RELAY: Relay: airborne=1 lat=41.398342 lon=-81.806396 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (80967) BLE_RELAY: Relay: airborne=1 lat=41.398342 lon=-81.806396 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (81576) UPLOADER: Upload cycle: 1 detections queued[0m
+[0;32mI (81817) BLE_RELAY: Relay: airborne=1 lat=41.398342 lon=-81.806396 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (82126) wifi:ic_disable_sniffer[0m
+[0;33mW (82226) wifi:(itwt)itwt_stop_process![0m
+[0;32mI (82667) BLE_RELAY: Relay: airborne=1 lat=41.398342 lon=-81.806396 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (82726) UPLOADER: Connecting to WiFi: 'TheFastStinkyKid'[0m
+[0;32mI (82735) wifi:ap channel adjust o:1,0 n:9,0[0m
+[0;32mI (82736) wifi:new:<9,0>, old:<1,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (82737) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (82737) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (82746) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (82755) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (82755) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (82756) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (82756) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (82757) wifi:(trc)phytype:CBW20-SGI, snr:61, maxRate:144, highestRateIdx:0[0m
+[0;33mW (82757) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (82757) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:61, ampduState:wait operational[0m
+[0;32mI (82758) wifi:ifidx:0, rssi:-37, nf:-98, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (82758) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (82799) wifi:connected with TheFastStinkyKid, aid = 25, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (82799) wifi:security: WPA2-PSK, phy:bgn, rssi:-37, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (82800) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (82800) wifi:pm start, type:1, aid:0x19, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (82800) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (82801) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:21, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (82802) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:22, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (82802) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:23, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (82808) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[1;31mE (82810) wifi:CCMP replay detected: A1=98:a3:16:7d:26:60 A2=cc:ab:2c:7d:19:e4 PN=1, RSC=2 seq=6192[0m
+[0;33mW (82812) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0000005[0m
+[0;32mI (82865) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;32mI (83519) BLE_RELAY: Relay: airborne=1 lat=41.398342 lon=-81.806396 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (83816) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (83816) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;32mI (83823) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:24, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;33mW (83824) wifi:<ba-add>idx:1, ifx:0, tid:3, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0003005[0m
+[0;32mI (83825) wifi:[ADDBA]RX addba response, status:0, tid:0/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;32mI (84101) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/detections → 200 OK[0m
+[0;32mI (84103) UPLOADER: Uploaded 1 detections[0m
+[0;32mI (84297) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/nodes/heartbeat → 200 OK[0m
+[0;32mI (84298) wifi:state: run -> init (0x0)[0m
+[0;32mI (84299) wifi:teardown, set twt_inactive_time_secs:6, sp_count:0[0m
+[0;32mI (84299) wifi:pm stop, total sleep time: 921393 us / 1498874 us[0m
+
+[0;32mI (84300) wifi:<ba-del>idx:0, tid:0[0m
+[0;32mI (84300) wifi:<ba-del>idx:1, tid:3[0m
+[0;32mI (84301) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (84370) BLE_RELAY: Relay: airborne=1 lat=41.398342 lon=-81.806396 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (85220) BLE_RELAY: Relay: airborne=1 lat=41.398342 lon=-81.806396 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (85902) wifi:ic_enable_sniffer[0m
+[0;32mI (85902) UPLOADER: Upload cycle done, scanner resumed[0m
+[0;32mI (86070) BLE_RELAY: Relay: airborne=1 lat=41.398342 lon=-81.806396 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (86920) BLE_RELAY: Relay: airborne=1 lat=41.398342 lon=-81.806396 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (87770) BLE_RELAY: Relay: airborne=1 lat=41.398342 lon=-81.806396 op_lat=41.398671 op_lon=-81.805793[0m
+[0;32mI (88135) WIFI_SCAN: ODID frame! RSSI=-82 len=79[0m
+[0;32mI (88135) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (88570) BLE_RELAY: Relay: airborne=1 lat=41.398659 lon=-81.807022 op_lat=41.398671 op_lon=-81.805801[0m
+[0;32mI (89420) BLE_RELAY: Relay: airborne=1 lat=41.398659 lon=-81.807022 op_lat=41.398671 op_lon=-81.805801[0m
+[0;32mI (90270) BLE_RELAY: Relay: airborne=1 lat=41.398659 lon=-81.807022 op_lat=41.398671 op_lon=-81.805801[0m
+[0;32mI (91120) BLE_RELAY: Relay: airborne=1 lat=41.398659 lon=-81.807022 op_lat=41.398671 op_lon=-81.805801[0m
+[0;32mI (91636) UPLOADER: Upload cycle: 1 detections queued[0m
+[0;32mI (91970) BLE_RELAY: Relay: airborne=1 lat=41.398659 lon=-81.807022 op_lat=41.398671 op_lon=-81.805801[0m
+[0;32mI (92186) wifi:ic_disable_sniffer[0m
+[0;33mW (92286) wifi:(itwt)itwt_stop_process![0m
+[0;32mI (92786) UPLOADER: Connecting to WiFi: 'TheFastStinkyKid'[0m
+[0;32mI (92796) wifi:ap channel adjust o:11,0 n:9,0[0m
+[0;32mI (92797) wifi:new:<9,0>, old:<11,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (92798) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (92798) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (92806) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (92813) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (92813) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (92814) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (92814) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (92814) wifi:(trc)phytype:CBW20-SGI, snr:62, maxRate:144, highestRateIdx:0[0m
+[0;33mW (92815) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (92815) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:62, ampduState:wait operational[0m
+[0;32mI (92816) wifi:ifidx:0, rssi:-36, nf:-98, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (92816) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (92820) BLE_RELAY: Relay: airborne=1 lat=41.398659 lon=-81.807022 op_lat=41.398671 op_lon=-81.805801[0m
+[0;32mI (92857) wifi:connected with TheFastStinkyKid, aid = 39, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (92858) wifi:security: WPA2-PSK, phy:bgn, rssi:-36, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (92859) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (92859) wifi:pm start, type:1, aid:0x27, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (92859) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (92860) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:25, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (92860) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:26, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (92861) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:27, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (92869) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[1;31mE (92871) wifi:CCMP replay detected: A1=98:a3:16:7d:26:60 A2=cc:ab:2c:7d:19:e4 PN=1, RSC=2 seq=9584[0m
+[0;33mW (92879) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0000005[0m
+[0;32mI (92901) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;32mI (93671) BLE_RELAY: Relay: airborne=1 lat=41.398659 lon=-81.807022 op_lat=41.398671 op_lon=-81.805801[0m
+[0;32mI (93883) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (93883) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;32mI (93922) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:28, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;33mW (93923) wifi:<ba-add>idx:1, ifx:0, tid:3, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0003005[0m
+[0;32mI (93927) wifi:[ADDBA]RX addba response, status:0, tid:0/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;32mI (94128) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/detections → 200 OK[0m
+[0;32mI (94129) UPLOADER: Uploaded 1 detections[0m
+[0;32mI (94364) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/nodes/heartbeat → 200 OK[0m
+[0;32mI (94366) wifi:state: run -> init (0x0)[0m
+[0;32mI (94367) wifi:teardown, set twt_inactive_time_secs:6, sp_count:0[0m
+[0;32mI (94367) wifi:pm stop, total sleep time: 983529 us / 1507685 us[0m
+
+[0;32mI (94367) wifi:<ba-del>idx:0, tid:0[0m
+[0;32mI (94368) wifi:<ba-del>idx:1, tid:3[0m
+[0;32mI (94368) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (94521) BLE_RELAY: Relay: airborne=1 lat=41.398659 lon=-81.807022 op_lat=41.398671 op_lon=-81.805801[0m
+[0;32mI (95371) BLE_RELAY: Relay: airborne=1 lat=41.398659 lon=-81.807022 op_lat=41.398671 op_lon=-81.805801[0m
+[0;32mI (95970) wifi:ic_enable_sniffer[0m
+[0;32mI (95970) UPLOADER: Upload cycle done, scanner resumed[0m
+[0;32mI (96221) BLE_RELAY: Relay: airborne=1 lat=41.398659 lon=-81.807022 op_lat=41.398671 op_lon=-81.805801[0m
+[0;32mI (97071) BLE_RELAY: Relay: airborne=1 lat=41.398659 lon=-81.807022 op_lat=41.398671 op_lon=-81.805801[0m
+[0;32mI (97921) BLE_RELAY: Relay: airborne=1 lat=41.398659 lon=-81.807022 op_lat=41.398671 op_lon=-81.805801[0m
+[0;32mI (98695) WIFI_SCAN: ODID frame! RSSI=-77 len=79[0m
+[0;32mI (98695) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (98771) BLE_RELAY: Relay: airborne=1 lat=41.398659 lon=-81.807022 op_lat=41.398671 op_lon=-81.805801[0m
+[0;32mI (99571) BLE_RELAY: Relay: airborne=1 lat=41.398689 lon=-81.807030 op_lat=41.398667 op_lon=-81.805800[0m
+[0;32mI (100421) BLE_RELAY: Relay: airborne=1 lat=41.398689 lon=-81.807030 op_lat=41.398667 op_lon=-81.805800[0m
+[0;32mI (101271) BLE_RELAY: Relay: airborne=1 lat=41.398689 lon=-81.807030 op_lat=41.398667 op_lon=-81.805800[0m
+[0;32mI (101696) UPLOADER: Upload cycle: 1 detections queued[0m
+[0;32mI (102121) BLE_RELAY: Relay: airborne=1 lat=41.398689 lon=-81.807030 op_lat=41.398667 op_lon=-81.805800[0m
+[0;32mI (102246) wifi:ic_disable_sniffer[0m
+[0;33mW (102346) wifi:(itwt)itwt_stop_process![0m
+[0;32mI (102846) UPLOADER: Connecting to WiFi: 'TheFastStinkyKid'[0m
+[0;32mI (102857) wifi:ap channel adjust o:11,0 n:9,0[0m
+[0;32mI (102857) wifi:new:<9,0>, old:<11,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (102858) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (102858) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (102870) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (102881) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (102881) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (102881) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (102882) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (102882) wifi:(trc)phytype:CBW20-SGI, snr:67, maxRate:144, highestRateIdx:0[0m
+[0;33mW (102882) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (102883) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:67, ampduState:wait operational[0m
+[0;32mI (102883) wifi:ifidx:0, rssi:-31, nf:-98, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (102884) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (102924) wifi:connected with TheFastStinkyKid, aid = 10, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (102924) wifi:security: WPA2-PSK, phy:bgn, rssi:-31, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (102925) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (102925) wifi:pm start, type:1, aid:0xa, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (102926) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (102926) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:29, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (102927) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:30, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (102927) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:31, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (102932) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[1;31mE (102933) wifi:CCMP replay detected: A1=98:a3:16:7d:26:60 A2=cc:ab:2c:7d:19:e4 PN=1, RSC=2 seq=14032[0m
+[0;32mI (102936) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;33mW (102962) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0000005[0m
+[0;32mI (102973) BLE_RELAY: Relay: airborne=1 lat=41.398689 lon=-81.807030 op_lat=41.398667 op_lon=-81.805800[0m
+[0;32mI (103823) BLE_RELAY: Relay: airborne=1 lat=41.398689 lon=-81.807030 op_lat=41.398667 op_lon=-81.805800[0m
+[0;32mI (103966) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (103966) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;32mI (103972) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:32, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;33mW (103973) wifi:<ba-add>idx:1, ifx:0, tid:3, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0003005[0m
+[0;32mI (103975) wifi:[ADDBA]RX addba response, status:0, tid:0/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;32mI (104184) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/detections → 200 OK[0m
+[0;32mI (104185) UPLOADER: Uploaded 1 detections[0m
+[0;32mI (104393) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/nodes/heartbeat → 200 OK[0m
+[0;32mI (104395) wifi:state: run -> init (0x0)[0m
+[0;32mI (104396) wifi:teardown, set twt_inactive_time_secs:6, sp_count:0[0m
+[0;32mI (104396) wifi:pm stop, total sleep time: 881341 us / 1470336 us[0m
+
+[0;32mI (104396) wifi:<ba-del>idx:0, tid:0[0m
+[0;32mI (104397) wifi:<ba-del>idx:1, tid:3[0m
+[0;32mI (104397) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (104674) BLE_RELAY: Relay: airborne=1 lat=41.398689 lon=-81.807030 op_lat=41.398667 op_lon=-81.805800[0m
+[0;32mI (105524) BLE_RELAY: Relay: airborne=1 lat=41.398689 lon=-81.807030 op_lat=41.398667 op_lon=-81.805800[0m
+[0;32mI (105999) wifi:ic_enable_sniffer[0m
+[0;32mI (105999) UPLOADER: Upload cycle done, scanner resumed[0m
+[0;32mI (106374) BLE_RELAY: Relay: airborne=1 lat=41.398689 lon=-81.807030 op_lat=41.398667 op_lon=-81.805800[0m
+[0;32mI (107224) BLE_RELAY: Relay: airborne=1 lat=41.398689 lon=-81.807030 op_lat=41.398667 op_lon=-81.805800[0m
+[0;32mI (108074) BLE_RELAY: Relay: airborne=1 lat=41.398689 lon=-81.807030 op_lat=41.398667 op_lon=-81.805800[0m
+[0;32mI (108924) BLE_RELAY: Relay: airborne=1 lat=41.398689 lon=-81.807030 op_lat=41.398667 op_lon=-81.805800[0m
+[0;32mI (109774) BLE_RELAY: Relay: airborne=1 lat=41.398689 lon=-81.807030 op_lat=41.398667 op_lon=-81.805800[0m
+[0;32mI (110624) BLE_RELAY: Relay: airborne=1 lat=41.398689 lon=-81.807030 op_lat=41.398667 op_lon=-81.805800[0m
+[0;32mI (111474) BLE_RELAY: Relay: airborne=1 lat=41.398689 lon=-81.807030 op_lat=41.398667 op_lon=-81.805800[0m
+[0;32mI (111699) UPLOADER: Upload cycle: 0 detections queued[0m
+[0;32mI (112249) wifi:ic_disable_sniffer[0m
+[0;32mI (112324) BLE_RELAY: Relay: airborne=1 lat=41.398689 lon=-81.807030 op_lat=41.398667 op_lon=-81.805800[0m
+[0;33mW (112349) wifi:(itwt)itwt_stop_process![0m
+[0;32mI (112849) UPLOADER: Connecting to WiFi: 'TheFastStinkyKid'[0m
+[0;32mI (112864) wifi:ap channel adjust o:11,0 n:9,0[0m
+[0;32mI (112865) wifi:new:<9,0>, old:<11,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (112866) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (112866) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (112874) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (112880) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (112881) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (112881) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (112882) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (112882) wifi:(trc)phytype:CBW20-SGI, snr:68, maxRate:144, highestRateIdx:0[0m
+[0;33mW (112882) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (112883) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:68, ampduState:wait operational[0m
+[0;32mI (112883) wifi:ifidx:0, rssi:-30, nf:-98, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (112883) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (112920) wifi:connected with TheFastStinkyKid, aid = 36, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (112921) wifi:security: WPA2-PSK, phy:bgn, rssi:-30, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (112922) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (112922) wifi:pm start, type:1, aid:0x24, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (112922) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (112923) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:33, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (112923) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:34, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (112924) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:35, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (112926) wifi:[ADDBA]RX addba response, status:0, tid:0/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;32mI (112928) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;33mW (112935) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0000005[0m
+[0;32mI (112971) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;32mI (113177) BLE_RELAY: Relay: airborne=1 lat=41.398689 lon=-81.807030 op_lat=41.398667 op_lon=-81.805800[0m
+[0;32mI (113777) BLE_RELAY: Drone no frames — stopping relay[0m
+[0;32mI (113777) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (113828) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (113941) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (113941) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;33mW (113993) wifi:<ba-add>idx:1, ifx:0, tid:3, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0003005[0m
+[0;32mI (114116) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/nodes/heartbeat → 200 OK[0m
+[0;32mI (114118) wifi:state: run -> init (0x0)[0m
+[0;32mI (114119) wifi:teardown, set twt_inactive_time_secs:6, sp_count:0[0m
+[0;32mI (114119) wifi:pm stop, total sleep time: 792900 us / 1196696 us[0m
+
+[0;32mI (114119) wifi:<ba-del>idx:0, tid:0[0m
+[0;32mI (114119) wifi:<ba-del>idx:1, tid:3[0m
+[0;32mI (114120) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (115722) wifi:ic_enable_sniffer[0m
+[0;32mI (115722) UPLOADER: Upload cycle done, scanner resumed[0m
+[0;32mI (125895) WIFI_SCAN: ODID frame! RSSI=-72 len=79[0m
+[0;32mI (125895) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (126696) BLE_RELAY: Relay: airborne=1 lat=41.399368 lon=-81.806099 op_lat=41.398660 op_lon=-81.805784[0m
+[0;32mI (127546) BLE_RELAY: Relay: airborne=1 lat=41.399368 lon=-81.806099 op_lat=41.398660 op_lon=-81.805784[0m
+[0;32mI (128396) BLE_RELAY: Relay: airborne=1 lat=41.399368 lon=-81.806099 op_lat=41.398660 op_lon=-81.805784[0m
+[0;32mI (129246) BLE_RELAY: Relay: airborne=1 lat=41.399368 lon=-81.806099 op_lat=41.398660 op_lon=-81.805784[0m
+[0;32mI (130096) BLE_RELAY: Relay: airborne=1 lat=41.399368 lon=-81.806099 op_lat=41.398660 op_lon=-81.805784[0m
+[0;32mI (130946) BLE_RELAY: Relay: airborne=1 lat=41.399368 lon=-81.806099 op_lat=41.398660 op_lon=-81.805784[0m
+[0;32mI (131796) BLE_RELAY: Relay: airborne=1 lat=41.399368 lon=-81.806099 op_lat=41.398660 op_lon=-81.805784[0m
+[0;32mI (131796) UPLOADER: Upload cycle: 1 detections queued[0m
+[0;32mI (132346) wifi:ic_disable_sniffer[0m
+[0;33mW (132446) wifi:(itwt)itwt_stop_process![0m
+[0;32mI (132646) BLE_RELAY: Relay: airborne=1 lat=41.399368 lon=-81.806099 op_lat=41.398660 op_lon=-81.805784[0m
+[0;32mI (132946) UPLOADER: Connecting to WiFi: 'TheFastStinkyKid'[0m
+[0;32mI (132956) wifi:ap channel adjust o:5,0 n:9,0[0m
+[0;32mI (132956) wifi:new:<9,0>, old:<5,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (132957) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (132957) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (132965) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (132975) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (132975) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (132975) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (132976) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (132976) wifi:(trc)phytype:CBW20-SGI, snr:61, maxRate:144, highestRateIdx:0[0m
+[0;33mW (132977) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (132977) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:61, ampduState:wait operational[0m
+[0;32mI (132977) wifi:ifidx:0, rssi:-37, nf:-98, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (132978) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (133037) wifi:connected with TheFastStinkyKid, aid = 17, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (133037) wifi:security: WPA2-PSK, phy:bgn, rssi:-37, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (133038) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (133038) wifi:pm start, type:1, aid:0x11, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (133039) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (133039) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:36, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (133040) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:37, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (133041) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:38, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (133042) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;32mI (133051) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[1;31mE (133055) wifi:CCMP replay detected: A1=98:a3:16:7d:26:60 A2=cc:ab:2c:7d:19:e4 PN=1, RSC=2 seq=24896[0m
+[0;33mW (133059) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0000005[0m
+[0;32mI (133496) BLE_RELAY: Relay: airborne=1 lat=41.399368 lon=-81.806099 op_lat=41.398660 op_lon=-81.805784[0m
+[0;32mI (134068) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (134068) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;32mI (134076) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:39, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;33mW (134077) wifi:<ba-add>idx:1, ifx:0, tid:3, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0003005[0m
+[0;32mI (134079) wifi:[ADDBA]RX addba response, status:0, tid:0/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;32mI (134276) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/detections → 200 OK[0m
+[0;32mI (134278) UPLOADER: Uploaded 1 detections[0m
+[0;32mI (134347) BLE_RELAY: Relay: airborne=1 lat=41.399368 lon=-81.806099 op_lat=41.398660 op_lon=-81.805784[0m
+[0;32mI (134482) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/nodes/heartbeat → 200 OK[0m
+[0;32mI (134484) wifi:state: run -> init (0x0)[0m
+[0;32mI (134484) wifi:teardown, set twt_inactive_time_secs:6, sp_count:0[0m
+[0;32mI (134485) wifi:pm stop, total sleep time: 823182 us / 1445795 us[0m
+
+[0;32mI (134485) wifi:<ba-del>idx:0, tid:0[0m
+[0;32mI (134485) wifi:<ba-del>idx:1, tid:3[0m
+[0;32mI (134486) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (135197) BLE_RELAY: Relay: airborne=1 lat=41.399368 lon=-81.806099 op_lat=41.398660 op_lon=-81.805784[0m
+[0;32mI (136047) BLE_RELAY: Relay: airborne=1 lat=41.399368 lon=-81.806099 op_lat=41.398660 op_lon=-81.805784[0m
+[0;32mI (136087) wifi:ic_enable_sniffer[0m
+[0;32mI (136087) UPLOADER: Upload cycle done, scanner resumed[0m
+[0;32mI (136135) WIFI_SCAN: ODID frame! RSSI=-66 len=79[0m
+[0;32mI (136135) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (136847) BLE_RELAY: Relay: airborne=1 lat=41.398926 lon=-81.805733 op_lat=41.398661 op_lon=-81.805785[0m
+[0;32mI (137697) BLE_RELAY: Relay: airborne=1 lat=41.398926 lon=-81.805733 op_lat=41.398661 op_lon=-81.805785[0m
+[0;32mI (138547) BLE_RELAY: Relay: airborne=1 lat=41.398926 lon=-81.805733 op_lat=41.398661 op_lon=-81.805785[0m
+[0;32mI (139397) BLE_RELAY: Relay: airborne=1 lat=41.398926 lon=-81.805733 op_lat=41.398661 op_lon=-81.805785[0m
+[0;32mI (140247) BLE_RELAY: Relay: airborne=1 lat=41.398926 lon=-81.805733 op_lat=41.398661 op_lon=-81.805785[0m
+[0;32mI (141097) BLE_RELAY: Relay: airborne=1 lat=41.398926 lon=-81.805733 op_lat=41.398661 op_lon=-81.805785[0m
+[0;32mI (141836) UPLOADER: Upload cycle: 1 detections queued[0m
+[0;32mI (141947) BLE_RELAY: Relay: airborne=1 lat=41.398926 lon=-81.805733 op_lat=41.398661 op_lon=-81.805785[0m
+[0;32mI (142386) wifi:ic_disable_sniffer[0m
+[0;33mW (142486) wifi:(itwt)itwt_stop_process![0m
+[0;32mI (142797) BLE_RELAY: Relay: airborne=1 lat=41.398926 lon=-81.805733 op_lat=41.398661 op_lon=-81.805785[0m
+[0;32mI (142986) UPLOADER: Connecting to WiFi: 'TheFastStinkyKid'[0m
+[0;32mI (142995) wifi:ap channel adjust o:4,0 n:9,0[0m
+[0;32mI (142996) wifi:new:<9,0>, old:<4,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (142997) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (142997) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (143004) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (143012) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (143012) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (143012) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (143013) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (143013) wifi:(trc)phytype:CBW20-SGI, snr:61, maxRate:144, highestRateIdx:0[0m
+[0;33mW (143014) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (143014) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:61, ampduState:wait operational[0m
+[0;32mI (143014) wifi:ifidx:0, rssi:-37, nf:-98, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (143015) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (143053) wifi:connected with TheFastStinkyKid, aid = 46, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (143053) wifi:security: WPA2-PSK, phy:bgn, rssi:-37, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (143054) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (143054) wifi:pm start, type:1, aid:0x2e, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (143055) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (143055) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:40, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (143056) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:41, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (143056) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:42, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (143059) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[1;31mE (143061) wifi:CCMP replay detected: A1=98:a3:16:7d:26:60 A2=cc:ab:2c:7d:19:e4 PN=1, RSC=2 seq=28288[0m
+[0;33mW (143064) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0000005[0m
+[0;32mI (143076) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;32mI (143649) BLE_RELAY: Relay: airborne=1 lat=41.398926 lon=-81.805733 op_lat=41.398661 op_lon=-81.805785[0m
+[0;32mI (144067) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (144067) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;33mW (144105) wifi:<ba-add>idx:1, ifx:0, tid:3, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0003005[0m
+[0;32mI (144131) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:43, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;33mW (144132) wifi:<ba-add>idx:2, ifx:0, tid:2, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0002005[0m
+[0;32mI (144141) wifi:[ADDBA]RX addba response, status:0, tid:0/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;32mI (144331) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/detections → 200 OK[0m
+[0;32mI (144332) UPLOADER: Uploaded 1 detections[0m
+[0;32mI (144500) BLE_RELAY: Relay: airborne=1 lat=41.398926 lon=-81.805733 op_lat=41.398661 op_lon=-81.805785[0m
+[0;32mI (144508) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/nodes/heartbeat → 200 OK[0m
+[0;32mI (144510) wifi:state: run -> init (0x0)[0m
+[0;32mI (144511) wifi:teardown, set twt_inactive_time_secs:6, sp_count:0[0m
+[0;32mI (144511) wifi:pm stop, total sleep time: 905215 us / 1456116 us[0m
+
+[0;32mI (144511) wifi:<ba-del>idx:0, tid:0[0m
+[0;32mI (144512) wifi:<ba-del>idx:2, tid:2[0m
+[0;32mI (144512) wifi:<ba-del>idx:1, tid:3[0m
+[0;32mI (144512) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (145351) BLE_RELAY: Relay: airborne=1 lat=41.398926 lon=-81.805733 op_lat=41.398661 op_lon=-81.805785[0m
+[0;32mI (146114) wifi:ic_enable_sniffer[0m
+[0;32mI (146114) UPLOADER: Upload cycle done, scanner resumed[0m
+[0;32mI (146201) BLE_RELAY: Relay: airborne=1 lat=41.398926 lon=-81.805733 op_lat=41.398661 op_lon=-81.805785[0m
+[0;32mI (147051) BLE_RELAY: Relay: airborne=1 lat=41.398926 lon=-81.805733 op_lat=41.398661 op_lon=-81.805785[0m
+[0;32mI (147901) BLE_RELAY: Relay: airborne=1 lat=41.398926 lon=-81.805733 op_lat=41.398661 op_lon=-81.805785[0m
+[0;32mI (148751) BLE_RELAY: Relay: airborne=1 lat=41.398926 lon=-81.805733 op_lat=41.398661 op_lon=-81.805785[0m
+[0;32mI (149601) BLE_RELAY: Relay: airborne=1 lat=41.398926 lon=-81.805733 op_lat=41.398661 op_lon=-81.805785[0m
+[0;32mI (150451) BLE_RELAY: Relay: airborne=1 lat=41.398926 lon=-81.805733 op_lat=41.398661 op_lon=-81.805785[0m
+[0;32mI (151301) BLE_RELAY: Relay: airborne=1 lat=41.398926 lon=-81.805733 op_lat=41.398661 op_lon=-81.805785[0m
+[0;32mI (151351) BLE_RELAY: Drone no frames — stopping relay[0m
+[0;32mI (151351) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (151401) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (153415) WIFI_SCAN: ODID frame! RSSI=-73 len=79[0m
+[0;32mI (153415) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (154252) BLE_RELAY: Relay: airborne=1 lat=41.398819 lon=-81.805748 op_lat=41.398655 op_lon=-81.805784[0m
+[0;32mI (155102) BLE_RELAY: Relay: airborne=1 lat=41.398819 lon=-81.805748 op_lat=41.398655 op_lon=-81.805784[0m
+[0;32mI (155952) BLE_RELAY: Relay: airborne=1 lat=41.398819 lon=-81.805748 op_lat=41.398655 op_lon=-81.805784[0m
+[0;32mI (156802) BLE_RELAY: Relay: airborne=1 lat=41.398819 lon=-81.805748 op_lat=41.398655 op_lon=-81.805784[0m
+[0;32mI (157652) BLE_RELAY: Relay: airborne=1 lat=41.398819 lon=-81.805748 op_lat=41.398655 op_lon=-81.805784[0m
+[0;32mI (158502) BLE_RELAY: Relay: airborne=1 lat=41.398819 lon=-81.805748 op_lat=41.398655 op_lon=-81.805784[0m
+[0;32mI (159352) BLE_RELAY: Relay: airborne=1 lat=41.398819 lon=-81.805748 op_lat=41.398655 op_lon=-81.805784[0m
+[0;32mI (160135) WIFI_SCAN: ODID frame! RSSI=-68 len=79[0m
+[0;32mI (160135) ODID: Pack parsed 3 msgs — basic_id=1 loc=1 sys=1[0m
+[0;32mI (160202) BLE_RELAY: Relay: airborne=1 lat=41.398819 lon=-81.805748 op_lat=41.398655 op_lon=-81.805784[0m
+[0;32mI (161002) BLE_RELAY: Relay: airborne=1 lat=41.398819 lon=-81.805748 op_lat=41.398660 op_lon=-81.805778[0m
+[0;32mI (161852) BLE_RELAY: Relay: airborne=1 lat=41.398819 lon=-81.805748 op_lat=41.398660 op_lon=-81.805778[0m
+[0;32mI (161936) UPLOADER: Upload cycle: 2 detections queued[0m
+[0;32mI (162486) wifi:ic_disable_sniffer[0m
+[0;33mW (162586) wifi:(itwt)itwt_stop_process![0m
+[0;32mI (162702) BLE_RELAY: Relay: airborne=1 lat=41.398819 lon=-81.805748 op_lat=41.398660 op_lon=-81.805778[0m
+[0;32mI (163086) UPLOADER: Connecting to WiFi: 'TheFastStinkyKid'[0m
+[0;32mI (163097) wifi:ap channel adjust o:10,0 n:9,0[0m
+[0;32mI (163097) wifi:new:<9,0>, old:<10,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (163098) wifi:(connect)dot11_authmode:0x3, pairwise_cipher:0x3, group_cipher:0x3[0m
+[0;32mI (163099) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (163106) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (163115) wifi:(assoc)RESP, Extended Capabilities length:8, operating_mode_notification:0[0m
+[0;32mI (163116) wifi:(assoc)RESP, Extended Capabilities, MBSSID:0, TWT Responder:0, OBSS Narrow Bandwidth RU In OFDMA Tolerance:0[0m
+[0;32mI (163116) wifi:Extended Capabilities length:8, operating_mode_notification:1[0m
+[0;32mI (163117) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (163117) wifi:(trc)phytype:CBW20-SGI, snr:49, maxRate:144, highestRateIdx:0[0m
+[0;33mW (163117) wifi:(trc)band:2G, phymode:3, highestRateIdx:0, lowestRateIdx:11, dataSchedTableSize:14[0m
+[0;32mI (163118) wifi:(trc)band:2G, rate(S-MCS7, rateIdx:0), ampdu(rate:S-MCS7, schedIdx(0, stop:8)), snr:49, ampduState:wait operational[0m
+[0;32mI (163118) wifi:ifidx:0, rssi:-49, nf:-98, phytype(0x3, CBW20-SGI), phymode(0x3, 11bgn), max_rate:144, he:0, vht:0, ht:1[0m
+[0;32mI (163118) wifi:(ht)max.RxAMPDULenExponent:3(65535 bytes), MMSS:5(4 us)[0m
+[0;32mI (163160) wifi:connected with TheFastStinkyKid, aid = 42, channel 9, BW20, bssid = cc:ab:2c:7d:19:e4[0m
+[0;32mI (163160) wifi:security: WPA2-PSK, phy:bgn, rssi:-49, cipher(pairwise:0x3, group:0x3), pmf:1, [0m
+[0;32mI (163161) wifi:pm start, type: 1, twt_start:0[0m
+
+[0;32mI (163161) wifi:pm start, type:1, aid:0x2a, trans-BSSID:cc:ab:2c:7d:19:e4, BSSID[5]:0xe4, mbssid(max-indicator:0, index:0), he:0[0m
+[0;32mI (163162) wifi:set rx beacon pti, rx_bcn_pti: 10, bcn_timeout: 25000, mt_pti: 10, mt_time: 10000[0m
+[0;32mI (163162) wifi:[ADDBA]TX addba request, tid:0, dialogtoken:44, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (163163) wifi:[ADDBA]TX addba request, tid:7, dialogtoken:45, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x20)[0m
+[0;32mI (163163) wifi:[ADDBA]TX addba request, tid:5, dialogtoken:46, bufsize:64, A-MSDU:0(not supported), policy:1(IMR), ssn:0(0x0)[0m
+[0;32mI (163168) wifi:[ADDBA]RX addba response, status:0, tid:0/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;32mI (163169) wifi:[ADDBA]RX addba response, status:0, tid:7/tb:1(0xa1), bufsize:64, batimeout:0, txa_wnd:64[0m
+[0;33mW (163171) wifi:<ba-add>idx:0, ifx:0, tid:0, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0000005[0m
+[0;32mI (163250) wifi:AP's beacon interval = 102400 us, DTIM period = 3[0m
+[0;32mI (163553) BLE_RELAY: Relay: airborne=1 lat=41.398819 lon=-81.805748 op_lat=41.398660 op_lon=-81.805778[0m
+[0;32mI (164174) esp_netif_handlers: sta ip: 192.168.1.142, mask: 255.255.255.0, gw: 192.168.1.254[0m
+[0;32mI (164174) UPLOADER: WiFi connected, IP: 192.168.1.142[0m
+[0;33mW (164183) wifi:<ba-add>idx:1, ifx:0, tid:3, TAHI:0x100e419, TALO:0x7d2cabcc, (ssn:1, win:64, cur_ssn:1), CONF:0xc0003005[0m
+[0;32mI (164403) BLE_RELAY: Relay: airborne=1 lat=41.398819 lon=-81.805748 op_lat=41.398660 op_lon=-81.805778[0m
+[0;32mI (164476) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/detections → 200 OK[0m
+[0;32mI (164477) UPLOADER: Uploaded 2 detections[0m
+[0;32mI (164616) UPLOADER: POST http://airaware-proxy.erik-ff2.workers.dev/api/nodes/heartbeat → 200 OK[0m
+[0;32mI (164618) wifi:state: run -> init (0x0)[0m
+[0;32mI (164618) wifi:teardown, set twt_inactive_time_secs:6, sp_count:0[0m
+[0;32mI (164619) wifi:pm stop, total sleep time: 847277 us / 1456989 us[0m
+
+[0;32mI (164619) wifi:<ba-del>idx:0, tid:0[0m
+[0;32mI (164619) wifi:<ba-del>idx:1, tid:3[0m
+[0;32mI (164620) wifi:new:<9,0>, old:<9,0>, ap:<9,0>, sta:<9,0>, prof:6, snd_ch_cfg:0x0[0m
+[0;32mI (165253) BLE_RELAY: Relay: airborne=1 lat=41.398819 lon=-81.805748 op_lat=41.398660 op_lon=-81.805778[0m
+[0;32mI (166103) BLE_RELAY: Relay: airborne=1 lat=41.398819 lon=-81.805748 op_lat=41.398660 op_lon=-81.805778[0m
+[0;32mI (166221) wifi:ic_enable_sniffer[0m
+[0;32mI (166221) UPLOADER: Upload cycle done, scanner resumed[0m
+[0;32mI (166953) BLE_RELAY: Relay: airborne=1 lat=41.398819 lon=-81.805748 op_lat=41.398660 op_lon=-81.805778[0m
+[0;32mI (167803) BLE_RELAY: Relay: airborne=1 lat=41.398819 lon=-81.805748 op_lat=41.398660 op_lon=-81.805778[0m

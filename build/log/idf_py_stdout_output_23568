@@ -1,0 +1,131 @@
+Command: C:\Espressif\python_env\idf5.5_py3.11_env\Scripts\python.exe C:\Espressif\frameworks\esp-idf-v5.5.3\tools/idf_monitor.py -p COM5 -b 115200 --toolchain-prefix riscv32-esp-elf- --target esp32c6 --revision 0 --decode-panic backtrace C:\Users\joyce\OneDrive\Documents\C6-Firmware\build\westshore_remote_id.elf C:\Users\joyce\OneDrive\Documents\C6-Firmware\build\bootloader\bootloader.elf --force-color -m 'C:\Espressif\python_env\idf5.5_py3.11_env\Scripts\python.exe' 'C:\Espressif\frameworks\esp-idf-v5.5.3\tools\idf.py' '-p' 'COM5'
+ESP-ROM:esp32c6-20220919
+Build:Sep 19 2022
+rst:0x15 (USB_UART_HPSYS),boot:0xc (SPI_FAST_FLASH_BOOT)
+Saved PC:0x4080b244
+SPIWP:0xee
+mode:DIO, clock div:2
+load:0x40875730,len:0x1734
+load:0x4086b910,len:0xe78
+load:0x4086e610,len:0x31a8
+entry 0x4086b91a
+[0;32mI (23) boot: ESP-IDF v5.5.3 2nd stage bootloader[0m
+[0;32mI (23) boot: compile time Apr  5 2026 21:49:06[0m
+[0;32mI (23) boot: chip revision: v0.2[0m
+[0;32mI (23) boot: efuse block revision: v0.3[0m
+[0;32mI (24) boot.esp32c6: SPI Speed      : 80MHz[0m
+[0;32mI (24) boot.esp32c6: SPI Mode       : DIO[0m
+[0;32mI (24) boot.esp32c6: SPI Flash Size : 4MB[0m
+[0;32mI (25) boot: Enabling RNG early entropy source...[0m
+[0;32mI (25) boot: Partition Table:[0m
+[0;32mI (25) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (26) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (26) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (27) boot:  2 otadata          OTA data         01 00 00010000 00002000[0m
+[0;32mI (27) boot:  3 ota_0            OTA app          00 10 00020000 001c0000[0m
+[0;32mI (28) boot:  4 ota_1            OTA app          00 11 001e0000 001c0000[0m
+[0;32mI (28) boot:  5 storage          Unknown data     01 82 003a0000 00060000[0m
+[0;32mI (29) boot: End of partition table[0m
+[0;32mI (30) esp_image: segment 0: paddr=00020020 vaddr=42110020 size=42444h (271428) map[0m
+[0;32mI (80) esp_image: segment 1: paddr=0006246c vaddr=40800000 size=0dbach ( 56236) load[0m
+[0;32mI (93) esp_image: segment 2: paddr=00070020 vaddr=42000020 size=102ce8h (1060072) map[0m
+[0;32mI (289) esp_image: segment 3: paddr=00172d10 vaddr=4080dbac size=14138h ( 82232) load[0m
+[0;32mI (307) esp_image: segment 4: paddr=00186e50 vaddr=40821cf0 size=03a58h ( 14936) load[0m
+[0;32mI (318) boot: Loaded app from partition at offset 0x20000[0m
+[0;32mI (318) boot: Disabling RNG early entropy source...[0m
+[0;32mI (319) cpu_start: Unicore app[0m
+[0;32mI (328) cpu_start: Pro cpu start user code[0m
+[0;32mI (328) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (328) app_init: Application information:[0m
+[0;32mI (328) app_init: Project name:     westshore_remote_id[0m
+[0;32mI (329) app_init: App version:      1[0m
+[0;32mI (329) app_init: Compile time:     Apr  5 2026 21:57:11[0m
+[0;32mI (329) app_init: ELF file SHA256:  55336164e...[0m
+[0;32mI (329) app_init: ESP-IDF:          v5.5.3[0m
+[0;32mI (329) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (330) efuse_init: Max chip rev:     v0.99 [0m
+[0;32mI (330) efuse_init: Chip rev:         v0.2[0m
+[0;32mI (330) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (330) heap_init: At 4082F6A0 len 0004CF70 (307 KiB): RAM[0m
+[0;32mI (331) heap_init: At 4087C610 len 00002F54 (11 KiB): RAM[0m
+[0;32mI (331) heap_init: At 50000000 len 00003FE8 (15 KiB): RTCRAM[0m
+[0;32mI (332) spi_flash: detected chip: gd[0m
+[0;32mI (332) spi_flash: flash io: dio[0m
+[0;32mI (332) sleep_gpio: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (333) sleep_gpio: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (334) main_task: Started on CPU0[0m
+[0;32mI (334) main_task: Calling app_main()[0m
+[0;32mI (345) LED: LED initialised on GPIO4[0m
+[0;32mI (347) NVS_CFG: Config loaded (mode=0 ch=1-13 bl=0 upload=on ssid='TheFastStinkyKid')[0m
+[0;32mI (347) MAIN: ===========================================[0m
+[0;32mI (347) MAIN:  AirAware X1 — Remote ID Sensor Node v1.1[0m
+[0;32mI (347) MAIN:  ESP32-C6  |  IDF v5.5.3[0m
+[0;32mI (348) MAIN: ===========================================[0m
+[0;32mI (348) MAIN:  Mode:     BLE relay[0m
+[0;32mI (348) MAIN:  Channels: 1-13[0m
+[0;32mI (348) MAIN:  Upload:   enabled  SSID: 'TheFastStinkyKid'[0m
+[0;32mI (348) MAIN:  Node:     Test Node[0m
+[0;32mI (349) OUTPUT: Output task running on UART0 (TX=GPIO16, 115200 baud)[0m
+[0;32mI (349) WIFI_SCAN: Config AP SSID: AirAware-X1-2661[0m
+[0;32mI (351) pp: pp rom version: 5b8dcfa[0m
+[0;32mI (352) net80211: net80211 rom version: 5b8dcfa[0m
+[0;32mI (353) wifi:wifi driver task: 408433f0, prio:23, stack:6656, core=0[0m
+[0;32mI (358) wifi:wifi firmware version: 4df78f2[0m
+[0;32mI (358) wifi:wifi certification version: v7.0[0m
+[0;32mI (358) wifi:config NVS flash: enabled[0m
+[0;32mI (358) wifi:config nano formatting: disabled[0m
+[0;32mI (358) wifi:mac_version:HAL_MAC_ESP32AX_761,ut_version:N, band mode:0x1[0m
+[0;32mI (359) wifi:Init data frame dynamic rx buffer num: 8[0m
+[0;32mI (359) wifi:Init static rx mgmt buffer num: 5[0m
+[0;32mI (359) wifi:Init management short buffer num: 32[0m
+[0;32mI (359) wifi:Init static tx buffer num: 4[0m
+[0;32mI (360) wifi:Init static tx FG buffer num: 2[0m
+[0;32mI (360) wifi:Init static rx buffer size: 1700 (rxctrl:92, csi:512)[0m
+[0;32mI (360) wifi:Init static rx buffer num: 4[0m
+[0;32mI (360) wifi:Init dynamic rx buffer num: 8[0m
+[0;32mI (361) wifi_init: rx ba win: 6[0m
+[0;32mI (361) wifi_init: accept mbox: 6[0m
+[0;32mI (361) wifi_init: tcpip mbox: 32[0m
+[0;32mI (361) wifi_init: udp mbox: 6[0m
+[0;32mI (361) wifi_init: tcp mbox: 6[0m
+[0;32mI (361) wifi_init: tcp tx win: 5760[0m
+[0;32mI (362) wifi_init: tcp rx win: 5760[0m
+[0;32mI (362) wifi_init: tcp mss: 1440[0m
+[0;32mI (362) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (362) wifi_init: WiFi RX IRAM OP enabled[0m
+[0;32mI (362) wifi_init: WiFi SLP IRAM OP enabled[0m
+[0;32mI (363) phy_init: phy_version 343,b513b46,Nov 14 2025,16:34:12[0m
+[0;33mW (415) wifi:ACK_TAB0   :0x   90a0b, QAM16:0x9 (24Mbps), QPSK:0xa (12Mbps), BPSK:0xb (6Mbps)[0m
+[0;33mW (415) wifi:CTS_TAB0   :0x   90a0b, QAM16:0x9 (24Mbps), QPSK:0xa (12Mbps), BPSK:0xb (6Mbps)[0m
+[0;33mW (415) wifi:(agc)0x600a7128:0xd2023800, min.avgNF:0xce->0xd2(dB), RCalCount:0x22, min.RRssi:0x800(-128.00)[0m
+[0;32mI (416) wifi:11ax coex: WDEVAX_PTI0(0x55777555), WDEVAX_PTI1(0x00003377).[0m
+
+[0;32mI (417) wifi:mode : sta (98:a3:16:7d:26:60) + softAP (98:a3:16:7d:26:61)[0m
+[0;32mI (417) wifi:enable tsf[0m
+[0;33mW (418) wifi:11ax/11ac mode can not work under phy bw 40M, the sta 2G phymode changed to 11N[0m
+[0;32mI (418) wifi:Total power save buffer number: 2[0m
+[0;32mI (419) wifi:Init max length of beacon: 752/752[0m
+[0;32mI (419) wifi:Init max length of beacon: 752/752[0m
+[0;32mI (420) esp_netif_lwip: DHCP server started on interface WIFI_AP_DEF with IP: 192.168.4.1[0m
+[0;32mI (421) CFG_SRV: Starting HTTP config server on http://192.168.4.1[0m
+[0;32mI (423) CFG_SRV: Config server ready (non-blocking)[0m
+[0;32mI (423) wifi:ic_enable_sniffer[0m
+[0;32mI (424) WIFI_SCAN: Scanner started — AP 'AirAware-X1-2661', ch 1-13, 500ms dwell[0m
+[0;32mI (424) WIFI_SCAN: Config portal: connect to 'AirAware-X1-2661' → http://192.168.4.1[0m
+[0;32mI (924) BLE_INIT: Using main XTAL as clock source, chip ver: 2[0m
+[0;32mI (924) BLE_INIT: ble controller commit:[17fdc66][0m
+[0;32mI (929) BLE_INIT: Bluetooth MAC: 98:a3:16:7d:26:62[0m
+[0;32mI (937) phy: libbtbb version: c493933, Nov 14 2025, 16:34:25[0m
+[0;32mI (942) BLE_RELAY: BLE host synced — configuring extended advertiser[0m
+[0;32mI (943) BLE_RELAY: Extended advertiser configured OK[0m
+[0;32mI (943) BLE_RELAY: Relay task running[0m
+[0;32mI (943) BLE_RELAY: BLE relay initializing[0m
+[0;32mI (943) UPLOADER: Uploader task started (interval=10s)[0m
+[0;32mI (943) UPLOADER: WiFi uploader started (interval=10s queue=100)[0m
+[0;32mI (944) MAIN: System ready[0m
+[0;32mI (944) MAIN:   Wi-Fi scanner:  ch 1-13, 500ms dwell[0m
+[0;32mI (944) MAIN:   BLE relay:      active[0m
+[0;32mI (944) MAIN:   Cloud upload:   active[0m
+[0;32mI (944) MAIN:   Config portal:  AirAware-X1-XXXX → http://192.168.4.1[0m
+[0;32mI (993) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+

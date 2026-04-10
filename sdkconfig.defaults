@@ -1,0 +1,75 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Westshore Drone Remote ID Receiver — sdkconfig.defaults
+# Target: ESP32-C6-WROOM-1U  (esp32c6)
+# IDF version: v5.3 or later
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Target ───────────────────────────────────────────────────────────────────
+CONFIG_IDF_TARGET="esp32c6"
+
+# ── Flash / partition ────────────────────────────────────────────────────────
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="4MB"
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+
+# ── FreeRTOS ─────────────────────────────────────────────────────────────────
+CONFIG_FREERTOS_HZ=1000
+CONFIG_FREERTOS_UNICORE=n
+
+# ── Log level ────────────────────────────────────────────────────────────────
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+CONFIG_LOG_DEFAULT_LEVEL=3
+
+# ── USB / UART console ───────────────────────────────────────────────────────
+# Route IDF log output to USB-JTAG CDC — frees UART0 (GPIO16/17) for JSON
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y
+CONFIG_ESP_CONSOLE_SECONDARY_NONE=y
+
+# ── Wi-Fi ────────────────────────────────────────────────────────────────────
+CONFIG_ESP_WIFI_ENABLED=y
+CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM=4
+CONFIG_ESP_WIFI_DYNAMIC_RX_BUFFER_NUM=8
+CONFIG_ESP_WIFI_STATIC_TX_BUFFER=y
+CONFIG_ESP_WIFI_TX_BUFFER_TYPE=0
+CONFIG_ESP_WIFI_STATIC_TX_BUFFER_NUM=4
+CONFIG_ESP_WIFI_PROMISCUOUS_BUF_SIZE=1600
+# Disable power save for continuous scanning
+CONFIG_ESP_WIFI_STA_DISCONNECTED_PM_ENABLE=n
+CONFIG_ESP_PHY_ENABLE_USB=y
+
+# ── Bluetooth / NimBLE ───────────────────────────────────────────────────────
+CONFIG_BT_ENABLED=y
+CONFIG_BT_NIMBLE_ENABLED=y
+CONFIG_BT_CONTROLLER_ENABLED=y
+CONFIG_BT_NIMBLE_ROLE_CENTRAL=n
+CONFIG_BT_NIMBLE_ROLE_PERIPHERAL=n
+CONFIG_BT_NIMBLE_ROLE_BROADCASTER=n
+CONFIG_BT_NIMBLE_ROLE_OBSERVER=y
+# Enable BT5 extended advertising scanner
+CONFIG_BT_NIMBLE_EXT_ADV=y
+CONFIG_BT_NIMBLE_CODED_PHY=y
+# BLE host task stack
+CONFIG_BT_NIMBLE_HOST_TASK_STACK_SIZE=5120
+# Max number of concurrent connections (0 since we only observe)
+CONFIG_BT_NIMBLE_MAX_CONNECTIONS=1
+# Store BLE config in RAM (faster, no NVS wear)
+CONFIG_BT_NIMBLE_NVS_PERSIST=n
+
+# ── NVS ──────────────────────────────────────────────────────────────────────
+CONFIG_NVS_ENCRYPTION=n
+
+# ── Stack sizes ───────────────────────────────────────────────────────────────
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=6144
+CONFIG_ESP_SYSTEM_EVENT_TASK_STACK_SIZE=4096
+
+# ── Power ────────────────────────────────────────────────────────────────────
+# Disable light sleep — we need full-time RF scanning
+CONFIG_PM_ENABLE=n
+CONFIG_FREERTOS_USE_TICKLESS_IDLE=n
+
+# ── Compiler optimisations ───────────────────────────────────────────────────
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
+CONFIG_COMPILER_OPTIMIZATION_ASSERTIONS_ENABLE=y
+CONFIG_MBEDTLS_SSL_PROTO_TLS1_3=n
+CONFIG_MBEDTLS_SSL_RENEGOTIATION=y
