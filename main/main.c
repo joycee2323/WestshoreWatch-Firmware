@@ -62,9 +62,6 @@ void app_main(void)
              g_config.mode == WSD_MODE_RELAY ? "BLE relay" : "UART only");
     ESP_LOGI(TAG, " Channels: %d-%d",
              g_config.ch_2g_start, g_config.ch_2g_stop);
-    ESP_LOGI(TAG, " Upload:   %s  SSID: '%s'",
-             g_config.upload_en ? "enabled" : "disabled",
-             g_config.wifi_ssid[0] ? g_config.wifi_ssid : "(not set)");
     ESP_LOGI(TAG, " Node:     %s",
              g_config.node_name[0] ? g_config.node_name : "(unnamed)");
 
@@ -98,7 +95,13 @@ void app_main(void)
 
     vTaskDelay(pdMS_TO_TICKS(500));
 
-    /* BLE relay — always on (independent of WiFi upload) */
+    /* BLE stack init — unconditional so the detection advertiser (handle 2)
+     * is available regardless of relay mode. */
+    err = ble_relay_init();
+    if (err != ESP_OK)
+        ESP_LOGW(TAG, "ble_relay_init failed: %d", err);
+
+    /* BLE relay — only when mode == RELAY */
     if (g_config.mode == WSD_MODE_RELAY) {
         err = ble_relay_start(relay_queue);
         if (err != ESP_OK)
@@ -112,6 +115,7 @@ void app_main(void)
              g_config.ch_2g_start, g_config.ch_2g_stop, WSD_WIFI_DWELL_MS);
     ESP_LOGI(TAG, "  BLE relay:      %s",
              g_config.mode == WSD_MODE_RELAY ? "active" : "disabled");
+    ESP_LOGI(TAG, "  Detection adv:  handle 2, company 0x08FF");
     ESP_LOGI(TAG, "  Config portal:  AirAware-X1-XXXX → http://192.168.4.1");
 
     while (true) {

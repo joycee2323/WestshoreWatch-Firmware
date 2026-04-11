@@ -1,5 +1,6 @@
 #include "output.h"
 #include "config.h"
+#include "ble_relay.h"
 #include "esp_log.h"
 #include "driver/uart.h"
 #include "freertos/FreeRTOS.h"
@@ -81,7 +82,7 @@ static int json_escape(const char *in, char *out, int max_out)
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
- * Format one detection event as a JSON line
+ * Format one detection event as a JSON line (full schema — UART)
  * ───────────────────────────────────────────────────────────────────────────── */
 static int format_json(const odid_detection_t *d, char *buf, int max_len)
 {
@@ -140,11 +141,48 @@ static int format_json(const odid_detection_t *d, char *buf, int max_len)
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
+ * Compact JSON for GATT notify — fits in a single BLE ATT MTU.
+ *
+ * Fields:
+ *   id      (only when has_basic_id)
+ *   lat, lon, alt, spd, hdg
+ *   op_lat, op_lon  (only when has_system)
+ *
+ * No trailing newline — GATT notify is a framed transport.
+ * ───────────────────────────────────────────────────────────────────────────── */
+static int format_json_compact(const odid_detection_t *d, char *buf, int max_len)
+{
+    int n = 0;
+    n += snprintf(buf + n, max_len - n, "{");
+
+    if (d->has_basic_id) {
+        char esc_id[32];
+        json_escape(d->basic_id.uas_id, esc_id, sizeof(esc_id));
+        n += snprintf(buf + n, max_len - n, "\"id\":\"%s\",", esc_id);
+    }
+
+    n += snprintf(buf + n, max_len - n,
+        "\"lat\":%.7f,\"lon\":%.7f,\"alt\":%.1f,\"spd\":%.2f,\"hdg\":%d",
+        d->location.lat, d->location.lon, d->location.alt_geo,
+        d->location.speed_horiz, (int)d->location.heading);
+
+    if (d->has_system) {
+        n += snprintf(buf + n, max_len - n,
+            ",\"op_lat\":%.7f,\"op_lon\":%.7f",
+            d->system.operator_lat, d->system.operator_lon);
+    }
+
+    n += snprintf(buf + n, max_len - n, "}");
+    return n;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
  * Output task
  * ───────────────────────────────────────────────────────────────────────────── */
 static void output_task(void *arg)
 {
     static char json_buf[WSD_JSON_MAX_LEN];
+    static char gatt_buf[256];
     odid_detection_t det;
 
     ESP_LOGI(TAG, "Output task running on UART%d (TX=GPIO%d, %d baud)",
@@ -162,6 +200,13 @@ static void output_task(void *arg)
             int len = format_json(&det, json_buf, sizeof(json_buf));
             if (len > 0 && len < (int)sizeof(json_buf)) {
                 uart_write_bytes(WSD_UART_PRIMARY_NUM, json_buf, len);
+            }
+
+            /* Also push a compact variant out as a BLE manufacturer-specific
+             * advertisement (handle 2, company 0x08FF) for the AirAware app. */
+            int glen = format_json_compact(&det, gatt_buf, sizeof(gatt_buf));
+            if (glen > 0 && glen < (int)sizeof(gatt_buf)) {
+                ble_detection_advertise(gatt_buf, (size_t)glen);
             }
         }
     }

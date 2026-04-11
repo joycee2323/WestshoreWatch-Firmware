@@ -1,0 +1,3907 @@
+Command: C:\Espressif\python_env\idf5.5_py3.11_env\Scripts\python.exe C:\Espressif\frameworks\esp-idf-v5.5.3\tools/idf_monitor.py -p COM7 -b 115200 --toolchain-prefix riscv32-esp-elf- --target esp32c6 --revision 0 --decode-panic backtrace C:\Users\joyce\AirAware\C6-Firmware\build\westshore_remote_id.elf C:\Users\joyce\AirAware\C6-Firmware\build\bootloader\bootloader.elf --force-color -m 'C:\Espressif\python_env\idf5.5_py3.11_env\Scripts\python.exe' 'C:\Espressif\frameworks\esp-idf-v5.5.3\tools\idf.py' '-p' 'COM7'
+ESP-ROM:esp32c6-20220919
+Build:Sep 19 2022
+rst:0x15 (USB_UART_HPSYS),boot:0xc (SPI_FAST_FLASH_BOOT)
+Saved PC:0x4080b1e4
+SPIWP:0xee
+mode:DIO, clock div:2
+load:0x40875730,len:0x1734
+load:0x4086b910,len:0xe78
+load:0x4086e610,len:0x31a8
+entry 0x4086b91a
+[0;32mI (23) boot: ESP-IDF v5.5.3 2nd stage bootloader[0m
+[0;32mI (23) boot: compile time Apr 10 2026 19:35:56[0m
+[0;32mI (23) boot: chip revision: v0.2[0m
+[0;32mI (23) boot: efuse block revision: v0.3[0m
+[0;32mI (24) boot.esp32c6: SPI Speed      : 80MHz[0m
+[0;32mI (24) boot.esp32c6: SPI Mode       : DIO[0m
+[0;32mI (24) boot.esp32c6: SPI Flash Size : 4MB[0m
+[0;32mI (25) boot: Enabling RNG early entropy source...[0m
+[0;32mI (25) boot: Partition Table:[0m
+[0;32mI (25) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (26) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (26) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (27) boot:  2 otadata          OTA data         01 00 00010000 00002000[0m
+[0;32mI (27) boot:  3 ota_0            OTA app          00 10 00020000 001c0000[0m
+[0;32mI (28) boot:  4 ota_1            OTA app          00 11 001e0000 001c0000[0m
+[0;32mI (28) boot:  5 storage          Unknown data     01 82 003a0000 00060000[0m
+[0;32mI (29) boot: End of partition table[0m
+[0;32mI (29) esp_image: segment 0: paddr=00020020 vaddr=420f0020 size=27b48h (162632) map[0m
+[0;32mI (60) esp_image: segment 1: paddr=00047b70 vaddr=40800000 size=084a8h ( 33960) load[0m
+[0;32mI (68) esp_image: segment 2: paddr=00050020 vaddr=42000020 size=edc7ch (973948) map[0m
+[0;32mI (248) esp_image: segment 3: paddr=0013dca4 vaddr=408084a8 size=197dch (104412) load[0m
+[0;32mI (271) esp_image: segment 4: paddr=00157488 vaddr=40821c90 size=03b30h ( 15152) load[0m
+[0;32mI (282) boot: Loaded app from partition at offset 0x20000[0m
+[0;32mI (282) boot: Disabling RNG early entropy source...[0m
+[0;32mI (283) cpu_start: Unicore app[0m
+[0;32mI (292) cpu_start: Pro cpu start user code[0m
+[0;32mI (292) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (292) app_init: Application information:[0m
+[0;32mI (292) app_init: Project name:     westshore_remote_id[0m
+[0;32mI (292) app_init: App version:      58a4e46-dirty[0m
+[0;32mI (293) app_init: Compile time:     Apr 10 2026 21:39:56[0m
+[0;32mI (293) app_init: ELF file SHA256:  86f894f3f...[0m
+[0;32mI (293) app_init: ESP-IDF:          v5.5.3[0m
+[0;32mI (293) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (294) efuse_init: Max chip rev:     v0.99 [0m
+[0;32mI (294) efuse_init: Chip rev:         v0.2[0m
+[0;32mI (294) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (294) heap_init: At 4082BEB0 len 00050760 (321 KiB): RAM[0m
+[0;32mI (295) heap_init: At 4087C610 len 00002F54 (11 KiB): RAM[0m
+[0;32mI (295) heap_init: At 50000000 len 00003FE8 (15 KiB): RTCRAM[0m
+[0;32mI (296) spi_flash: detected chip: gd[0m
+[0;32mI (296) spi_flash: flash io: dio[0m
+[0;32mI (296) sleep_gpio: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (297) sleep_gpio: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (298) main_task: Started on CPU0[0m
+[0;32mI (298) main_task: Calling app_main()[0m
+[0;32mI (302) LED: LED initialised on GPIO4[0m
+[0;32mI (302) NVS_CFG: No saved config — using factory defaults[0m
+[0;32mI (302) MAIN: ===========================================[0m
+[0;32mI (302) MAIN:  AirAware X1 — Remote ID Sensor Node v1.1[0m
+[0;32mI (302) MAIN:  ESP32-C6  |  IDF v5.5.3[0m
+[0;32mI (302) MAIN: ===========================================[0m
+[0;32mI (303) MAIN:  Mode:     BLE relay[0m
+[0;32mI (303) MAIN:  Channels: 1-13[0m
+[0;32mI (303) MAIN:  Node:     (unnamed)[0m
+[0;32mI (304) OUTPUT: Output task running on UART0 (TX=GPIO16, 115200 baud)[0m
+[0;32mI (304) WIFI_SCAN: Config AP SSID: AirAware-X1-2635[0m
+[0;32mI (306) pp: pp rom version: 5b8dcfa[0m
+[0;32mI (306) net80211: net80211 rom version: 5b8dcfa[0m
+[0;32mI (308) wifi:wifi driver task: 4083e2a8, prio:23, stack:6656, core=0[0m
+[0;32mI (311) wifi:wifi firmware version: 4df78f2[0m
+[0;32mI (311) wifi:wifi certification version: v7.0[0m
+[0;32mI (311) wifi:config NVS flash: enabled[0m
+[0;32mI (311) wifi:config nano formatting: disabled[0m
+[0;32mI (312) wifi:mac_version:HAL_MAC_ESP32AX_761,ut_version:N, band mode:0x1[0m
+[0;32mI (312) wifi:Init data frame dynamic rx buffer num: 8[0m
+[0;32mI (312) wifi:Init static rx mgmt buffer num: 5[0m
+[0;32mI (313) wifi:Init management short buffer num: 32[0m
+[0;32mI (313) wifi:Init static tx buffer num: 4[0m
+[0;32mI (313) wifi:Init static tx FG buffer num: 2[0m
+[0;32mI (313) wifi:Init static rx buffer size: 1700 (rxctrl:92, csi:512)[0m
+[0;32mI (314) wifi:Init static rx buffer num: 4[0m
+[0;32mI (314) wifi:Init dynamic rx buffer num: 8[0m
+[0;32mI (314) wifi_init: rx ba win: 6[0m
+[0;32mI (314) wifi_init: accept mbox: 6[0m
+[0;32mI (315) wifi_init: tcpip mbox: 32[0m
+[0;32mI (315) wifi_init: udp mbox: 6[0m
+[0;32mI (315) wifi_init: tcp mbox: 6[0m
+[0;32mI (315) wifi_init: tcp tx win: 65535[0m
+[0;32mI (315) wifi_init: tcp rx win: 65535[0m
+[0;32mI (315) wifi_init: tcp mss: 1440[0m
+[0;32mI (315) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (315) wifi_init: WiFi RX IRAM OP enabled[0m
+[0;32mI (315) wifi_init: WiFi SLP IRAM OP enabled[0m
+[0;32mI (456) phy_init: phy_version 343,b513b46,Nov 14 2025,16:34:12[0m
+[0;32mI (521) phy_init: Saving new calibration data due to checksum failure or outdated calibration data, mode(0)[0m
+[0;33mW (530) wifi:ACK_TAB0   :0x   90a0b, QAM16:0x9 (24Mbps), QPSK:0xa (12Mbps), BPSK:0xb (6Mbps)[0m
+[0;33mW (531) wifi:CTS_TAB0   :0x   90a0b, QAM16:0x9 (24Mbps), QPSK:0xa (12Mbps), BPSK:0xb (6Mbps)[0m
+[0;33mW (531) wifi:(agc)0x600a7128:0xd219a800, min.avgNF:0xce->0xd2(dB), RCalCount:0x19a, min.RRssi:0x800(-128.00)[0m
+[0;32mI (532) wifi:11ax coex: WDEVAX_PTI0(0x55777555), WDEVAX_PTI1(0x00003377).[0m
+
+[0;32mI (533) wifi:mode : sta (98:a3:16:7d:26:34) + softAP (98:a3:16:7d:26:35)[0m
+[0;32mI (533) wifi:enable tsf[0m
+[0;33mW (533) wifi:11ax/11ac mode can not work under phy bw 40M, the sta 2G phymode changed to 11N[0m
+[0;32mI (537) wifi:Total power save buffer number: 2[0m
+[0;32mI (537) wifi:Init max length of beacon: 752/752[0m
+[0;32mI (537) wifi:Init max length of beacon: 752/752[0m
+[0;32mI (539) esp_netif_lwip: DHCP server started on interface WIFI_AP_DEF with IP: 192.168.4.1[0m
+[0;32mI (539) CFG_SRV: Starting HTTP config server on http://192.168.4.1[0m
+[0;32mI (541) CFG_SRV: Config server ready[0m
+[0;32mI (541) DNS_SRV: Captive DNS listening on UDP/53 → 0104a8c0[0m
+[0;32mI (542) wifi:ic_enable_sniffer[0m
+[0;32mI (543) WIFI_SCAN: Scanner started — AP 'AirAware-X1-2635', ch 1-13, 500ms dwell[0m
+[0;32mI (543) WIFI_SCAN: Config portal: connect to 'AirAware-X1-2635' → http://192.168.4.1[0m
+[0;32mI (1043) BLE_INIT: Using main XTAL as clock source, chip ver: 2[0m
+[0;32mI (1044) BLE_INIT: ble controller commit:[17fdc66][0m
+[0;32mI (1049) BLE_INIT: Bluetooth MAC: 98:a3:16:7d:26:36[0m
+[0;32mI (1058) BLE_RELAY: NimBLE host initialized[0m
+[0;32mI (1062) BLE_RELAY: BLE host synced — configuring extended advertiser[0m
+[0;32mI (1063) BLE_RELAY: Extended advertiser configured OK[0m
+[0;32mI (1063) GATT_SRV: host synced — starting GATT advertising[0m
+[0;32mI (1064) NimBLE: GAP procedure initiated: extended advertise; instance=1[0m
+
+[0;32mI (1065) GATT_SRV: GATT server advertising as 'AirAware-X1-2636'[0m
+[0;32mI (1066) GATT_SRV: GATT server initialized[0m
+[0;32mI (1066) BLE_RELAY: Relay task running[0m
+[0;32mI (1066) BLE_RELAY: BLE relay started[0m
+[0;32mI (1066) MAIN: System ready[0m
+[0;32mI (1066) MAIN:   Wi-Fi scanner:  ch 1-13, 500ms dwell[0m
+[0;32mI (1066) MAIN:   BLE relay:      active[0m
+[0;32mI (1066) MAIN:   GATT server:    active[0m
+[0;32mI (1066) MAIN:   Config portal:  AirAware-X1-XXXX → http://192.168.4.1[0m
+[0;32mI (1116) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (1217) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (1217) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (1318) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (1318) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (1419) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (1420) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (1521) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (1521) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (1622) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (1623) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (1724) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (1725) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (1826) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (1826) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (1927) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (1928) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (2028) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (2028) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (2130) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (2131) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (2232) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (2233) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (2333) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (2334) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (2434) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (2435) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (2535) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (2536) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (2636) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (2637) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (2738) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (2738) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (2839) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (2840) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (2940) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (2940) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (3041) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (3042) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (3142) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (3143) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (3244) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (3244) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (3345) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (3346) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (3447) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (3448) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (3548) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (3549) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (3650) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (3651) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (3751) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (3752) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (3853) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (3854) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (3955) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (3956) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (4056) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (4057) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (4157) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (4158) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (4259) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (4260) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (4360) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (4361) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (4462) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (4462) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (4563) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (4564) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (4665) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (4666) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (4767) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (4767) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (4868) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (4868) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (4969) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (4969) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (5070) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (5071) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (5172) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (5173) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (5273) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (5274) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (5374) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (5375) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (5475) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (5476) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (5576) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (5577) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (5678) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (5678) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (5780) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (5780) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (5882) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (5883) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (5983) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (5984) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (6085) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (6086) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (6187) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (6188) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (6289) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (6290) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (6390) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (6391) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (6492) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (6492) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (6594) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (6595) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (6696) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (6697) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (6798) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (6799) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (6899) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (6899) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (7000) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (7000) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (7102) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (7103) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (7204) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (7205) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (7305) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (7306) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (7407) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (7408) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (7509) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (7510) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (7610) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (7611) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (7712) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (7712) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (7814) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (7815) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (7916) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (7917) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (8017) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (8017) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (8118) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (8119) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (8220) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (8221) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (8322) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (8322) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (8424) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (8425) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (8525) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (8525) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (8626) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (8627) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (8728) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (8729) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (8829) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (8830) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (8931) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (8931) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (9033) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (9034) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (9134) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (9135) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (9236) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (9237) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (9337) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (9338) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (9439) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (9439) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (9540) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (9541) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (9641) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (9642) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (9743) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (9744) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (9845) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (9845) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (9946) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (9947) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (10048) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (10049) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (10149) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (10150) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (10251) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (10252) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (10352) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (10353) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (10453) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (10454) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (10555) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (10556) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (10657) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (10658) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (10758) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (10759) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (10859) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (10860) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (10961) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (10962) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (11063) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (11064) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (11165) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (11166) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (11267) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (11267) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (11368) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (11369) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (11470) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (11470) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (11571) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (11572) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (11673) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (11674) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (11775) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (11776) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (11876) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (11876) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (11977) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (11977) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (12078) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (12079) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (12180) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (12181) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (12281) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (12282) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (12383) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (12384) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (12485) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (12486) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (12587) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (12588) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (12688) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (12688) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (12789) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (12790) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (12890) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (12890) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (12991) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (12991) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (13092) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (13093) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (13194) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (13195) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (13295) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (13295) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (13396) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (13397) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (13497) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (13497) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (13598) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (13599) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (13700) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (13701) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (13802) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (13802) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (13903) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (13904) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (14004) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (14005) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (14105) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (14106) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (14207) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (14207) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (14308) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (14309) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (14409) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (14409) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (14510) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (14510) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (14611) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (14612) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (14713) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (14713) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (14814) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (14814) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (14915) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (14916) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (15016) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (15016) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (15117) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (15118) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (15219) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (15220) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (15320) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (15320) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (15421) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (15422) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (15522) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (15522) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (15623) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (15624) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (15725) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (15726) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (15827) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (15827) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (15929) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (15929) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (16030) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (16031) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (16132) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (16133) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (16234) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (16234) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (16335) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (16336) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (16436) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (16437) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (16537) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (16537) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (16638) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (16639) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (16740) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (16741) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (16841) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (16842) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (16942) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (16943) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (17043) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (17043) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (17145) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (17146) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (17247) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (17248) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (17348) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (17349) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (17450) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (17451) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (17551) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (17552) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (17653) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (17654) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (17754) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (17755) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (17856) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (17857) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (17957) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (17957) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (18059) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (18060) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (18161) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (18162) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (18263) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (18263) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (18364) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (18365) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (18465) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (18466) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (18566) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (18567) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (18668) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (18669) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (18769) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (18770) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (18870) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (18871) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (18972) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (18973) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (19074) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (19075) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (19175) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (19175) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (19276) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (19276) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (19378) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (19378) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (19479) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (19480) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (19581) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (19582) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (19683) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (19683) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (19784) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (19784) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (19885) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (19886) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (19986) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (19986) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (20088) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (20089) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (20190) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (20191) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (20292) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (20292) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (20393) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (20394) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (20495) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (20496) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (20597) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (20598) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (20699) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (20700) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (20801) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (20802) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (20902) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (20902) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (21003) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (21004) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (21104) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (21105) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (21206) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (21207) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (21307) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (21308) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (21408) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (21408) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (21509) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (21509) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (21610) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (21611) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (21712) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (21713) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (21813) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (21814) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (21914) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (21915) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (22015) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (22015) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (22116) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (22117) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (22218) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (22219) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (22320) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (22320) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (22421) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (22422) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (22522) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (22523) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (22623) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (22624) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (22725) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (22726) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (22826) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (22826) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (22927) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (22927) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (23029) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (23030) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (23130) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (23131) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (23232) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (23232) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (23333) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (23334) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (23434) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (23434) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (23535) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (23535) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (23636) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (23637) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (23738) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (23738) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (23840) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (23841) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (23941) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (23942) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (24043) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (24044) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (24146) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (24147) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (24248) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (24248) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (24349) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (24349) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (24450) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (24451) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (24551) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (24552) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (24653) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (24654) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (24755) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (24756) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (24856) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (24856) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (24958) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (24958) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (25059) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (25060) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (25161) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (25162) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (25262) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (25263) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (25364) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (25365) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (25465) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (25465) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (25567) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (25568) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (25669) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (25670) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (25770) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (25770) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (25871) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (25872) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (25973) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (25974) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (26074) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (26075) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (26175) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (26175) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (26276) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (26277) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (26378) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (26379) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (26480) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (26480) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (26581) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (26582) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (26683) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (26684) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (26784) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (26785) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (26885) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (26886) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (26986) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (26986) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (27087) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (27088) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (27189) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (27190) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (27290) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (27290) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (27391) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (27392) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (27492) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (27493) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (27593) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (27594) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (27695) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (27696) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (27796) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (27796) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (27897) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (27897) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (27999) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (27999) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (28100) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (28101) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (28202) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (28202) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (28303) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (28303) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (28405) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (28406) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (28507) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (28507) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (28608) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (28609) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (28710) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (28711) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (28811) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (28812) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (28912) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (28913) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (29013) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (29014) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (29114) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (29115) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (29216) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (29217) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (29318) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (29318) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (29419) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (29419) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (29520) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (29521) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (29622) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (29623) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (29724) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (29725) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (29826) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (29826) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (29927) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (29927) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (30028) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (30028) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (30130) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (30131) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (30232) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (30233) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (30334) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (30335) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (30435) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (30436) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (30537) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (30537) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (30638) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (30639) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (30740) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (30741) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (30842) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (30842) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (30943) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (30944) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (31044) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (31045) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (31145) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (31146) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (31247) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (31248) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (31348) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (31349) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (31449) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (31450) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (31550) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (31551) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (31652) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (31653) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (31754) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (31755) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (31855) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (31856) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (31956) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (31956) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (32057) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (32058) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (32158) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (32159) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (32259) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (32259) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (32360) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (32361) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (32461) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (32462) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (32563) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (32564) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (32665) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (32666) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (32766) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (32767) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (32867) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (32867) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (32968) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (32969) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (33070) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (33071) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (33172) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (33173) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (33273) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (33274) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (33374) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (33374) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (33475) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (33475) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (33577) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (33578) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (33679) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (33680) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (33781) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (33782) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (33883) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (33884) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (33985) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (33985) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (34086) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (34087) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (34188) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (34189) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (34290) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (34290) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (34391) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (34392) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (34492) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (34493) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (34594) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (34595) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (34696) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (34697) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (34797) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (34797) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (34898) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (34898) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (34999) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (35000) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (35100) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (35101) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (35202) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (35202) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (35303) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (35304) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (35405) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (35406) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (35507) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (35507) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (35608) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (35609) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (35710) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (35711) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (35811) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (35811) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (35912) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (35913) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (36014) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (36015) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (36116) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (36117) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (36218) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (36219) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (36319) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (36320) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (36421) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (36421) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (36522) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (36523) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (36623) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (36624) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (36725) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (36726) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (36827) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (36828) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (36929) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (36929) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (37030) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (37031) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (37131) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (37132) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (37233) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (37233) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (37334) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (37335) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (37436) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (37437) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (37538) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (37538) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (37639) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (37640) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (37741) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (37742) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (37842) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (37842) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (37943) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (37944) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (38045) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (38047) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (38148) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (38149) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (38250) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (38251) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (38351) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (38352) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (38452) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (38453) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (38554) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (38555) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (38656) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (38657) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (38757) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (38758) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (38859) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (38860) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (38961) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (38962) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (39062) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (39063) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (39163) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (39164) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (39265) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (39266) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (39367) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (39368) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (39469) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (39470) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (39571) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (39572) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (39673) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (39673) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (39774) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (39775) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (39875) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (39876) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (39977) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (39977) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (40078) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (40079) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (40180) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (40181) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (40281) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (40282) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (40383) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (40384) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (40484) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (40485) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (40585) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (40586) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (40687) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (40688) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (40788) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (40788) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (40889) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (40890) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (40991) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (40992) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (41093) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (41094) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (41195) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (41196) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (41296) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (41297) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (41397) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (41397) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (41498) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (41499) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (41599) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (41600) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (41702) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (41703) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (41804) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (41805) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (41906) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (41907) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (42007) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (42007) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (42108) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (42109) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (42210) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (42211) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (42312) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (42313) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (42413) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (42414) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (42515) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (42516) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (42616) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (42617) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (42718) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (42719) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (42819) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (42820) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (42921) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (42921) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (43023) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (43024) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (43125) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (43126) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (43227) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (43228) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (43329) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (43330) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (43431) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (43432) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (43533) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (43533) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (43634) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (43635) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (43736) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (43737) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (43837) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (43838) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (43938) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (43939) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (44039) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (44040) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (44141) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (44142) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (44243) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (44244) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (44344) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (44345) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (44446) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (44447) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (44548) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (44549) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (44650) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (44651) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (44752) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (44753) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (44853) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (44854) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (44954) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (44954) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (45055) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (45056) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (45156) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (45157) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (45258) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (45259) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (45359) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (45360) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (45461) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (45462) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (45563) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (45564) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (45665) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (45666) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (45767) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (45768) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (45868) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (45869) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (45969) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (45970) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (46070) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (46071) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (46172) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (46173) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (46273) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (46274) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (46374) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (46375) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (46475) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (46475) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (46576) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (46577) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (46678) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (46679) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (46780) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (46780) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (46881) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (46882) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (46983) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (46983) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (47084) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (47085) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (47186) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (47187) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (47287) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (47288) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (47388) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (47389) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (47490) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (47491) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (47591) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (47592) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (47693) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (47694) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (47794) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (47795) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (47895) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (47895) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (47996) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (47996) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (48097) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (48098) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (48199) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (48199) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (48300) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (48300) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (48402) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (48403) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (48504) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (48504) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (48605) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (48606) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (48708) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (48709) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (48809) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (48810) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (48911) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (48912) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (49012) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (49012) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (49113) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (49114) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (49215) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (49216) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (49317) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (49318) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (49418) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (49418) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (49519) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (49519) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (49621) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (49622) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (49723) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (49723) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (49824) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (49825) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (49925) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (49925) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (50026) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (50026) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (50127) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (50128) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (50229) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (50230) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (50330) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (50330) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (50431) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (50431) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (50532) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (50533) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (50633) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (50634) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (50735) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (50736) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (50837) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (50837) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (50938) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (50939) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (51040) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (51041) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+I (51142) NimBLE: GAP procedure initiated: stop extended advertising.
+
+[0;32mI (51143) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (51244) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (51245) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (51345) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (51346) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (51447) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (51447) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (51548) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (51549) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (51649) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (51650) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (51751) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (51751) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (51852) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (51852) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (51953) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (51954) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (52054) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (52054) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (52155) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (52156) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (52256) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (52257) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (52358) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (52358) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (52459) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (52460) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (52561) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (52562) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (52663) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (52663) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (52764) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (52765) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (52865) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (52865) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (52966) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (52966) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (53067) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (53068) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (53169) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (53170) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (53270) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (53271) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (53371) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (53372) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (53472) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (53472) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (53573) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (53574) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (53675) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (53676) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (53778) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (53779) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (53879) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (53880) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (53980) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (53980) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (54081) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (54082) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (54182) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (54183) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (54283) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (54284) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (54384) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (54384) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (54485) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (54486) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (54586) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (54587) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (54688) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (54689) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (54789) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (54790) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (54890) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (54890) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (54991) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (54992) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (55092) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (55093) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (55194) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (55195) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (55296) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (55297) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (55398) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (55399) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (55499) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (55500) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (55601) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (55602) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (55703) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (55704) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (55805) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (55806) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (55907) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (55908) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (56009) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (56010) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (56111) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (56112) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (56212) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (56213) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (56313) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (56314) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (56414) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (56414) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (56516) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (56517) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (56617) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (56618) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (56719) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (56719) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (56820) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (56820) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (56921) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (56921) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (57023) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (57023) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (57124) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (57125) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (57226) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (57227) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (57327) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (57328) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (57428) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (57429) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (57529) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (57529) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (57631) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (57632) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (57733) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (57734) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (57834) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (57834) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (57935) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (57935) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (58036) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (58037) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (58138) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (58139) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (58239) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (58239) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (58340) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (58341) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (58441) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (58442) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (58543) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (58544) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (58644) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (58645) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (58746) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (58747) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (58847) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (58847) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (58948) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (58948) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (59049) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (59050) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (59150) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (59151) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (59251) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (59251) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (59352) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (59352) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (59453) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (59454) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (59555) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (59556) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (59657) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (59658) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (59759) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (59760) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (59860) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (59861) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (59962) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (59962) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (60063) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (60064) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (60164) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (60165) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (60266) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (60267) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (60367) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (60368) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (60468) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (60468) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (60570) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (60571) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (60672) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (60673) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (60774) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (60775) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (60875) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (60876) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (60977) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (60978) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (61079) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (61080) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (61181) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (61181) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (61282) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (61283) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (61383) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (61384) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (61484) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (61484) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (61585) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (61586) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (61687) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (61688) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (61788) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (61789) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (61890) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (61891) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (61991) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (61991) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (62092) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (62093) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (62194) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (62195) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (62296) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (62296) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (62397) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (62398) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (62499) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (62499) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (62600) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (62601) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (62702) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (62703) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (62804) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (62805) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (62905) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (62905) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (63006) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (63006) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (63107) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (63108) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (63209) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (63209) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (63310) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (63311) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (63411) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (63412) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (63513) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (63513) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (63614) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (63615) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (63716) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (63717) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (63818) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (63818) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (63919) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (63920) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (64020) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (64021) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (64122) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (64123) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (64224) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (64225) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (64326) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (64327) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (64427) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (64428) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (64529) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (64530) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (64630) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (64631) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (64732) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (64733) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (64833) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (64834) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (64934) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (64934) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (65035) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (65036) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (65136) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (65137) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (65238) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (65238) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (65339) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (65340) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (65440) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (65440) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (65542) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (65542) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (65643) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (65644) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (65745) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (65746) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (65846) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (65846) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (65947) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (65947) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (66048) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (66049) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (66150) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (66151) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (66252) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (66253) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (66354) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (66354) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (66455) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (66456) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (66557) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (66558) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (66659) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (66660) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (66761) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (66762) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (66862) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (66862) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (66963) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (66963) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (67064) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (67065) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (67166) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (67167) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (67268) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (67268) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (67369) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (67370) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (67470) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (67470) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (67571) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (67572) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (67673) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (67674) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (67775) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (67775) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (67876) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (67876) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (67977) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (67978) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (68079) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (68080) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (68181) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (68182) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (68282) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (68283) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (68384) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (68385) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (68485) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (68486) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (68586) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (68587) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (68688) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (68689) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (68789) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (68790) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (68891) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (68892) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (68992) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (68992) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (69093) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (69094) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (69194) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (69195) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (69296) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (69296) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (69397) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (69398) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (69499) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (69500) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (69601) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (69602) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (69703) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (69704) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (69804) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (69804) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (69905) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (69905) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (70006) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (70007) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (70107) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (70108) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (70209) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (70210) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (70311) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (70312) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (70412) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (70413) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (70513) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (70513) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (70614) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (70615) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (70716) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (70717) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (70817) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (70817) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (70918) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (70919) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (71020) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (71021) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (71122) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (71123) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (71223) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (71224) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (71324) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (71325) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (71425) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (71425) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (71526) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (71527) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (71627) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (71628) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (71728) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (71728) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (71829) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (71830) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (71930) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (71930) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (72032) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (72033) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (72134) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (72135) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (72236) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (72236) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (72338) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (72339) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (72440) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (72441) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (72541) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (72542) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (72643) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (72644) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (72745) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (72746) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (72847) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (72847) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (72948) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (72949) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (73049) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (73050) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (73151) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (73152) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (73253) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (73254) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (73354) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (73355) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (73455) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (73455) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (73556) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (73557) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (73658) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (73659) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (73759) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (73760) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (73861) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (73862) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (73962) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (73963) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (74063) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (74064) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (74165) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (74166) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (74266) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (74267) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (74368) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (74368) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (74470) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (74470) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (74572) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (74573) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (74674) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (74675) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (74775) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (74776) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (74876) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (74876) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (74977) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (74978) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (75079) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (75080) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (75181) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (75182) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (75283) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (75284) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (75384) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (75385) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (75485) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (75485) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (75586) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (75587) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (75688) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (75689) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (75790) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (75790) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (75892) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (75893) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (75993) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (75994) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (76094) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (76095) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (76195) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (76196) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (76297) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (76297) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (76399) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (76399) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (76500) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (76501) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (76602) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (76603) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (76704) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (76705) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (76806) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (76807) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (76907) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (76907) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (77008) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (77008) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (77110) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (77111) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (77212) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (77213) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (77314) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (77315) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (77416) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (77417) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (77518) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (77518) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (77619) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (77620) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (77721) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (77722) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (77822) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (77823) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (77923) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (77924) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (78025) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (78026) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (78126) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (78127) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (78227) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (78228) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (78329) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (78330) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (78431) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (78432) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (78533) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (78534) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (78635) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (78636) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (78737) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (78737) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (78838) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (78838) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (78939) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (78939) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (79040) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (79040) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (79141) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (79142) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (79243) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (79244) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (79344) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (79344) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (79446) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (79447) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (79548) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (79549) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (79650) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (79651) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (79752) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (79753) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (79853) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (79854) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (79954) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (79954) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (80055) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (80056) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (80157) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (80158) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (80258) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (80258) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (80359) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (80360) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (80460) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (80461) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (80561) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (80562) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (80663) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (80664) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (80765) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (80765) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (80866) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (80867) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (80968) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (80969) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (81069) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (81070) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (81171) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (81172) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (81273) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (81274) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (81374) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (81375) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (81475) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (81476) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (81576) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (81577) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (81678) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (81679) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (81779) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (81780) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (81880) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (81881) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (81982) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (81982) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (82083) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (82084) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (82185) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (82186) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (82286) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (82287) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (82388) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (82389) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (82490) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (82491) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (82591) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (82592) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (82693) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (82694) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (82795) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (82796) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (82896) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (82896) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (82998) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (82999) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (83100) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (83101) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (83202) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (83203) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (83303) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (83304) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (83405) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (83406) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (83506) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (83506) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (83607) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (83608) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (83709) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (83710) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (83811) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (83812) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (83912) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (83913) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (84013) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (84014) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (84114) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (84115) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (84216) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (84217) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (84318) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (84319) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (84419) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (84420) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (84521) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (84522) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (84623) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (84624) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (84724) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (84724) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (84825) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (84826) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (84926) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (84927) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (85028) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (85029) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (85130) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (85131) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (85232) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (85233) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (85334) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (85335) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (85435) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (85436) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (85536) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (85536) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (85637) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (85638) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (85739) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (85740) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (85840) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (85841) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (85941) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (85942) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (86042) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (86042) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (86143) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (86144) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (86244) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (86245) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (86346) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (86347) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (86448) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (86448) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (86549) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (86550) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (86651) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (86652) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (86753) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (86753) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (86854) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (86855) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (86956) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (86956) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (87057) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (87058) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (87158) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (87159) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (87260) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (87261) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (87362) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (87362) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (87463) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (87464) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (87564) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (87565) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (87666) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (87667) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (87767) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (87768) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (87868) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (87869) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (87970) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (87971) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (88071) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (88072) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (88173) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (88174) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (88275) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (88275) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (88376) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (88377) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (88477) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (88478) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (88578) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (88579) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (88680) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (88681) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (88782) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (88783) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (88883) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (88883) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (88984) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (88984) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (89085) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (89086) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (89187) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (89188) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (89288) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (89288) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (89389) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (89390) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (89491) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (89492) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (89592) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (89593) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (89694) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (89695) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (89795) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (89796) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (89896) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (89897) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (89997) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (89997) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (90098) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (90099) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (90200) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (90201) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (90302) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (90303) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (90403) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (90404) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (90504) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (90504) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (90605) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (90606) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (90707) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (90708) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (90809) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (90810) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (90910) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (90910) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (91012) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (91012) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (91113) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (91114) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (91215) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (91215) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (91316) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (91317) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (91418) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (91419) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (91519) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (91519) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (91621) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (91622) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (91723) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (91723) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (91824) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (91825) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (91926) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (91927) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (92027) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (92027) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (92129) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (92130) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (92231) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (92232) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (92333) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (92334) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (92435) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (92436) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (92536) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (92537) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (92638) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (92639) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (92740) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (92741) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (92842) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (92842) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (92943) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (92944) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (93044) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (93045) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (93145) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (93146) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (93247) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (93247) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (93348) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (93349) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (93449) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (93449) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (93550) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (93551) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (93651) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (93652) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (93753) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (93754) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (93855) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (93856) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (93957) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (93958) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (94058) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (94059) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (94159) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (94160) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (94261) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (94262) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (94362) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (94363) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (94464) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (94464) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (94566) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (94567) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (94668) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (94669) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (94769) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (94769) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (94870) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (94871) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (94972) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (94972) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (95074) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (95075) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (95176) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (95177) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (95277) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (95277) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (95378) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (95379) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (95479) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (95479) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (95581) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (95582) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (95683) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (95684) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (95785) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (95786) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (95886) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (95887) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (95987) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (95988) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (96088) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (96089) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (96190) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (96190) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (96291) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (96291) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (96392) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (96393) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (96493) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (96494) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (96595) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (96596) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (96697) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (96698) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+
+[0;32mI (96798) NimBLE: GAP procedure initiated: stop extended advertising.[0m
+
+[0;32mI (96798) NimBLE: GAP procedure initiated: extended advertise; instance=0[0m
+

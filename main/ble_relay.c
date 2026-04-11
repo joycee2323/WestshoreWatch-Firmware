@@ -13,12 +13,28 @@
 
 static const char *TAG = "BLE_RELAY";
 
-static QueueHandle_t s_queue   = NULL;
-static bool          s_running = false;
-static uint8_t       s_counter = 0;
+static QueueHandle_t s_queue        = NULL;
+static bool          s_running      = false;
+static bool          s_inited       = false;
+static bool          s_task_created = false;
+static uint8_t       s_counter      = 0;
 
-/* Extended advertising handle 0 */
-#define ADV_HANDLE 0
+/* Handle 0: ODID relay broadcast (legacy PDU, non-connectable)
+ * Handle 2: AirAware detection advertiser (extended PDU, non-connectable,
+ *           manufacturer-specific data, company ID 0x08FF) */
+#define ADV_HANDLE      0
+#define DET_ADV_HANDLE  2
+
+/* Max JSON payload that fits in a single extended-adv AD structure.
+ * AD header: 1 len + 1 type(0xFF) + 2 company id = 4 bytes.
+ * Extended adv can carry more, but keep the detection payload small
+ * enough that the Android app can parse it from a single adv report. */
+#define DET_JSON_MAX    200
+
+static bool s_det_adv_configured = false;
+
+/* Forward decls */
+static void relay_task(void *arg);
 
 /* ─────────────────────────────────────────────────────────────────────────────
  * Encode helpers
@@ -417,7 +433,56 @@ static void relay_task(void *arg)
     #undef LOC_VALID
 
     ble_gap_ext_adv_stop(ADV_HANDLE);
+    s_task_created = false;
     vTaskDelete(NULL);
+}
+
+/* Helper: spawn the relay task once. Safe to call from both on_sync and
+ * ble_relay_start — guarded by s_task_created. */
+static void spawn_relay_task_if_ready(void)
+{
+    if (!s_running || s_task_created) return;
+    BaseType_t ret = xTaskCreate(relay_task, "ble_relay",
+                                 4096, NULL,
+                                 WSD_OUTPUT_TASK_PRIO + 1, NULL);
+    if (ret == pdPASS) {
+        s_task_created = true;
+    } else {
+        ESP_LOGE(TAG, "relay task create failed");
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Detection advertiser (handle 2) — configuration
+ * ───────────────────────────────────────────────────────────────────────────── */
+static int configure_detection_advertiser(void)
+{
+    /* Non-connectable, non-scannable extended PDU. Payload capacity is large
+     * enough for our ~150-byte compact JSON plus the 4-byte AD header. */
+    struct ble_gap_ext_adv_params params;
+    memset(&params, 0, sizeof(params));
+    params.legacy_pdu    = 0;
+    params.connectable   = 0;
+    params.scannable     = 0;
+    params.own_addr_type = BLE_OWN_ADDR_PUBLIC;
+    params.primary_phy   = BLE_HCI_LE_PHY_1M;
+    params.secondary_phy = BLE_HCI_LE_PHY_1M;
+    params.itvl_min      = BLE_GAP_ADV_ITVL_MS(100);
+    params.itvl_max      = BLE_GAP_ADV_ITVL_MS(150);
+    params.sid           = 2;
+    params.tx_power      = 127;  /* 127 = host has no preference */
+
+    int rc = ble_gap_ext_adv_configure(DET_ADV_HANDLE, &params,
+                                       NULL, NULL, NULL);
+    if (rc != 0) {
+        ESP_LOGE(TAG, "det ext_adv_configure (handle %d) failed: %d",
+                 DET_ADV_HANDLE, rc);
+        return rc;
+    }
+
+    s_det_adv_configured = true;
+    ESP_LOGI(TAG, "Detection advertiser configured on handle %d", DET_ADV_HANDLE);
+    return 0;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -425,14 +490,9 @@ static void relay_task(void *arg)
  * ───────────────────────────────────────────────────────────────────────────── */
 static void on_sync(void)
 {
-    ESP_LOGI(TAG, "BLE host synced — configuring extended advertiser");
+    ESP_LOGI(TAG, "BLE host synced — configuring extended advertisers");
 
-    /* Configure extended advertising instance 0:
-     * - Non-connectable, non-scannable legacy PDU (1M PHY)
-     * - ODID spec requires non-scannable for compatibility with all apps
-     * - Own address: public
-     * - 100ms interval
-     */
+    /* Handle 0 — non-connectable legacy PDU for ODID relay. */
     struct ble_gap_ext_adv_params params;
     memset(&params, 0, sizeof(params));
     params.legacy_pdu      = 1;
@@ -448,18 +508,22 @@ static void on_sync(void)
     int rc = ble_gap_ext_adv_configure(ADV_HANDLE, &params, NULL, NULL, NULL);
     if (rc != 0) {
         ESP_LOGE(TAG, "ext_adv_configure failed: %d — relay will not work", rc);
-        return;
+    } else {
+        ESP_LOGI(TAG, "Relay advertiser configured OK");
     }
 
-    ESP_LOGI(TAG, "Extended advertiser configured OK");
+    /* Handle 2 — extended PDU for AirAware detection advertising. */
+    configure_detection_advertiser();
 
-    xTaskCreate(relay_task, "ble_relay",
-                4096, NULL, WSD_OUTPUT_TASK_PRIO + 1, NULL);
+    /* If ble_relay_start() was called before the host synced, start the task
+     * now. If relay mode is disabled, this is a no-op. */
+    spawn_relay_task_if_ready();
 }
 
 static void on_reset(int reason)
 {
     ESP_LOGW(TAG, "BLE host reset: %d", reason);
+    s_det_adv_configured = false;
 }
 
 static void nimble_host_task(void *arg)
@@ -471,11 +535,9 @@ static void nimble_host_task(void *arg)
 /* ─────────────────────────────────────────────────────────────────────────────
  * Public API
  * ───────────────────────────────────────────────────────────────────────────── */
-esp_err_t ble_relay_start(QueueHandle_t detect_queue)
+esp_err_t ble_relay_init(void)
 {
-    if (s_running) return ESP_OK;
-    s_queue   = detect_queue;
-    s_running = true;
+    if (s_inited) return ESP_OK;
 
     esp_err_t err = nimble_port_init();
     if (err != ESP_OK) {
@@ -488,8 +550,79 @@ esp_err_t ble_relay_start(QueueHandle_t detect_queue)
 
     nimble_port_freertos_init(nimble_host_task);
 
-    ESP_LOGI(TAG, "BLE relay initializing");
+    s_inited = true;
+    ESP_LOGI(TAG, "NimBLE host initialized");
     return ESP_OK;
+}
+
+esp_err_t ble_relay_start(QueueHandle_t detect_queue)
+{
+    if (s_running) return ESP_OK;
+    if (!s_inited) {
+        ESP_LOGE(TAG, "ble_relay_start called before ble_relay_init");
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    s_queue   = detect_queue;
+    s_running = true;
+
+    /* If the host has already synced, spawn the task immediately.
+     * Otherwise on_sync will do it when sync fires. */
+    if (ble_hs_synced()) {
+        spawn_relay_task_if_ready();
+    }
+
+    ESP_LOGI(TAG, "BLE relay started");
+    return ESP_OK;
+}
+
+void ble_detection_advertise(const char *json, size_t len)
+{
+    if (!s_det_adv_configured) return;
+    if (!json || len == 0) return;
+    if (len > DET_JSON_MAX) len = DET_JSON_MAX;
+
+    /* Build manufacturer-specific AD structure:
+     *   [0] length = 1 (type) + 2 (company id) + json_len
+     *   [1] 0xFF  (AD type: Manufacturer Specific Data)
+     *   [2] company id LSB (0xFF of 0x08FF)
+     *   [3] company id MSB (0x08 of 0x08FF)
+     *   [4..] json bytes */
+    uint8_t buf[4 + DET_JSON_MAX];
+    buf[0] = (uint8_t)(3 + len);
+    buf[1] = 0xFF;
+    buf[2] = 0xFF;   /* company 0x08FF, little-endian */
+    buf[3] = 0x08;
+    memcpy(&buf[4], json, len);
+    size_t total = 4 + len;
+
+    struct os_mbuf *data = os_msys_get_pkthdr(total, 0);
+    if (!data) {
+        ESP_LOGW(TAG, "det msys_get_pkthdr failed");
+        return;
+    }
+    if (os_mbuf_append(data, buf, total) != 0) {
+        ESP_LOGW(TAG, "det mbuf_append failed");
+        os_mbuf_free_chain(data);
+        return;
+    }
+
+    /* Stop, update payload, restart. ble_gap_ext_adv_set_data requires the
+     * advertiser to be stopped if it is currently active. */
+    if (ble_gap_ext_adv_active(DET_ADV_HANDLE)) {
+        ble_gap_ext_adv_stop(DET_ADV_HANDLE);
+    }
+
+    int rc = ble_gap_ext_adv_set_data(DET_ADV_HANDLE, data);
+    if (rc != 0) {
+        ESP_LOGW(TAG, "det ext_adv_set_data failed: %d", rc);
+        return;
+    }
+
+    rc = ble_gap_ext_adv_start(DET_ADV_HANDLE, 0, 0);
+    if (rc != 0 && rc != BLE_HS_EALREADY) {
+        ESP_LOGW(TAG, "det ext_adv_start failed: %d", rc);
+    }
 }
 
 void ble_relay_stop(void)

@@ -49,9 +49,13 @@ CONFIG_BT_NIMBLE_ROLE_OBSERVER=y
 # Enable BT5 extended advertising scanner
 CONFIG_BT_NIMBLE_EXT_ADV=y
 CONFIG_BT_NIMBLE_CODED_PHY=y
+# Two extended-advertising instances: handle 0 for the ODID relay broadcast
+# and handle 2 for the AirAware detection advertiser (manufacturer-specific
+# data, company 0x08FF).
+CONFIG_BT_NIMBLE_MAX_EXT_ADV_INSTANCES=3
 # BLE host task stack
 CONFIG_BT_NIMBLE_HOST_TASK_STACK_SIZE=5120
-# Max number of concurrent connections (0 since we only observe)
+# Max number of concurrent connections (1 for the GATT client)
 CONFIG_BT_NIMBLE_MAX_CONNECTIONS=1
 # Store BLE config in RAM (faster, no NVS wear)
 CONFIG_BT_NIMBLE_NVS_PERSIST=n
