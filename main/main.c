@@ -81,31 +81,38 @@ void app_main(void)
                 WSD_OUTPUT_TASK_PRIO + 2, NULL);
 
     /* UART JSON output — always on */
+    ESP_LOGI(TAG, "boot: starting output_task");
     err = output_task_start(output_queue);
     if (err != ESP_OK)
         ESP_LOGW(TAG, "Output task failed: %d", err);
 
     /* WiFi scanner — also starts the always-on config AP and HTTP server */
+    ESP_LOGI(TAG, "boot: starting wifi_scanner");
     err = wifi_scanner_start(raw_queue);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Wi-Fi scanner failed: %d — halting", err);
         led_set_pattern(LED_PATTERN_ERROR);
         while (true) vTaskDelay(pdMS_TO_TICKS(1000));
     }
+    ESP_LOGI(TAG, "boot: wifi_scanner up");
 
     vTaskDelay(pdMS_TO_TICKS(500));
 
     /* BLE stack init — unconditional so the detection advertiser (handle 2)
      * is available regardless of relay mode. */
+    ESP_LOGI(TAG, "boot: ble_relay_init");
     err = ble_relay_init();
     if (err != ESP_OK)
         ESP_LOGW(TAG, "ble_relay_init failed: %d", err);
+    ESP_LOGI(TAG, "boot: ble_relay_init done");
 
     /* BLE relay — only when mode == RELAY */
     if (g_config.mode == WSD_MODE_RELAY) {
+        ESP_LOGI(TAG, "boot: ble_relay_start");
         err = ble_relay_start(relay_queue);
         if (err != ESP_OK)
             ESP_LOGW(TAG, "BLE relay failed: %d", err);
+        ESP_LOGI(TAG, "boot: ble_relay_start done");
     }
 
     led_set_pattern(LED_PATTERN_SCANNING);

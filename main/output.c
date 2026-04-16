@@ -42,21 +42,46 @@ static esp_err_t uart_init(void)
     };
 
     esp_err_t err;
-    err = uart_param_config(WSD_UART_PRIMARY_NUM, &cfg);
-    if (err != ESP_OK) return err;
 
+    ESP_LOGI(TAG, "uart_init: uart_param_config UART%d @ %d baud",
+             WSD_UART_PRIMARY_NUM, WSD_UART_PRIMARY_BAUD);
+    err = uart_param_config(WSD_UART_PRIMARY_NUM, &cfg);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "uart_param_config failed: 0x%x (%s)",
+                 err, esp_err_to_name(err));
+        return err;
+    }
+    ESP_LOGI(TAG, "uart_init: uart_param_config OK");
+
+    ESP_LOGI(TAG, "uart_init: uart_set_pin TX=GPIO%d RX=GPIO%d",
+             WSD_UART_PRIMARY_TX, WSD_UART_PRIMARY_RX);
     err = uart_set_pin(WSD_UART_PRIMARY_NUM,
                        WSD_UART_PRIMARY_TX,
                        WSD_UART_PRIMARY_RX,
                        UART_PIN_NO_CHANGE,
                        UART_PIN_NO_CHANGE);
-    if (err != ESP_OK) return err;
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "uart_set_pin failed: 0x%x (%s)",
+                 err, esp_err_to_name(err));
+        return err;
+    }
+    ESP_LOGI(TAG, "uart_init: uart_set_pin OK");
 
+    ESP_LOGI(TAG, "uart_init: uart_driver_install (rx_buf=%d tx_buf=%d)",
+             WSD_UART_BUF_SIZE * 2, WSD_UART_BUF_SIZE * 2);
     err = uart_driver_install(WSD_UART_PRIMARY_NUM,
                               WSD_UART_BUF_SIZE * 2,
                               WSD_UART_BUF_SIZE * 2,
                               0, NULL, 0);
-    return err;
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "uart_driver_install failed: 0x%x (%s)",
+                 err, esp_err_to_name(err));
+        return err;
+    }
+    ESP_LOGI(TAG, "uart_init: uart_driver_install OK");
+
+    ESP_LOGI(TAG, "uart_init: OK");
+    return ESP_OK;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -182,6 +207,8 @@ static int format_json_compact(const odid_detection_t *d, char *buf, int max_len
  * ───────────────────────────────────────────────────────────────────────────── */
 static void output_task(void *arg)
 {
+    ESP_LOGI(TAG, "output_task: task entered");
+
     static char json_buf[WSD_JSON_MAX_LEN];
     static char gatt_buf[256];
     odid_detection_t det;
@@ -218,14 +245,19 @@ static void output_task(void *arg)
  * ───────────────────────────────────────────────────────────────────────────── */
 esp_err_t output_task_start(QueueHandle_t detect_queue)
 {
+    ESP_LOGI(TAG, "output_task_start: enter (queue=%p)", detect_queue);
     s_queue = detect_queue;
 
+    ESP_LOGI(TAG, "output_task_start: calling uart_init");
     esp_err_t err = uart_init();
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "UART init failed: %d", err);
         return err;
     }
+    ESP_LOGI(TAG, "output_task_start: uart_init returned OK");
 
+    ESP_LOGI(TAG, "output_task_start: xTaskCreate stack=%d prio=%d",
+             WSD_OUTPUT_STACK, WSD_OUTPUT_TASK_PRIO);
     BaseType_t ret = xTaskCreate(output_task, "output",
                                  WSD_OUTPUT_STACK, NULL,
                                  WSD_OUTPUT_TASK_PRIO, NULL);
@@ -233,6 +265,7 @@ esp_err_t output_task_start(QueueHandle_t detect_queue)
         ESP_LOGE(TAG, "Failed to create output task");
         return ESP_ERR_NO_MEM;
     }
+    ESP_LOGI(TAG, "output_task_start: task created, returning OK");
 
     return ESP_OK;
 }

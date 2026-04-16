@@ -268,24 +268,26 @@ esp_err_t wifi_scanner_start(QueueHandle_t output_queue)
     ESP_LOGI(TAG, "Config AP SSID: %s", s_ap_ssid);
 
     /* Network stack init */
+    ESP_LOGI(TAG, "step: esp_netif_init");
     esp_netif_init();
+    ESP_LOGI(TAG, "step: esp_event_loop_create_default");
     esp_event_loop_create_default();
 
     /* Create both netif interfaces before WiFi starts */
+    ESP_LOGI(TAG, "step: create default AP+STA netifs");
     esp_netif_create_default_wifi_ap();
     esp_netif_create_default_wifi_sta();
 
+    ESP_LOGI(TAG, "step: esp_wifi_init");
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
-    /* ESP32-C5 is dual-band; lock to 2.4 GHz since ODID beacons only
-     * transmit on 2.4 GHz and 5 GHz scan would waste dwell time. */
-    esp_wifi_set_band_mode(WIFI_BAND_MODE_2G_ONLY);
-
+    ESP_LOGI(TAG, "step: esp_wifi_set_storage(RAM)");
     esp_wifi_set_storage(WIFI_STORAGE_RAM);
 
     /* Register AP station connect/disconnect handler so the scanner
      * auto-pauses whenever a client is on the config portal. */
+    ESP_LOGI(TAG, "step: register AP event handlers");
     ESP_ERROR_CHECK(esp_event_handler_instance_register(
         WIFI_EVENT, WIFI_EVENT_AP_STACONNECTED,
         &ap_event_handler, NULL, NULL));
@@ -294,6 +296,7 @@ esp_err_t wifi_scanner_start(QueueHandle_t output_queue)
         &ap_event_handler, NULL, NULL));
 
     /* APSTA mode: AP for config portal + STA for uplink */
+    ESP_LOGI(TAG, "step: esp_wifi_set_mode(APSTA)");
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
 
     /* Configure the soft-AP */
@@ -307,10 +310,23 @@ esp_err_t wifi_scanner_start(QueueHandle_t output_queue)
                                : WIFI_AUTH_WPA2_PSK;
     ap_cfg.ap.channel        = WSD_AP_CHANNEL;  /* keep AP on ch6 — best for ODID overlap */
 
+    ESP_LOGI(TAG, "step: esp_wifi_set_config(AP)");
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &ap_cfg));
+    ESP_LOGI(TAG, "step: esp_wifi_start");
     ESP_ERROR_CHECK(esp_wifi_start());
 
+    /* ESP32-C5 is dual-band; lock to 2.4 GHz since ODID beacons only
+     * transmit on 2.4 GHz. Must be called AFTER esp_wifi_start — the API
+     * returns ESP_ERR_WIFI_NOT_STARTED otherwise. */
+    ESP_LOGI(TAG, "step: esp_wifi_set_band_mode(2G_ONLY)");
+    esp_err_t bm_err = esp_wifi_set_band_mode(WIFI_BAND_MODE_2G_ONLY);
+    if (bm_err != ESP_OK) {
+        ESP_LOGW(TAG, "esp_wifi_set_band_mode failed: 0x%x (%s)",
+                 bm_err, esp_err_to_name(bm_err));
+    }
+
     /* Start the HTTP config server (non-blocking) */
+    ESP_LOGI(TAG, "step: config_server_start_http");
     config_server_start_http();
 
     /* Start captive-portal DNS hijack so phones auto-open the config UI.
