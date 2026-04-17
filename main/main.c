@@ -42,7 +42,14 @@ void app_main(void)
         nvs_flash_init();
     }
 
-    led_init();
+    ESP_LOGI(TAG, "boot: calling led_init");
+    esp_err_t led_err = led_init();
+    if (led_err != ESP_OK) {
+        ESP_LOGE(TAG, "boot: led_init returned 0x%x (%s)",
+                 led_err, esp_err_to_name(led_err));
+    } else {
+        ESP_LOGI(TAG, "boot: led_init returned OK");
+    }
     led_set_pattern(LED_PATTERN_BOOT);
 
     /* Load config — falls back to defaults on first boot */

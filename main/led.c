@@ -16,6 +16,7 @@ static inline void led_off(void) { gpio_set_level(WSD_LED_GPIO, 0); }
 
 static void led_task(void *arg)
 {
+    ESP_LOGI(TAG, "led_task: entered, driving GPIO%d high", WSD_LED_GPIO);
     led_on();  /* Solid on at boot */
 
     while (true) {
@@ -40,6 +41,8 @@ static void led_task(void *arg)
 
 esp_err_t led_init(void)
 {
+    ESP_LOGI(TAG, "led_init: enter, GPIO%d", WSD_LED_GPIO);
+
     gpio_config_t io = {
         .pin_bit_mask = (1ULL << WSD_LED_GPIO),
         .mode         = GPIO_MODE_OUTPUT,
@@ -47,14 +50,23 @@ esp_err_t led_init(void)
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type    = GPIO_INTR_DISABLE,
     };
+    ESP_LOGI(TAG, "led_init: calling gpio_config");
     esp_err_t err = gpio_config(&io);
     if (err != ESP_OK) {
-        ESP_LOGE(TAG, "gpio_config failed: %d", err);
+        ESP_LOGE(TAG, "gpio_config failed: 0x%x (%s)",
+                 err, esp_err_to_name(err));
         return err;
     }
-    led_off();
+    ESP_LOGI(TAG, "led_init: gpio_config OK");
 
-    xTaskCreate(led_task, "led", 1024, NULL, 2, &s_task);
+    led_off();
+    ESP_LOGI(TAG, "led_init: initial led_off done");
+
+    BaseType_t ret = xTaskCreate(led_task, "led", 2048, NULL, 2, &s_task);
+    if (ret != pdPASS) {
+        ESP_LOGE(TAG, "led_init: xTaskCreate failed (ret=%d)", (int)ret);
+        return ESP_ERR_NO_MEM;
+    }
     ESP_LOGI(TAG, "LED initialised on GPIO%d", WSD_LED_GPIO);
     return ESP_OK;
 }
