@@ -534,8 +534,13 @@ static int configure_id_advertiser(void)
         return rc;
     }
 
+    /* Use ESP_MAC_BT so the payload MAC matches the on-air public address
+     * the controller advertises under (set via r_esp_ble_ll_set_public_addr
+     * during BLE init). The WiFi STA MAC differs by 2 bytes, which caused
+     * the Android scanner's observed device_id to mismatch the registered
+     * backend identity. */
     uint8_t mac[6];
-    esp_read_mac(mac, ESP_MAC_WIFI_STA);
+    esp_read_mac(mac, ESP_MAC_BT);
 
     size_t key_len = strlen(g_config.api_key);
     if (key_len > ID_API_KEY_MAX) key_len = ID_API_KEY_MAX;
