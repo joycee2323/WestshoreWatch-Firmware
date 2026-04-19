@@ -77,7 +77,7 @@ static bool form_has_field(const char *body, const char *key)
 static const char HEAD[] =
 "<!DOCTYPE html><html><head><meta charset=utf-8>"
 "<meta name=viewport content=\"width=device-width,initial-scale=1\">"
-"<title>AirAware X1</title><style>"
+"<title>Westshore Watch X1</title><style>"
 "*{box-sizing:border-box;margin:0;padding:0}"
 "body{font:14px system-ui;background:#f4f4f4;color:#222}"
 ".h{background:#0b1118;color:#fff;padding:12px}"
@@ -138,7 +138,7 @@ static esp_err_t handler_root_get(httpd_req_t *req)
 
     /* Header + nav + open form */
     snprintf(buf, sizeof(buf),
-        "<div class=h><h1>AIRAWARE X1</h1><small>%s</small></div>"
+        "<div class=h><h1>WESTSHORE WATCH X1</h1><small>%s</small></div>"
         "<div class=n>"
         "<button class=o data-t=g onclick=\"T(this,'g')\">General</button>"
         "<button data-t=r onclick=\"T(this,'r')\">Reception</button>"

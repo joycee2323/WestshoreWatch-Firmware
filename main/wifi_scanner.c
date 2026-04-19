@@ -35,7 +35,7 @@ static int s_ap_sta_count = 0;
 
 
 /* Soft-AP SSID built from MAC at startup */
-static char s_ap_ssid[32] = "AirAware-X1-0000";
+static char s_ap_ssid[32] = "WestshoreWatch-0000";
 
 /* ─────────────────────────────────────────────────────────────────────────────
  * 802.11 frame header
@@ -216,13 +216,13 @@ static void channel_hop_task(void *arg)
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
- * Build AirAware-X1-XXXX SSID from MAC
+ * Build WestshoreWatch-XXXX SSID from MAC
  * ───────────────────────────────────────────────────────────────────────────── */
 static void build_ap_ssid(char *buf, size_t len)
 {
     uint8_t mac[6];
     esp_read_mac(mac, ESP_MAC_WIFI_SOFTAP);
-    snprintf(buf, len, "AirAware-X1-%02X%02X", mac[4], mac[5]);
+    snprintf(buf, len, "WestshoreWatch-%02X%02X", mac[4], mac[5]);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────

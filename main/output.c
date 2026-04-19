@@ -231,7 +231,7 @@ static void output_task(void *arg)
             }
 
             /* Also push a compact variant out as a BLE manufacturer-specific
-             * advertisement (handle 2, company 0x08FF) for the AirAware app. */
+             * advertisement (handle 2, company 0x08FF) for the Westshore Watch app. */
             int glen = format_json_compact(&det, gatt_buf, sizeof(gatt_buf));
             if (glen > 0 && glen < (int)sizeof(gatt_buf)) {
                 ble_detection_advertise(gatt_buf, (size_t)glen);

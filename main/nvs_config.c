@@ -31,7 +31,7 @@ void wsd_config_defaults(wsd_config_t *cfg)
     cfg->land_timeout_s    = 5;
     cfg->silent_timeout_s  = 15;
 
-    /* AirAware defaults — empty until configured via captive portal */
+    /* Westshore Watch defaults — empty until configured via captive portal */
     cfg->wifi_ssid[0]  = '\0';
     cfg->wifi_pass[0]  = '\0';
     cfg->server_url[0] = '\0';
@@ -91,7 +91,7 @@ esp_err_t wsd_config_load(wsd_config_t *cfg)
         nvs_get_str(h, key, cfg->blacklist[i], &len);
     }
 
-    /* AirAware upload fields */
+    /* Westshore Watch upload fields */
     LOAD_STR("aw_ssid",    wifi_ssid);
     LOAD_STR("aw_pass",    wifi_pass);
     LOAD_STR("aw_url",     server_url);
@@ -156,7 +156,7 @@ esp_err_t wsd_config_save(const wsd_config_t *cfg)
         nvs_erase_key(h, key);
     }
 
-    /* AirAware upload fields */
+    /* Westshore Watch upload fields */
     nvs_set_str(h, "aw_ssid", cfg->wifi_ssid);
     nvs_set_str(h, "aw_pass", cfg->wifi_pass);
     nvs_set_str(h, "aw_url",  cfg->server_url);

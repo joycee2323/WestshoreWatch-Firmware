@@ -58,11 +58,11 @@ void app_main(void)
     /* ── NORMAL OPERATION MODE ──────────────────────────────────────────────
      *
      * Config portal is always-on as a background soft-AP.
-     * Connect to AirAware-X1-XXXX (password: airaware1) → http://192.168.4.1
+     * Connect to WestshoreWatch-XXXX (password: westshore1) → http://192.168.4.1
      *
      * ────────────────────────────────────────────────────────────────────── */
     ESP_LOGI(TAG, "===========================================");
-    ESP_LOGI(TAG, " AirAware X1 — Remote ID Sensor Node v1.1");
+    ESP_LOGI(TAG, " Westshore Watch X1 — Remote ID Sensor Node v1.1");
     ESP_LOGI(TAG, " ESP32-C5  |  IDF %s", esp_get_idf_version());
     ESP_LOGI(TAG, "===========================================");
     ESP_LOGI(TAG, " Mode:     %s",
@@ -130,7 +130,7 @@ void app_main(void)
     ESP_LOGI(TAG, "  BLE relay:      %s",
              g_config.mode == WSD_MODE_RELAY ? "active" : "disabled");
     ESP_LOGI(TAG, "  Detection adv:  handle 2, company 0x08FF");
-    ESP_LOGI(TAG, "  Config portal:  AirAware-X1-XXXX → http://192.168.4.1");
+    ESP_LOGI(TAG, "  Config portal:  WestshoreWatch-XXXX → http://192.168.4.1");
 
     while (true) {
         vTaskDelay(pdMS_TO_TICKS(5000));

@@ -12,7 +12,7 @@
 #define WSD_SERIAL_MAX_LEN   32
 #define WSD_LABEL_MAX_LEN    32
 
-/* AirAware upload config field sizes */
+/* Westshore Watch upload config field sizes */
 #define WSD_WIFI_SSID_MAX    64
 #define WSD_WIFI_PASS_MAX    64
 #define WSD_SERVER_URL_MAX   128
@@ -55,10 +55,10 @@ typedef struct {
     uint16_t            land_timeout_s;              /* seconds grounded → stop  */
     uint16_t            silent_timeout_s;            /* seconds no frames → stop */
 
-    /* ── AirAware cloud upload ──────────────────────────────────────────────── */
+    /* ── Westshore Watch cloud upload ──────────────────────────────────────────────── */
     char                wifi_ssid[WSD_WIFI_SSID_MAX];   /* uplink network SSID   */
     char                wifi_pass[WSD_WIFI_PASS_MAX];   /* uplink network pass   */
-    char                server_url[WSD_SERVER_URL_MAX]; /* AirAware backend URL  */
+    char                server_url[WSD_SERVER_URL_MAX]; /* Westshore Watch backend URL  */
     char                api_key[WSD_API_KEY_MAX];       /* node API key          */
     char                node_name[WSD_NODE_NAME_MAX];   /* display name          */
     bool                upload_en;                      /* enable cloud upload   */

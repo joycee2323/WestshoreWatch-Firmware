@@ -7,11 +7,11 @@
  * wifi_scanner_start() owns WiFi init and starts the AP.
  * config_server_start_http() registers the HTTP handlers on top of that.
  *
- * The SSID is built at runtime by wifi_scanner: "AirAware-X1-XXXX"
+ * The SSID is built at runtime by wifi_scanner: "WestshoreWatch-XXXX"
  * ───────────────────────────────────────────────────────────────────────────── */
 
 /* AP password — set to "" for open network, or set a password */
-#define CFG_AP_PASS     "airaware1"
+#define CFG_AP_PASS     "westshore1"
 
 /* AP IP address (default gateway assigned to connecting clients) */
 #define CFG_AP_IP       "192.168.4.1"

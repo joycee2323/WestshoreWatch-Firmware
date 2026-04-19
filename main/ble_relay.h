@@ -13,9 +13,9 @@
  *              Re-emits decoded Remote ID detections so any standard app
  *              (OpenDroneID OSM, DroneScanner, DroneScout pro) picks them up.
  *
- *   Handle 2 — AirAware detection advertiser (extended PDU, Manufacturer
+ *   Handle 2 — Westshore Watch detection advertiser (extended PDU, Manufacturer
  *              Specific Data, company ID 0x08FF). Broadcasts a compact JSON
- *              detection payload to the AirAware Android app. Advertising
+ *              detection payload to the Westshore Watch Android app. Advertising
  *              payload is refreshed each time ble_detection_advertise() is
  *              called with a new JSON blob.
  */

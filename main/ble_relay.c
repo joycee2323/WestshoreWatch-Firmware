@@ -22,7 +22,7 @@ static bool          s_task_created = false;
 static uint8_t       s_counter      = 0;
 
 /* Handle 0: ODID relay broadcast (extended adv, legacy PDU, non-connectable)
- * Handle 2: AirAware detection advertiser (extended PDU, non-connectable,
+ * Handle 2: Westshore Watch detection advertiser (extended PDU, non-connectable,
  *           manufacturer-specific data, company ID 0x08FF)
  * Handle 3: Node identity advertiser (extended PDU, non-connectable,
  *           manufacturer-specific data, company ID 0x08FE — MAC + key prefix) */
@@ -624,7 +624,7 @@ static void on_sync(void)
     /* Legacy GAP advertiser — identity beacon (static MAC + API key). */
     configure_id_advertiser();
 
-    /* Handle 2 — extended PDU for AirAware detection advertising. */
+    /* Handle 2 — extended PDU for Westshore Watch detection advertising. */
     configure_detection_advertiser();
 
     /* If ble_relay_start() was called before the host synced, start the task

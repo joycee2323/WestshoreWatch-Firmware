@@ -1,6 +1,6 @@
-# AirAware Firmware — ESP32-C5 / ESP32-C6
+# Westshore Watch Firmware — ESP32-C5 / ESP32-C6
 
-Firmware for the AirAware X1 Remote ID receiver node by Westshore Drone Services.
+Firmware for the Westshore Watch X1 Remote ID receiver node by Westshore Drone Services.
 A single source tree builds for two PCB revisions — pick the target before
 the first build.
 

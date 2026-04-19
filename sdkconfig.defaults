@@ -44,7 +44,7 @@ CONFIG_BT_NIMBLE_ROLE_OBSERVER=y
 # symbol was removed in IDF 5.5.
 CONFIG_BT_NIMBLE_EXT_ADV=y
 # Four extended-advertising instances: handle 0 for the ODID relay broadcast,
-# handle 2 for the AirAware detection advertiser (manufacturer-specific
+# handle 2 for the Westshore Watch detection advertiser (manufacturer-specific
 # data, company 0x08FF), and handle 3 for the node identity advertiser
 # (MAC + API key, company 0x08FE).
 CONFIG_BT_NIMBLE_MAX_EXT_ADV_INSTANCES=4

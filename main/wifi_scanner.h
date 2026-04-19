@@ -9,7 +9,7 @@
  * Initialises the WiFi driver, starts the config soft-AP (always-on),
  * enables promiscuous mode for ODID detection, and begins channel hopping.
  *
- * The soft-AP SSID is built at runtime: "AirAware-X1-XXXX" where XXXX
+ * The soft-AP SSID is built at runtime: "WestshoreWatch-XXXX" where XXXX
  * is the last 4 hex digits of the device MAC address.
  */
 esp_err_t wifi_scanner_start(QueueHandle_t output_queue);
