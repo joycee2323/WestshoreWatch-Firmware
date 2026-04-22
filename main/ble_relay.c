@@ -29,14 +29,22 @@ static bool          s_inited       = false;
 static bool          s_task_created = false;
 static uint8_t       s_counter      = 0;
 
-/* Handle 0: ODID relay broadcast (extended adv, legacy PDU, non-connectable)
+/* Handle 0: ODID relay broadcast (extended adv, legacy PDU, non-connectable).
+ *           DroneScout/DJI-app compatible per-message emission stays on this
+ *           handle so third-party receivers keep working.
+ * Handle 1: ODID Message Pack advertiser (extended PDU, non-connectable).
+ *           Bundles basic_id + location + system into a single self-identifying
+ *           advertisement for the Westshore Watch phone app, eliminating the
+ *           one-uasId-per-sourceMac attribution heuristic that breaks under
+ *           multi-drone relay.
  * Handle 2: Westshore Watch detection advertiser (extended PDU, non-connectable,
  *           manufacturer-specific data, company ID 0x08FF)
  * Handle 3: Node identity advertiser (extended PDU, non-connectable,
  *           manufacturer-specific data, company ID 0x08FE — MAC + key prefix) */
-#define ADV_HANDLE      0
-#define DET_ADV_HANDLE  2
-#define ID_ADV_HANDLE   3
+#define ADV_HANDLE       0
+#define PACK_ADV_HANDLE  1
+#define DET_ADV_HANDLE   2
+#define ID_ADV_HANDLE    3
 
 /* Max JSON payload that fits in a single extended-adv AD structure.
  * AD header: 1 len + 1 type(0xFF) + 2 company id = 4 bytes.
@@ -57,8 +65,9 @@ static uint8_t       s_counter      = 0;
  * fits comfortably. 64 gives headroom for any future key format. */
 #define ID_API_KEY_MAX  64
 
-static bool s_det_adv_configured = false;
-static bool s_id_adv_configured  = false;
+static bool s_det_adv_configured  = false;
+static bool s_id_adv_configured   = false;
+static bool s_pack_adv_configured = false;
 
 /* Forward decls */
 static void relay_task(void *arg);
@@ -201,6 +210,86 @@ static void advertise_odid(const uint8_t *odid_msg_25)
     rc = ble_gap_ext_adv_start(ADV_HANDLE, 0, 0);
     if (rc != 0 && rc != BLE_HS_EALREADY) {
         ESP_LOGW(TAG, "ext_adv_start failed: %d", rc);
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * ODID Message Pack (msgType 0xF) — self-identifying multi-message advertisement
+ *
+ * Each pack bundles 3 × 25-byte sub-messages (basic_id + location + system)
+ * with a 2-byte pack header:
+ *   [0]      msgType<<4 | version = 0xF2
+ *   [1]      msg_count = 3
+ *   [2..26]  basic_id sub-message (25B)
+ *   [27..51] location sub-message (25B)
+ *   [52..76] system sub-message (25B)
+ *
+ * The pack is self-identifying: every packet carries its own basic_id alongside
+ * the location/system fields, so the phone doesn't need the fragile "most-recent
+ * basic_id on this sourceMac" heuristic. Emitted on PACK_ADV_HANDLE (handle 1),
+ * extended PDU, so it exceeds the 31-byte legacy cap without breaking handle 0's
+ * DroneScout compatibility.
+ * ───────────────────────────────────────────────────────────────────────────── */
+#define ODID_PACK_MSG_COUNT  3
+#define ODID_PACK_PAYLOAD    (2 + 25 * ODID_PACK_MSG_COUNT)   /* 77 */
+
+static void encode_pack(const odid_detection_t *d, uint8_t *buf)
+{
+    memset(buf, 0, ODID_PACK_PAYLOAD);
+    buf[0] = (ODID_MSG_PACK << 4) | 0x02;
+    buf[1] = ODID_PACK_MSG_COUNT;
+    encode_basic_id(d, &buf[2]);
+    encode_location(d, &buf[2 + 25]);
+    encode_system  (d, &buf[2 + 25 + 25]);
+}
+
+/* Advertise one ODID Message Pack on PACK_ADV_HANDLE.
+ *
+ * AD structure (extended PDU):
+ *   [0]       length = 1 (type) + 2 (UUID) + 2 (app header) + 77 (pack) = 82
+ *   [1]       0x16 (Service Data 16-bit UUID)
+ *   [2-3]     UUID = 0xFFFA (LE)
+ *   [4]       app code 0x0D
+ *   [5]       rolling counter (shared s_counter with handle 0)
+ *   [6..82]   77-byte pack payload */
+static void advertise_pack(const uint8_t *pack_payload)
+{
+    if (!s_pack_adv_configured) return;
+
+    const size_t ad_len = 1 + 1 + 2 + 2 + ODID_PACK_PAYLOAD;  /* 83 */
+    uint8_t adv_raw[83];
+    adv_raw[0] = (uint8_t)(ad_len - 1);  /* length field excludes itself */
+    adv_raw[1] = 0x16;
+    adv_raw[2] = 0xFA;
+    adv_raw[3] = 0xFF;
+    adv_raw[4] = 0x0D;
+    adv_raw[5] = s_counter++;
+    memcpy(&adv_raw[6], pack_payload, ODID_PACK_PAYLOAD);
+
+    struct os_mbuf *data = os_msys_get_pkthdr(ad_len, 0);
+    if (!data) {
+        ESP_LOGW(TAG, "pack msys_get_pkthdr failed");
+        return;
+    }
+    if (os_mbuf_append(data, adv_raw, ad_len) != 0) {
+        ESP_LOGW(TAG, "pack mbuf_append failed");
+        os_mbuf_free_chain(data);
+        return;
+    }
+
+    if (ble_gap_ext_adv_active(PACK_ADV_HANDLE)) {
+        ble_gap_ext_adv_stop(PACK_ADV_HANDLE);
+    }
+
+    int rc = ble_gap_ext_adv_set_data(PACK_ADV_HANDLE, data);
+    if (rc != 0) {
+        ESP_LOGW(TAG, "pack ext_adv_set_data failed: %d", rc);
+        return;
+    }
+
+    rc = ble_gap_ext_adv_start(PACK_ADV_HANDLE, 0, 0);
+    if (rc != 0 && rc != BLE_HS_EALREADY) {
+        ESP_LOGW(TAG, "pack ext_adv_start failed: %d", rc);
     }
 }
 
@@ -466,15 +555,28 @@ static void relay_task(void *arg)
     memset(s_slots, 0, sizeof(s_slots));
 
     /* ── Relay strategy ────────────────────────────────────────────────────────
-     * Each live slot gets its full basic+self+location+system burst back-to-back
-     * before we move on to the next slot, so the phone receives self-consistent
-     * per-drone bursts from a single source MAC. Location emits every cycle;
-     * Basic and Self-Id emit every 5th cycle.
+     * Two parallel emission paths:
+     *
+     * 1. Handle 0 (legacy PDU, DroneScout-compatible): per-slot burst with
+     *    basic + location + system every cycle (option A), self_id every 5th.
+     *    Emitting basic every cycle guarantees every bare Location on the wire
+     *    has an immediately-preceding basic_id within ~50ms intra-burst gap,
+     *    collapsing the phone's attribution inheritance window.
+     *
+     * 2. Handle 1 (extended PDU, self-identifying): per-slot ODID Message Pack
+     *    every cycle (option C). Each pack bundles {basic_id, location, system}
+     *    for one drone in one advertisement. The Westshore Watch phone app
+     *    bypasses sourceMac-based attribution entirely when parsing pack
+     *    msgType 0xF.
+     *
+     * Handle 0 and handle 1 run concurrently. DroneScout/DJI apps see legacy
+     * emission; Westshore Watch prefers packs.
      * ────────────────────────────────────────────────────────────────────────── */
     uint8_t basic_buf[25] = {0};
     uint8_t loc_buf[25]   = {0};
     uint8_t self_buf[25]  = {0};
     uint8_t sys_buf[25]   = {0};
+    uint8_t pack_buf[ODID_PACK_PAYLOAD] = {0};
     uint8_t cycle = 0;
 
     /* Bridge beacon — Basic ID with UAS ID = "DroneScout Bridge", ua_type=Other.
@@ -514,6 +616,9 @@ static void relay_task(void *arg)
         int live = count_live_slots();
         if (live == 0) {
             ble_gap_ext_adv_stop(ADV_HANDLE);
+            if (s_pack_adv_configured && ble_gap_ext_adv_active(PACK_ADV_HANDLE)) {
+                ble_gap_ext_adv_stop(PACK_ADV_HANDLE);
+            }
             led_set_detecting(false);
             advertise_odid(bridge_buf);
             vTaskDelay(pdMS_TO_TICKS(50));
@@ -539,9 +644,31 @@ static void relay_task(void *arg)
             if (out.has_system) encode_system(&out, sys_buf);
             encode_self_id_signal(&out, self_buf, out.rssi, out.source);
 
+            /* Option C: emit a self-identifying pack on handle 1 every cycle
+             * for every live slot. The Westshore Watch phone app consumes
+             * these; attribution is resolved in-packet via the embedded
+             * basic_id. Handle 0 below continues to emit legacy per-message
+             * ODID for DroneScout compatibility.
+             *
+             * Packs require location to be valid (the pack carries a
+             * location sub-message; an empty one would mislead receivers).
+             * If location is missing this cycle we skip the pack and let
+             * legacy emission on handle 0 carry what we have. */
+            if (loc_valid) {
+                encode_pack(&out, pack_buf);
+                advertise_pack(pack_buf);
+            }
+
+            /* Option A: basic_id now emits every cycle (not just cycle 0).
+             * Locations arriving at the phone on handle 0 will always have
+             * an immediately-preceding basic_id from the same slot within
+             * the same burst, shrinking the attribution inheritance window
+             * from one every-5th-cycle gap to a tight ~50ms intra-burst gap.
+             * self_id stays gated to cycle 0 — its frequency is irrelevant
+             * to attribution (Self-Id is the "DroneScout Bridge" tag). */
+            advertise_odid(basic_buf);
+            vTaskDelay(pdMS_TO_TICKS(50));
             if (cycle == 0) {
-                advertise_odid(basic_buf);
-                vTaskDelay(pdMS_TO_TICKS(50));
                 advertise_odid(self_buf);
                 vTaskDelay(pdMS_TO_TICKS(50));
             }
@@ -627,6 +754,37 @@ static int configure_detection_advertiser(void)
 
     s_det_adv_configured = true;
     ESP_LOGI(TAG, "Detection advertiser configured on handle %d", DET_ADV_HANDLE);
+    return 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Pack advertiser (handle 1) — extended PDU ODID Message Pack
+ * ───────────────────────────────────────────────────────────────────────────── */
+static int configure_pack_advertiser(void)
+{
+    struct ble_gap_ext_adv_params params;
+    memset(&params, 0, sizeof(params));
+    params.legacy_pdu    = 0;        /* extended PDU — 83-byte AD exceeds legacy 31B cap */
+    params.connectable   = 0;
+    params.scannable     = 0;
+    params.own_addr_type = BLE_OWN_ADDR_PUBLIC;
+    params.primary_phy   = BLE_HCI_LE_PHY_1M;
+    params.secondary_phy = BLE_HCI_LE_PHY_1M;
+    params.itvl_min      = BLE_GAP_ADV_ITVL_MS(100);
+    params.itvl_max      = BLE_GAP_ADV_ITVL_MS(150);
+    params.sid           = 1;
+    params.tx_power      = 127;
+
+    int rc = ble_gap_ext_adv_configure(PACK_ADV_HANDLE, &params,
+                                       NULL, NULL, NULL);
+    if (rc != 0) {
+        ESP_LOGE(TAG, "pack ext_adv_configure (handle %d) failed: %d",
+                 PACK_ADV_HANDLE, rc);
+        return rc;
+    }
+
+    s_pack_adv_configured = true;
+    ESP_LOGI(TAG, "Pack advertiser configured on handle %d", PACK_ADV_HANDLE);
     return 0;
 }
 
@@ -750,6 +908,9 @@ static void on_sync(void)
     /* Legacy GAP advertiser — identity beacon (static MAC + API key). */
     configure_id_advertiser();
 
+    /* Handle 1 — extended PDU for self-identifying ODID Message Pack. */
+    configure_pack_advertiser();
+
     /* Handle 2 — extended PDU for Westshore Watch detection advertising. */
     configure_detection_advertiser();
 
@@ -761,8 +922,9 @@ static void on_sync(void)
 static void on_reset(int reason)
 {
     ESP_LOGW(TAG, "BLE host reset: %d", reason);
-    s_det_adv_configured = false;
-    s_id_adv_configured  = false;
+    s_det_adv_configured  = false;
+    s_id_adv_configured   = false;
+    s_pack_adv_configured = false;
 }
 
 static void nimble_host_task(void *arg)
