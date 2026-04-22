@@ -257,6 +257,28 @@ static drone_slot_t s_slots[MAX_CONCURRENT_DRONES];
                       (d).location.lon >= -180.0f && (d).location.lon <= 180.0f && \
                       ((d).location.lat != 0.0f || (d).location.lon != 0.0f))
 
+/* [diag] TEMPORARY — revert after triage. Scan all live slots and log if any
+ * two share the same src_mac, which would make MAC-fallback attribution
+ * ambiguous and is the suspected residual cross-attribution path. */
+static void diag_check_mac_collision(void)
+{
+    for (int i = 0; i < MAX_CONCURRENT_DRONES; i++) {
+        if (s_slots[i].uas_id[0] == '\0' || !s_slots[i].mac_known) continue;
+        for (int j = i + 1; j < MAX_CONCURRENT_DRONES; j++) {
+            if (s_slots[j].uas_id[0] == '\0' || !s_slots[j].mac_known) continue;
+            if (memcmp(s_slots[i].src_mac, s_slots[j].src_mac, 6) == 0) {
+                ESP_LOGW(TAG,
+                    "[diag] MAC COLLISION slot[%d](%s) and slot[%d](%s) "
+                    "both src_mac=%02X:%02X:%02X:%02X:%02X:%02X",
+                    i, s_slots[i].uas_id, j, s_slots[j].uas_id,
+                    s_slots[i].src_mac[0], s_slots[i].src_mac[1],
+                    s_slots[i].src_mac[2], s_slots[i].src_mac[3],
+                    s_slots[i].src_mac[4], s_slots[i].src_mac[5]);
+            }
+        }
+    }
+}
+
 /* Return the slot owning this frame, claiming a free or stalest slot if the
  * frame carries a new uas_id. Returns NULL when a bare Location/System frame
  * arrives from a MAC we have no prior BasicId context for (drop). */
@@ -267,8 +289,22 @@ static drone_slot_t *resolve_slot(const odid_detection_t *det, TickType_t now)
             if (s_slots[i].uas_id[0] &&
                 strncmp(s_slots[i].uas_id, det->basic_id.uas_id,
                         ODID_STR_LEN) == 0) {
+                /* [diag] TEMPORARY — log MAC overwrites on existing slots. */
+                if (s_slots[i].mac_known &&
+                    memcmp(s_slots[i].src_mac, det->mac, 6) != 0) {
+                    ESP_LOGI(TAG,
+                        "[diag] basicid uas=%s mac=%02X:%02X:%02X:%02X:%02X:%02X "
+                        "(overwriting prior mac=%02X:%02X:%02X:%02X:%02X:%02X)",
+                        det->basic_id.uas_id,
+                        det->mac[0], det->mac[1], det->mac[2],
+                        det->mac[3], det->mac[4], det->mac[5],
+                        s_slots[i].src_mac[0], s_slots[i].src_mac[1],
+                        s_slots[i].src_mac[2], s_slots[i].src_mac[3],
+                        s_slots[i].src_mac[4], s_slots[i].src_mac[5]);
+                }
                 memcpy(s_slots[i].src_mac, det->mac, 6);
                 s_slots[i].mac_known = true;
+                diag_check_mac_collision();
                 return &s_slots[i];
             }
         }
@@ -291,14 +327,45 @@ static drone_slot_t *resolve_slot(const odid_detection_t *det, TickType_t now)
         strlcpy(claim->uas_id, det->basic_id.uas_id, sizeof(claim->uas_id));
         memcpy(claim->src_mac, det->mac, 6);
         claim->mac_known = true;
+        diag_check_mac_collision();
         return claim;
     }
 
+    /* [diag] TEMPORARY — count MAC matches and log fallback outcome so we can
+     * see whether ambiguous matches are happening on bare Location frames. */
+    drone_slot_t *first_match = NULL;
+    int match_count = 0;
     for (int i = 0; i < MAX_CONCURRENT_DRONES; i++) {
         if (s_slots[i].uas_id[0] == '\0' || !s_slots[i].mac_known) continue;
-        if (memcmp(s_slots[i].src_mac, det->mac, 6) == 0) return &s_slots[i];
+        if (memcmp(s_slots[i].src_mac, det->mac, 6) == 0) {
+            if (!first_match) first_match = &s_slots[i];
+            match_count++;
+        }
     }
-    return NULL;
+    if (match_count == 0) {
+        ESP_LOGD(TAG,
+            "[diag] mac-fallback miss for incoming mac=%02X:%02X:%02X:%02X:%02X:%02X "
+            "— frame dropped",
+            det->mac[0], det->mac[1], det->mac[2],
+            det->mac[3], det->mac[4], det->mac[5]);
+        return NULL;
+    }
+    if (match_count > 1) {
+        ESP_LOGW(TAG,
+            "[diag] mac-fallback AMBIGUOUS match_count=%d incoming mac=%02X:%02X:%02X:%02X:%02X:%02X "
+            "first_uas=%s — returning first",
+            match_count,
+            det->mac[0], det->mac[1], det->mac[2],
+            det->mac[3], det->mac[4], det->mac[5],
+            first_match->uas_id);
+    } else {
+        ESP_LOGD(TAG,
+            "[diag] mac-fallback hit uas=%s for incoming mac=%02X:%02X:%02X:%02X:%02X:%02X",
+            first_match->uas_id,
+            det->mac[0], det->mac[1], det->mac[2],
+            det->mac[3], det->mac[4], det->mac[5]);
+    }
+    return first_match;
 }
 
 /* Merge a frame's populated fields into its slot's accumulator. Each frame
@@ -489,12 +556,17 @@ static void relay_task(void *arg)
                 vTaskDelay(pdMS_TO_TICKS(50));
             }
 
+            /* [diag] TEMPORARY — log every cycle, not every 5th, so we can
+             * verify per-slot ground truth on what the firmware is actually
+             * broadcasting. Revert after triage. */
+            ESP_LOGI(TAG, "[diag] broadcast slot[%d] uas=%s lat=%.6f lon=%.6f",
+                     i, s->uas_id,
+                     loc_valid ? (double)out.location.lat : 0.0,
+                     loc_valid ? (double)out.location.lon : 0.0);
             if (cycle == 0) {
-                ESP_LOGI(TAG, "Relay[%s]: airborne=%d lat=%.6f lon=%.6f op_lat=%.6f op_lon=%.6f",
+                ESP_LOGI(TAG, "Relay[%s]: airborne=%d op_lat=%.6f op_lon=%.6f",
                          s->uas_id,
                          out.has_location && out.location.status == OP_STATUS_AIRBORNE,
-                         loc_valid ? (double)out.location.lat : 0.0,
-                         loc_valid ? (double)out.location.lon : 0.0,
                          out.has_system ? (double)out.system.operator_lat : 0.0,
                          out.has_system ? (double)out.system.operator_lon : 0.0);
             }
