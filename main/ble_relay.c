@@ -13,6 +13,14 @@
 #include "led.h"
 #include <string.h>
 
+/* 32 chosen as a pragmatic ceiling that covers realistic multi-drone
+ * operations, stress scenarios, and adversarial cases without hitting
+ * dynamic allocation complexity. At ~400 bytes per slot this is ~13 KB
+ * static RAM, negligible on ESP32-C6 (~441 KB usable SRAM). The eviction
+ * ESP_LOGI line will flag if this ceiling is ever exceeded in the field,
+ * at which point bumping higher is a one-line change. */
+#define MAX_CONCURRENT_DRONES 32
+
 static const char *TAG = "BLE_RELAY";
 
 static QueueHandle_t s_queue        = NULL;
@@ -218,30 +226,183 @@ static void encode_bridge_beacon(uint8_t *buf)
 }
 
 
+/* Per-drone slot — replaces the single-accumulator design that independently
+ * overwrote basic_id / location / system across frames from different drones.
+ *
+ * Attribution: BasicId-bearing frames key the slot by uas_id; bare
+ * Location/System frames (no uas_id of their own) fall back to matching by
+ * the drone's original BLE MAC — safe here because odid_detection_t.mac is
+ * the drone's own address, not the relay's (downstream consumers on the
+ * phone side see only the relay MAC and can't use this signal).
+ *
+ * sys_saved moved per-slot so one drone's RC state can't leak into
+ * another's operator-location fallback. */
+typedef struct {
+    char              uas_id[ODID_STR_LEN + 1];  /* '\0' first byte = free slot */
+    uint8_t           src_mac[6];
+    bool              mac_known;
+    odid_detection_t  acc;
+    odid_system_t     sys_saved;
+    bool              sys_saved_ok;
+    TickType_t        last_any_frame;
+    TickType_t        last_valid_airborne;
+    TickType_t        first_grounded_after_flight;
+    bool              airborne_ever;  /* latched once we observe airborne */
+} drone_slot_t;
+
+static drone_slot_t s_slots[MAX_CONCURRENT_DRONES];
+
+#define LOC_VALID(d) ((d).has_location && \
+                      (d).location.lat >= -90.0f && (d).location.lat <= 90.0f && \
+                      (d).location.lon >= -180.0f && (d).location.lon <= 180.0f && \
+                      ((d).location.lat != 0.0f || (d).location.lon != 0.0f))
+
+/* Return the slot owning this frame, claiming a free or stalest slot if the
+ * frame carries a new uas_id. Returns NULL when a bare Location/System frame
+ * arrives from a MAC we have no prior BasicId context for (drop). */
+static drone_slot_t *resolve_slot(const odid_detection_t *det, TickType_t now)
+{
+    if (det->has_basic_id && det->basic_id.uas_id[0]) {
+        for (int i = 0; i < MAX_CONCURRENT_DRONES; i++) {
+            if (s_slots[i].uas_id[0] &&
+                strncmp(s_slots[i].uas_id, det->basic_id.uas_id,
+                        ODID_STR_LEN) == 0) {
+                memcpy(s_slots[i].src_mac, det->mac, 6);
+                s_slots[i].mac_known = true;
+                return &s_slots[i];
+            }
+        }
+        drone_slot_t *claim = NULL;
+        for (int i = 0; i < MAX_CONCURRENT_DRONES; i++) {
+            if (s_slots[i].uas_id[0] == '\0') { claim = &s_slots[i]; break; }
+        }
+        if (!claim) {
+            TickType_t oldest = now;
+            for (int i = 0; i < MAX_CONCURRENT_DRONES; i++) {
+                if (s_slots[i].last_any_frame <= oldest) {
+                    oldest = s_slots[i].last_any_frame;
+                    claim  = &s_slots[i];
+                }
+            }
+            ESP_LOGI(TAG, "All %d slots full — evicting stalest for new uas_id=%s",
+                     MAX_CONCURRENT_DRONES, det->basic_id.uas_id);
+        }
+        memset(claim, 0, sizeof(*claim));
+        strlcpy(claim->uas_id, det->basic_id.uas_id, sizeof(claim->uas_id));
+        memcpy(claim->src_mac, det->mac, 6);
+        claim->mac_known = true;
+        return claim;
+    }
+
+    for (int i = 0; i < MAX_CONCURRENT_DRONES; i++) {
+        if (s_slots[i].uas_id[0] == '\0' || !s_slots[i].mac_known) continue;
+        if (memcmp(s_slots[i].src_mac, det->mac, 6) == 0) return &s_slots[i];
+    }
+    return NULL;
+}
+
+/* Merge a frame's populated fields into its slot's accumulator. Each frame
+ * updates at most one slot, so basic_id / location / system never mix across
+ * drones the way the old single-acc MERGE did. */
+static void merge_into_slot(drone_slot_t *s, const odid_detection_t *det,
+                            TickType_t now)
+{
+    s->acc.rssi   = det->rssi;
+    s->acc.source = det->source;
+    if (det->has_basic_id) { s->acc.basic_id = det->basic_id; s->acc.has_basic_id = true; }
+    if (LOC_VALID(*det))   { s->acc.location = det->location; s->acc.has_location = true; }
+    if (det->has_system)   { s->acc.system   = det->system;   s->acc.has_system   = true; }
+    if (det->has_self_id)  { s->acc.self_id  = det->self_id;  s->acc.has_self_id  = true; }
+    s->last_any_frame = now;
+
+    /* sys_saved rules — unchanged semantics, scoped per-slot. */
+    if (s->acc.has_system && s->acc.has_basic_id) {
+        float op_lat = s->acc.system.operator_lat;
+        float op_lon = s->acc.system.operator_lon;
+        bool op_coords_valid =
+            (op_lat >= -90.0f && op_lat <= 90.0f &&
+             op_lon >= -180.0f && op_lon <= 180.0f &&
+             (op_lat != 0.0f || op_lon != 0.0f));
+
+        if (!s->sys_saved_ok) {
+            if (op_coords_valid) {
+                s->sys_saved    = s->acc.system;
+                s->sys_saved_ok = true;
+                ESP_LOGI(TAG, "Operator location saved (uas_id=%s): lat=%.6f lon=%.6f",
+                         s->uas_id, (double)op_lat, (double)op_lon);
+            } else {
+                ESP_LOGD(TAG, "Skipping invalid operator coords (uas_id=%s): lat=%.6f lon=%.6f",
+                         s->uas_id, (double)op_lat, (double)op_lon);
+                s->acc.has_system = false;
+            }
+        } else if (!op_coords_valid) {
+            s->acc.system = s->sys_saved;
+        }
+    } else if (s->acc.has_system && !s->acc.has_basic_id) {
+        ESP_LOGD(TAG, "Deferring operator location — waiting for Basic ID");
+        s->acc.has_system = false;
+    }
+
+    if (!s->sys_saved_ok && s->acc.has_basic_id && LOC_VALID(s->acc) &&
+        s->acc.has_location && s->acc.location.status == OP_STATUS_AIRBORNE) {
+        s->sys_saved = s->acc.system;
+        s->sys_saved.operator_lat = s->acc.location.lat;
+        s->sys_saved.operator_lon = s->acc.location.lon;
+        s->sys_saved_ok = true;
+        ESP_LOGI(TAG, "Operator location fallback — drone pos (uas_id=%s): lat=%.6f lon=%.6f",
+                 s->uas_id, (double)s->acc.location.lat, (double)s->acc.location.lon);
+    }
+
+    if (s->sys_saved_ok && !s->acc.has_system) {
+        s->acc.system     = s->sys_saved;
+        s->acc.has_system = true;
+    }
+}
+
+/* Per-slot silence/landing eviction. Returns true if the slot was freed. */
+static bool maybe_evict_slot(drone_slot_t *s, TickType_t now)
+{
+    if (s->uas_id[0] == '\0') return false;
+
+    bool landed = (s->first_grounded_after_flight != 0 &&
+                   (now - s->first_grounded_after_flight) > pdMS_TO_TICKS(5000));
+    bool silent = (s->last_valid_airborne != 0 &&
+                   (now - s->last_valid_airborne) > pdMS_TO_TICKS(15000));
+    bool any_silent = (s->last_any_frame != 0 &&
+                       (now - s->last_any_frame) > pdMS_TO_TICKS(15000));
+
+    if (landed || silent || any_silent) {
+        ESP_LOGI(TAG, "Drone %s %s — evicting slot",
+                 s->uas_id,
+                 landed ? "landed" : (silent ? "silent" : "no frames"));
+        memset(s, 0, sizeof(*s));
+        return true;
+    }
+    return false;
+}
+
+static int count_live_slots(void)
+{
+    int n = 0;
+    for (int i = 0; i < MAX_CONCURRENT_DRONES; i++) {
+        if (s_slots[i].uas_id[0] && s_slots[i].acc.has_basic_id) n++;
+    }
+    return n;
+}
+
 static void relay_task(void *arg)
 {
     odid_detection_t det;
 
     ESP_LOGI(TAG, "Relay task running");
 
-    /* Persistent accumulated state — survives across relay cycles so that
-     * basic_id from one frame is not lost when the next frame only has location.
-     * Reset after 30s of no valid relay to avoid stale data persisting. */
-    odid_detection_t acc;
-    memset(&acc, 0, sizeof(acc));
-    TickType_t last_valid_airborne = 0;
-    TickType_t first_grounded_after_flight = 0;
-    TickType_t last_any_frame = 0;  /* tracks any valid frame regardless of status */
-    /* sys_saved preserves operator/pilot location across signal loss.
-     * It is only populated once and never cleared. */
-    odid_system_t   sys_saved     = {0};
-    bool            sys_saved_ok  = false;
+    memset(s_slots, 0, sizeof(s_slots));
 
     /* ── Relay strategy ────────────────────────────────────────────────────────
-     * Location is the only message that changes frequently — broadcast it on
-     * every cycle (100ms dwell = 1 adv event at 100ms interval).
-     * Basic ID and Self-ID are static; broadcast them every 5th cycle (~500ms).
-     * This gives ~10 location updates/second to the app vs ~1/second previously.
+     * Each live slot gets its full basic+self+location+system burst back-to-back
+     * before we move on to the next slot, so the phone receives self-consistent
+     * per-drone bursts from a single source MAC. Location emits every cycle;
+     * Basic and Self-Id emit every 5th cycle.
      * ────────────────────────────────────────────────────────────────────────── */
     uint8_t basic_buf[25] = {0};
     uint8_t loc_buf[25]   = {0};
@@ -250,205 +411,98 @@ static void relay_task(void *arg)
     uint8_t cycle = 0;
 
     /* Bridge beacon — Basic ID with UAS ID = "DroneScout Bridge", ua_type=Other.
-     * Broadcast every cycle (continuously) matching real bridge behavior. */
+     * Broadcast when no slot is live, matching real bridge behavior. */
     uint8_t bridge_buf[25] = {0};
     encode_bridge_beacon(bridge_buf);
 
-    #define LOC_VALID(d) ((d).has_location && \
-                          (d).location.lat >= -90.0f && (d).location.lat <= 90.0f && \
-                          (d).location.lon >= -180.0f && (d).location.lon <= 180.0f && \
-                          ((d).location.lat != 0.0f || (d).location.lon != 0.0f))
-    #define MERGE(src) do { \
-        acc.rssi = (src).rssi; acc.source = (src).source; \
-        if ((src).has_basic_id) { acc.basic_id  = (src).basic_id;  acc.has_basic_id  = true; } \
-        if (LOC_VALID(src))     { acc.location  = (src).location;  acc.has_location  = true; } \
-        if ((src).has_system)   { acc.system    = (src).system;    acc.has_system    = true; } \
-        if ((src).has_self_id)  { acc.self_id   = (src).self_id;   acc.has_self_id   = true; } \
-    } while(0)
-
     while (s_running) {
 
-        /* Get one detection — short timeout so we stay responsive */
         bool got_frame = (xQueueReceive(s_queue, &det, pdMS_TO_TICKS(50)) == pdTRUE);
+        TickType_t now = xTaskGetTickCount();
 
         if (got_frame) {
-            /* Merge this frame — do NOT drain the whole queue so each position
-             * gets its own broadcast cycle rather than being collapsed into one. */
-            MERGE(det);
-            last_any_frame = xTaskGetTickCount();  /* track last frame regardless of status */
+            drone_slot_t *s = resolve_slot(&det, now);
+            if (s) {
+                merge_into_slot(s, &det, now);
 
-            /* Persist operator location.
-             * Rules:
-             *   1. Require Basic ID first — DJI sends bogus coords before startup.
-             *   2. Coords must be valid WGS84 and non-zero.
-             *   3. Once a good fix is saved it never gets overwritten.
-             *   4. Fallback: if RC sends 0,0 indefinitely (Mavic 3T / M4T / RC Pro),
-             *      use the drone's first airborne GPS position as pilot proxy.
-             *   5. CRITICAL: once saved, any subsequent bad coords from RC must be
-             *      replaced with the saved location before broadcasting. */
-            if (acc.has_system && acc.has_basic_id) {
-                float op_lat = acc.system.operator_lat;
-                float op_lon = acc.system.operator_lon;
-
-                bool op_coords_valid =
-                    (op_lat >= -90.0f && op_lat <= 90.0f &&
-                     op_lon >= -180.0f && op_lon <= 180.0f &&
-                     (op_lat != 0.0f || op_lon != 0.0f));
-
-                if (!sys_saved_ok) {
-                    if (op_coords_valid) {
-                        sys_saved    = acc.system;
-                        sys_saved_ok = true;
-                        ESP_LOGI(TAG, "Operator location saved: lat=%.6f lon=%.6f",
-                                 (double)op_lat, (double)op_lon);
-                    } else {
-                        /* Invalid coords, discard until we get a good one */
-                        ESP_LOGD(TAG, "Skipping invalid operator coords: lat=%.6f lon=%.6f",
-                                 (double)op_lat, (double)op_lon);
-                        acc.has_system = false;
-                    }
-                } else {
-                    /* Already have a good saved location — if RC is still sending
-                     * bad coords (0,0), override with saved good location so the
-                     * app always receives the correct pilot position. */
-                    if (!op_coords_valid) {
-                        acc.system = sys_saved;
-                    }
+                bool airborne = s->acc.has_location &&
+                                s->acc.location.status == OP_STATUS_AIRBORNE;
+                if (airborne) {
+                    s->last_valid_airborne = now;
+                    s->first_grounded_after_flight = 0;
+                    s->airborne_ever = true;
+                } else if (s->airborne_ever) {
+                    if (s->first_grounded_after_flight == 0)
+                        s->first_grounded_after_flight = now;
                 }
-            } else if (acc.has_system && !acc.has_basic_id) {
-                ESP_LOGD(TAG, "Deferring operator location — waiting for Basic ID");
-                acc.has_system = false;
-            }
-
-            /* Fallback: drone airborne but RC never sent valid operator coords */
-            if (!sys_saved_ok && acc.has_basic_id && LOC_VALID(acc) &&
-                acc.has_location && acc.location.status == OP_STATUS_AIRBORNE) {
-                sys_saved = acc.system;
-                sys_saved.operator_lat = acc.location.lat;
-                sys_saved.operator_lon = acc.location.lon;
-                sys_saved_ok = true;
-                ESP_LOGI(TAG, "Operator location fallback (drone pos): lat=%.6f lon=%.6f",
-                         (double)acc.location.lat, (double)acc.location.lon);
-            }
-
-            if (sys_saved_ok && !acc.has_system) {
-                acc.system    = sys_saved;
-                acc.has_system = true;
             }
         }
 
-        /* Silence/landing check — runs even when no frame received */
-        bool landed_chk = (first_grounded_after_flight != 0 &&
-                           (xTaskGetTickCount() - first_grounded_after_flight) > pdMS_TO_TICKS(5000));
-        bool silent_chk = (last_valid_airborne != 0 &&
-                           (xTaskGetTickCount() - last_valid_airborne) > pdMS_TO_TICKS(15000));
-        if (landed_chk || silent_chk) {
-            ESP_LOGI(TAG, "Drone %s — stopping relay", landed_chk ? "landed" : "silent");
+        /* Per-slot eviction (runs every tick, covers silent slots even when
+         * no frame is received). */
+        for (int i = 0; i < MAX_CONCURRENT_DRONES; i++) {
+            maybe_evict_slot(&s_slots[i], now);
+        }
+
+        int live = count_live_slots();
+        if (live == 0) {
             ble_gap_ext_adv_stop(ADV_HANDLE);
             led_set_detecting(false);
-            memset(&acc, 0, sizeof(acc));
-            if (sys_saved_ok) { acc.system = sys_saved; acc.has_system = true; }
-            last_valid_airborne = 0;
-            first_grounded_after_flight = 0;
-            cycle = 0;
-            continue;
-        }
-
-        if (!acc.has_basic_id) {
-            /* No drone — continuously broadcast bridge beacon */
             advertise_odid(bridge_buf);
             vTaskDelay(pdMS_TO_TICKS(50));
-            continue;
-        }
-
-        det = acc;
-
-        bool loc_valid = LOC_VALID(det);
-        bool airborne  = det.has_location && det.location.status == OP_STATUS_AIRBORNE;
-
-        if (airborne) {
-            last_valid_airborne = xTaskGetTickCount();
-            first_grounded_after_flight = 0;  /* reset grounded timer while flying */
-        } else if (last_valid_airborne != 0) {
-            /* Drone was airborne, now grounded — start grounded timer */
-            if (first_grounded_after_flight == 0)
-                first_grounded_after_flight = xTaskGetTickCount();
-        }
-
-        /* Check landing timeout — stop relay if:
-         *   (a) 15s silence with no airborne frames, OR
-         *   (b) drone has been grounded for 5s after previously being airborne */
-        bool landed = (first_grounded_after_flight != 0 &&
-                       (xTaskGetTickCount() - first_grounded_after_flight) > pdMS_TO_TICKS(5000));
-        bool silent = (last_valid_airborne != 0 &&
-                       (xTaskGetTickCount() - last_valid_airborne) > pdMS_TO_TICKS(15000));
-        /* Catch drones that never broadcast airborne status (e.g. Mavic 3T) —
-         * stop relay if no frames at all for 15s after we had at least one frame. */
-        bool any_silent = (last_any_frame != 0 &&
-                           (xTaskGetTickCount() - last_any_frame) > pdMS_TO_TICKS(15000));
-
-        if (landed || silent || any_silent) {
-            ESP_LOGI(TAG, "Drone %s — stopping relay",
-                     landed ? "landed" : (silent ? "silent" : "no frames"));
-            ble_gap_ext_adv_stop(ADV_HANDLE);
-            led_set_detecting(false);
-            memset(&acc, 0, sizeof(acc));
-            if (sys_saved_ok) { acc.system = sys_saved; acc.has_system = true; }
-            last_valid_airborne = 0;
-            first_grounded_after_flight = 0;
-            last_any_frame = 0;
             cycle = 0;
             continue;
         }
 
-        /* Bridge beacon broadcast is intentionally omitted during active relay.
-         * The idle path below handles it when no drone is being tracked.
-         * This gives maximum BLE airtime to drone position updates. */
+        led_set_detecting(true);
 
-        /* Encode fresh buffers */
-        encode_basic_id(&det, basic_buf);
-        if (loc_valid) encode_location(&det, loc_buf);
-        if (det.has_system) encode_system(&det, sys_buf);
-        encode_self_id_signal(&det, self_buf, det.rssi, det.source);
+        /* Broadcast each live slot's full cycle back-to-back. Each burst is
+         * self-consistent (basic_id + location + system all from one drone),
+         * so the phone's attributionBySource window collapses from ~500ms
+         * (old global cycle) to ~50ms (slot-to-slot gap). */
+        for (int i = 0; i < MAX_CONCURRENT_DRONES; i++) {
+            drone_slot_t *s = &s_slots[i];
+            if (s->uas_id[0] == '\0' || !s->acc.has_basic_id) continue;
 
-        /* Broadcast cycle:
-         * - Every cycle:   location (freshest data) + system (operator location)
-         * - Every 5th:     also basic_id + self_id
-         * System message is broadcast every cycle so apps joining mid-flight
-         * immediately receive the correct pilot location. */
-        if (cycle == 0) {
-            advertise_odid(basic_buf);
-            vTaskDelay(pdMS_TO_TICKS(50));
-            advertise_odid(self_buf);
-            vTaskDelay(pdMS_TO_TICKS(50));
-        }
+            odid_detection_t out = s->acc;
+            bool loc_valid = LOC_VALID(out);
 
-        if (loc_valid) {
-            advertise_odid(loc_buf);
-            vTaskDelay(pdMS_TO_TICKS(50));
-        }
+            encode_basic_id(&out, basic_buf);
+            if (loc_valid) encode_location(&out, loc_buf);
+            if (out.has_system) encode_system(&out, sys_buf);
+            encode_self_id_signal(&out, self_buf, out.rssi, out.source);
 
-        if (det.has_system) {
-            advertise_odid(sys_buf);
-            vTaskDelay(pdMS_TO_TICKS(50));
-        } else {
-            vTaskDelay(pdMS_TO_TICKS(50));
+            if (cycle == 0) {
+                advertise_odid(basic_buf);
+                vTaskDelay(pdMS_TO_TICKS(50));
+                advertise_odid(self_buf);
+                vTaskDelay(pdMS_TO_TICKS(50));
+            }
+            if (loc_valid) {
+                advertise_odid(loc_buf);
+                vTaskDelay(pdMS_TO_TICKS(50));
+            }
+            if (out.has_system) {
+                advertise_odid(sys_buf);
+                vTaskDelay(pdMS_TO_TICKS(50));
+            } else {
+                vTaskDelay(pdMS_TO_TICKS(50));
+            }
+
+            if (cycle == 0) {
+                ESP_LOGI(TAG, "Relay[%s]: airborne=%d lat=%.6f lon=%.6f op_lat=%.6f op_lon=%.6f",
+                         s->uas_id,
+                         out.has_location && out.location.status == OP_STATUS_AIRBORNE,
+                         loc_valid ? (double)out.location.lat : 0.0,
+                         loc_valid ? (double)out.location.lon : 0.0,
+                         out.has_system ? (double)out.system.operator_lat : 0.0,
+                         out.has_system ? (double)out.system.operator_lon : 0.0);
+            }
         }
 
         cycle = (cycle + 1) % 5;
-
-        /* Log only on cycle 0 to avoid spamming */
-        if (cycle == 0) {
-            ESP_LOGI(TAG, "Relay: airborne=%d lat=%.6f lon=%.6f op_lat=%.6f op_lon=%.6f",
-                     airborne,
-                     loc_valid ? (double)det.location.lat : 0.0,
-                     loc_valid ? (double)det.location.lon : 0.0,
-                     det.has_system ? (double)det.system.operator_lat : 0.0,
-                     det.has_system ? (double)det.system.operator_lon : 0.0);
-        }
     }
 
-    #undef MERGE
     #undef LOC_VALID
 
     ble_gap_ext_adv_stop(ADV_HANDLE);
