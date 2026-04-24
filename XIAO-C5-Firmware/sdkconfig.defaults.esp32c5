@@ -1,0 +1,16 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Westshore Drone Remote ID Receiver — sdkconfig.defaults.esp32c5
+# Target-specific overrides for ESP32-C5-WROOM-1-N8R8.
+# Shared settings live in sdkconfig.defaults.
+# ─────────────────────────────────────────────────────────────────────────────
+
+CONFIG_IDF_TARGET="esp32c5"
+
+# 8 MB flash on N8R8 module
+CONFIG_ESPTOOLPY_FLASHSIZE_8MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="8MB"
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.esp32c5.csv"
+
+# 2.4 GHz band lock is applied at runtime in wifi_scanner.c via
+# esp_wifi_set_band_mode(WIFI_BAND_MODE_2G_ONLY) — no build-time option
+# exists in IDF 5.5.

@@ -1,0 +1,10 @@
+# Westshore Remote ID Receiver — partition table with OTA support
+# 8MB Flash (ESP32-C5-WROOM-1-N8R8)
+#
+# Name,     Type, SubType,  Offset,   Size,     Flags
+nvs,        data, nvs,      0x9000,   0x6000,
+phy_init,   data, phy,      0xF000,   0x1000,
+otadata,    data, ota,      0x10000,  0x2000,
+ota_0,      app,  ota_0,    0x20000,  0x380000,
+ota_1,      app,  ota_1,    0x3A0000, 0x380000,
+storage,    data, spiffs,   0x720000, 0xE0000,

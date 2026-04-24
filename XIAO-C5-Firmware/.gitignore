@@ -1,0 +1,13 @@
+build/
+mnt/
+_build.log
+idf_activate.bat
+.cache/
+.claude/
+.vscode/
+sdkconfig
+dependencies.lock
+managed_components/
+*.bin
+*.elf
+*.map
