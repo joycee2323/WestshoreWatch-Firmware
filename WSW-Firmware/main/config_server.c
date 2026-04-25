@@ -1,4 +1,5 @@
 #include "config_server.h"
+#include "config.h"
 #include "nvs_config.h"
 #include "ota_handler.h"
 #include "led.h"
@@ -283,12 +284,14 @@ static esp_err_t handler_root_get(httpd_req_t *req)
         "<div class=s><h3>Device Info</h3>"
         "<table class=i>"
         "<tr><td>Firmware</td><td>%s</td></tr>"
+        "<tr><td>HW revision</td><td>%s</td></tr>"
         "<tr><td>Built</td><td>%s %s</td></tr>"
         "<tr><td>MAC</td><td>%s</td></tr>"
         "<tr><td>IDF</td><td>%s</td></tr>"
         "<tr><td>Free heap</td><td>%lu</td></tr>"
         "</table></div></div>",
-        app_desc->version, app_desc->date, app_desc->time,
+        app_desc->version, HW_REVISION,
+        app_desc->date, app_desc->time,
         mac_str, esp_get_idf_version(),
         (unsigned long)esp_get_free_heap_size());
     httpd_resp_send_chunk(req, buf, HTTPD_RESP_USE_STRLEN);

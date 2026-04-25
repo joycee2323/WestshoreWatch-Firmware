@@ -218,10 +218,17 @@ static void output_task(void *arg)
              WSD_UART_PRIMARY_TX,
              WSD_UART_PRIMARY_BAUD);
 
-    /* Startup banner */
-    const char *banner =
-        "{\"info\":\"Westshore Drone Remote ID Receiver v1.0 ready\"}\n";
-    uart_write_bytes(WSD_UART_PRIMARY_NUM, banner, strlen(banner));
+    /* Startup banner — one-shot identity frame the Android app captures
+     * on connection. `hw_rev` tells the app which board it's attached to
+     * so it can apply board-specific behavior without probing. */
+    char banner[160];
+    int bn = snprintf(banner, sizeof(banner),
+        "{\"info\":\"Westshore Drone Remote ID Receiver v1.0 ready\","
+        "\"hw_rev\":\"%s\"}\n",
+        HW_REVISION);
+    if (bn > 0 && bn < (int)sizeof(banner)) {
+        uart_write_bytes(WSD_UART_PRIMARY_NUM, banner, bn);
+    }
 
     while (true) {
         if (xQueueReceive(s_queue, &det, portMAX_DELAY) == pdTRUE) {

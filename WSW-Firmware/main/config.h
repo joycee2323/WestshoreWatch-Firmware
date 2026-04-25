@@ -46,6 +46,17 @@
  *    Pin 4: GND
  */
 
+// ── Hardware revision identifier ───────────────────────────────────────────
+// Surfaced in config portal System tab and UART boot identity frame so the
+// Android app can capture which board it's talking to.
+#if CONFIG_IDF_TARGET_ESP32C5
+    #define HW_REVISION             "westshore_v1_1"
+#elif CONFIG_IDF_TARGET_ESP32C6
+    #define HW_REVISION             "westshore_c6_v1"
+#else
+    #define HW_REVISION             "unknown"
+#endif
+
 // ── LED ─────────────────────────────────────────────────────────────────────
 #define WSD_LED_GPIO                4       // Orange status LED
 #define WSD_LED_ACTIVE_HIGH         1       // HIGH = LED on
