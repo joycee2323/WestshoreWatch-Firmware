@@ -625,6 +625,7 @@ static void relay_task(void *arg)
             if (s_pack_adv_configured && ble_gap_ext_adv_active(PACK_ADV_HANDLE)) {
                 ble_gap_ext_adv_stop(PACK_ADV_HANDLE);
             }
+            ble_detection_advertise_stop();   /* stop handle 2 (detection JSON) */
             led_set_detecting(false);
             advertise_odid(bridge_buf);
             vTaskDelay(pdMS_TO_TICKS(50));
