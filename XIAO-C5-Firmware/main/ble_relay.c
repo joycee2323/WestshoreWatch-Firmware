@@ -541,12 +541,18 @@ static bool maybe_evict_slot(drone_slot_t *s, TickType_t now)
 {
     if (s->uas_id[0] == '\0') return false;
 
+    /* Eviction thresholds come from g_config (captive-portal editable, NVS
+     * persisted). Defaults: land=5s, silent=15s. Previously hardcoded;
+     * the portal fields existed but were never read at runtime. */
+    uint32_t land_ms   = (uint32_t)g_config.land_timeout_s   * 1000U;
+    uint32_t silent_ms = (uint32_t)g_config.silent_timeout_s * 1000U;
+
     bool landed = (s->first_grounded_after_flight != 0 &&
-                   (now - s->first_grounded_after_flight) > pdMS_TO_TICKS(5000));
+                   (now - s->first_grounded_after_flight) > pdMS_TO_TICKS(land_ms));
     bool silent = (s->last_valid_airborne != 0 &&
-                   (now - s->last_valid_airborne) > pdMS_TO_TICKS(15000));
+                   (now - s->last_valid_airborne) > pdMS_TO_TICKS(silent_ms));
     bool any_silent = (s->last_any_frame != 0 &&
-                       (now - s->last_any_frame) > pdMS_TO_TICKS(15000));
+                       (now - s->last_any_frame) > pdMS_TO_TICKS(silent_ms));
 
     if (landed || silent || any_silent) {
         ESP_LOGI(TAG, "Drone %s %s — evicting slot",
