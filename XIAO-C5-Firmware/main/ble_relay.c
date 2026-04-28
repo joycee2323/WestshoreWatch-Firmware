@@ -314,6 +314,27 @@ static void encode_bridge_beacon(uint8_t *buf)
     memcpy(&buf[2], name, strlen(name));  /* padded with zeros to 20 bytes */
 }
 
+/* Overwrite handle-1 (Pack) payload with a benign placeholder so the
+ * controller stops re-emitting the last live drone's data after slot
+ * eviction. We can't rely on ble_gap_ext_adv_stop alone — on this NimBLE
+ * build the host marks the instance inactive but the controller keeps
+ * radiating the cached data buffer (see STALE_UAS_AUDIT_ROUND_3 for
+ * details). Set + start with a Pack carrying a Basic ID with
+ * UAS_ID="DroneScout Bridge" and msg_count=1; the WSW phone filter at
+ * maybeEnqueueForUpload (BLEScannerService.kt:357) drops anything with
+ * that UAS string, and DroneScout-compatible apps treat it as a bridge
+ * marker (same semantics as handle 0). */
+static void advertise_pack_idle_placeholder(void)
+{
+    if (!s_pack_adv_configured) return;
+    uint8_t pack_buf[ODID_PACK_PAYLOAD];
+    memset(pack_buf, 0, sizeof(pack_buf));
+    pack_buf[0] = (ODID_MSG_PACK << 4) | 0x02;
+    pack_buf[1] = 1;                          /* msg_count = 1 (just basic_id) */
+    encode_bridge_beacon(&pack_buf[2]);       /* basic_id = DroneScout Bridge */
+    advertise_pack(pack_buf);
+}
+
 
 /* Per-drone slot — replaces the single-accumulator design that independently
  * overwrote basic_id / location / system across frames from different drones.
@@ -615,10 +636,9 @@ static void relay_task(void *arg)
 
         int live = count_live_slots();
         if (live == 0) {
-            ble_gap_ext_adv_stop(ADV_HANDLE);
-            if (s_pack_adv_configured && ble_gap_ext_adv_active(PACK_ADV_HANDLE)) {
-                ble_gap_ext_adv_stop(PACK_ADV_HANDLE);
-            }
+            ble_gap_ext_adv_stop(ADV_HANDLE);             /* keep — pre-step for advertise_odid */
+            advertise_pack_idle_placeholder();            /* overwrite handle 1 (was: stop) */
+            ble_detection_advertise_stop();               /* now sets handle 2 to placeholder */
             /* LED: no per-packet flash here — the XIAO LED indicates
              * live RID packets, not relay cycle state. Flashes are
              * fired from the BLE/WiFi packet callbacks directly. */
@@ -1024,6 +1044,18 @@ void ble_detection_advertise(const char *json, size_t len)
     if (rc != 0 && rc != BLE_HS_EALREADY) {
         ESP_LOGW(TAG, "det ext_adv_start failed: %d", rc);
     }
+}
+
+void ble_detection_advertise_stop(void)
+{
+    if (!s_det_adv_configured) return;
+    /* Same NimBLE caveat as the Pack handle: a bare ext_adv_stop on this
+     * build doesn't actually halt the radio. Overwrite the AD payload with
+     * a tiny placeholder JSON instead. The Android app's ScanFilter at
+     * BLEScannerService.kt:230 doesn't ingest manufacturer 0x08FF anyway,
+     * so this is purely about silencing the controller's broadcast loop. */
+    static const char kPlaceholder[] = "{\"id\":\"\"}";
+    ble_detection_advertise(kPlaceholder, sizeof(kPlaceholder) - 1);
 }
 
 void ble_relay_stop(void)

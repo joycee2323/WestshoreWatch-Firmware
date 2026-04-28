@@ -42,4 +42,14 @@ esp_err_t ble_relay_start(QueueHandle_t detect_queue);
  */
 void ble_detection_advertise(const char *json, size_t len);
 
+/**
+ * Stop the handle-2 detection advertiser. No-op if the handle has not been
+ * configured or is already inactive. The retained payload is not cleared by
+ * NimBLE on stop; the next ble_detection_advertise() call will overwrite it
+ * before restarting. Use this to silence the handle when no fresh detection
+ * has arrived for a while (otherwise it broadcasts the last-set payload
+ * indefinitely).
+ */
+void ble_detection_advertise_stop(void);
+
 void ble_relay_stop(void);
