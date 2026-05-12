@@ -61,7 +61,13 @@
 
 // ── BLE scanner ───────────────────────────────────────────────────────────────
 #define WSD_BLE_SCAN_ITVL_MS        100     // scan interval (ms)
-#define WSD_BLE_SCAN_WIN_MS         100     // scan window  (100% duty = passive)
+// 20% duty (was 100%). Running the legacy BLE scan at 100% duty alongside
+// the Wi-Fi promiscuous scan starved the Wi-Fi RX path on the C5's shared
+// radio (2026-05-11 side-by-side vs X1 reference: Sentinel lost every
+// coalescer race). 20 ms window inside the 100 ms interval keeps BT4 RID
+// coverage while leaving 80% of the on-air time for Wi-Fi RX. Re-evaluate
+// if BLE detection rate drops noticeably in field deployment.
+#define WSD_BLE_SCAN_WIN_MS         20      // scan window (ms)
 
 // ── Output format ─────────────────────────────────────────────────────────────
 #define WSD_OUTPUT_USB_CDC          1       // also echo to USB CDC/JTAG console
