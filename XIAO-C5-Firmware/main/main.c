@@ -14,9 +14,13 @@
 #include "nvs_config.h"
 #include "odid_decoder.h"
 #include "wifi_scanner.h"
-#include "output.h"
 #include "led.h"
 #include "ble_relay.h"
+#include "status_led.h"
+#include "modem_manager.h"
+#include "detection_queue.h"
+#include "cellular_uploader.h"
+#include "gnss_reader.h"
 
 static const char *TAG = "MAIN";
 
@@ -24,6 +28,9 @@ static const char *TAG = "MAIN";
  * If we crash before this fires, otadata stays in pending-verify and the
  * bootloader rolls back to the previous slot on next boot. */
 #define WSD_OTA_VALIDATE_DELAY_S 60
+
+/* Upload watchdog — full system reboot if no successful upload in 10 min */
+#define UPLOAD_WDT_TIMEOUT_MS    (10 * 60 * 1000)
 
 static void ota_mark_valid_cb(void *arg)
 {
@@ -39,17 +46,17 @@ static void ota_mark_valid_cb(void *arg)
 }
 
 static QueueHandle_t raw_queue    = NULL;
-static QueueHandle_t output_queue = NULL;
-static QueueHandle_t relay_queue  = NULL;
+static QueueHandle_t detect_queue = NULL;
 
-/* Distribute one detection to all downstream queues */
+/* Distribute one detection to the cellular upload queue.
+ * Phone-paired mode used output_queue + relay_queue; this variant
+ * feeds a single detect_queue that drains via HTTPS over cellular. */
 static void distributor_task(void *arg)
 {
     odid_detection_t det;
     while (true) {
         if (xQueueReceive(raw_queue, &det, portMAX_DELAY) == pdTRUE) {
-            xQueueSend(output_queue, &det, 0);
-            xQueueSend(relay_queue,  &det, 0);
+            xQueueSend(detect_queue, &det, 0);
         }
     }
 }
@@ -64,33 +71,30 @@ void app_main(void)
         nvs_flash_init();
     }
 
-    ESP_LOGI(TAG, "boot: calling led_init");
-    esp_err_t led_err = led_init();
-    if (led_err != ESP_OK) {
-        ESP_LOGE(TAG, "boot: led_init returned 0x%x (%s)",
-                 led_err, esp_err_to_name(led_err));
-    } else {
-        ESP_LOGI(TAG, "boot: led_init returned OK");
+    /* Bi-color status LED (replaces onboard user LED for this variant) */
+    ESP_LOGI(TAG, "boot: calling status_led_init");
+    err = status_led_init();
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "boot: status_led_init failed: %s", esp_err_to_name(err));
     }
-    led_set_pattern(LED_PATTERN_BOOT);
+    status_led_set(STATUS_LED_YELLOW);
 
     /* Load config — falls back to defaults on first boot */
     wsd_config_load(&g_config);
 
-    /* ── NORMAL OPERATION MODE ──────────────────────────────────────────────
+    /* ── CELLULAR X1 MODE ──────────────────────────────────────────────────
      *
-     * Config portal is always-on as a background soft-AP.
-     * Connect to WestshoreWatch-XXXX (password: westshore1) → http://192.168.4.1
+     * Standalone cellular uplink via SIM7600G-H modem.
+     * BLE relay + UART JSON output + config portal are NOT started.
+     * Detection path: WiFi/BLE scan → detect_queue → HTTPS POST
      *
      * ────────────────────────────────────────────────────────────────────── */
     const esp_app_desc_t *app_desc = esp_app_get_description();
     ESP_LOGI(TAG, "===========================================");
-    ESP_LOGI(TAG, " Westshore Watch X1 — Remote ID Sensor Node %s",
-             app_desc->version);
+    ESP_LOGI(TAG, " Westshore Watch Cellular X1 %s", app_desc->version);
     ESP_LOGI(TAG, " ESP32-C5  |  IDF %s", esp_get_idf_version());
     ESP_LOGI(TAG, "===========================================");
-    ESP_LOGI(TAG, " Mode:     %s",
-             g_config.mode == WSD_MODE_RELAY ? "BLE relay" : "UART only");
+    ESP_LOGI(TAG, " Mode:     CELLULAR (SIM7600G-H)");
     ESP_LOGI(TAG, " Channels: %d-%d",
              g_config.ch_2g_start, g_config.ch_2g_stop);
     ESP_LOGI(TAG, " Node:     %s",
@@ -98,36 +102,35 @@ void app_main(void)
 
     /* Create detection queues */
     raw_queue    = xQueueCreate(WSD_DETECT_QUEUE_DEPTH, sizeof(odid_detection_t));
-    output_queue = xQueueCreate(WSD_DETECT_QUEUE_DEPTH, sizeof(odid_detection_t));
-    relay_queue  = xQueueCreate(WSD_DETECT_QUEUE_DEPTH, sizeof(odid_detection_t));
+    detect_queue = xQueueCreate(WSD_DETECT_QUEUE_DEPTH, sizeof(odid_detection_t));
 
-    if (!raw_queue || !output_queue || !relay_queue) {
+    if (!raw_queue || !detect_queue) {
         ESP_LOGE(TAG, "Queue creation failed — halting");
-        led_set_pattern(LED_PATTERN_ERROR);
+        status_led_set(STATUS_LED_RED);
         while (true) vTaskDelay(pdMS_TO_TICKS(1000));
     }
 
-    /* Distributor: fan-out detections to all consumers */
+    /* SPIFFS-backed offline buffer */
+    ESP_LOGI(TAG, "boot: detection_queue_init");
+    err = detection_queue_init();
+    if (err != ESP_OK)
+        ESP_LOGW(TAG, "detection_queue_init failed: %s — offline buffering disabled",
+                 esp_err_to_name(err));
+
+    /* Distributor: fan-out raw detections to cellular upload queue */
     xTaskCreate(distributor_task, "distributor", 2048, NULL,
                 WSD_OUTPUT_TASK_PRIO + 2, NULL);
 
-    /* UART JSON output — always on */
-    ESP_LOGI(TAG, "boot: starting output_task");
-    err = output_task_start(output_queue);
-    if (err != ESP_OK)
-        ESP_LOGW(TAG, "Output task failed: %d", err);
-
-    /* WiFi scanner — also starts the always-on config AP and HTTP server */
+    /* WiFi scanner — promiscuous-mode RID detection.
+     * NOTE: config portal + soft-AP start with wifi_scanner.  This is fine
+     * because the portal uses WiFi AP mode (not STA) — AP mode does not
+     * interfere with BLE detection coverage.  The portal is useful for
+     * bench debugging even on the cellular variant. */
     ESP_LOGI(TAG, "boot: starting wifi_scanner");
     err = wifi_scanner_start(raw_queue);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Wi-Fi scanner failed: %d — will retry then restart", err);
-        led_set_pattern(LED_PATTERN_ERROR);
-        // Retry up to 3 times with 2s spacing — covers transient RF cal
-        // failures (brownout still settling, PHY cal not ready). If all
-        // retries fail, restart the chip rather than halt forever — the
-        // bootloader's rollback gate still protects us from a bad image
-        // because the OTA-validate timer hasn't fired yet at this point.
+        status_led_set(STATUS_LED_RED);
         for (int retry = 0; retry < 3; retry++) {
             vTaskDelay(pdMS_TO_TICKS(2000));
             err = wifi_scanner_start(raw_queue);
@@ -139,7 +142,7 @@ void app_main(void)
         }
         if (err != ESP_OK) {
             ESP_LOGE(TAG, "Wi-Fi scanner failed after retries — restarting chip");
-            vTaskDelay(pdMS_TO_TICKS(500)); // let log flush over USB-CDC / UART
+            vTaskDelay(pdMS_TO_TICKS(500));
             esp_restart();
         }
     }
@@ -147,37 +150,46 @@ void app_main(void)
 
     vTaskDelay(pdMS_TO_TICKS(500));
 
-    /* BLE stack init — unconditional so the detection advertiser (handle 2)
-     * is available regardless of relay mode. */
-    ESP_LOGI(TAG, "boot: ble_relay_init");
+    /* BLE scanner — passive scan for BLE-based Remote ID broadcasts.
+     * We still init ble_relay for the NimBLE host but do NOT start the
+     * relay task or ext-adv handles — no phone-gateway use case. */
+    ESP_LOGI(TAG, "boot: ble_relay_init (scanner only, no relay)");
     err = ble_relay_init();
     if (err != ESP_OK)
         ESP_LOGW(TAG, "ble_relay_init failed: %d", err);
-    ESP_LOGI(TAG, "boot: ble_relay_init done");
+    /* Deliberately NOT calling ble_relay_start() — no BLE relay TX */
+    ESP_LOGI(TAG, "boot: BLE scanner active, relay TX disabled");
 
-    /* BLE relay — only when mode == RELAY */
-    if (g_config.mode == WSD_MODE_RELAY) {
-        ESP_LOGI(TAG, "boot: ble_relay_start");
-        err = ble_relay_start(relay_queue);
-        if (err != ESP_OK)
-            ESP_LOGW(TAG, "BLE relay failed: %d", err);
-        ESP_LOGI(TAG, "boot: ble_relay_start done");
+    /* Cellular modem — starts the SIM7600 state machine in a background task */
+    ESP_LOGI(TAG, "boot: starting modem_manager");
+    err = modem_manager_start();
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "modem_manager_start failed: %s — restarting",
+                 esp_err_to_name(err));
+        vTaskDelay(pdMS_TO_TICKS(500));
+        esp_restart();
     }
 
-    led_set_pattern(LED_PATTERN_SCANNING);
+    /* HTTPS uploader — drains detect_queue via cellular PPP */
+    ESP_LOGI(TAG, "boot: starting cellular_uploader");
+    err = cellular_uploader_start(detect_queue);
+    if (err != ESP_OK)
+        ESP_LOGW(TAG, "cellular_uploader_start failed: %s", esp_err_to_name(err));
 
-    ESP_LOGI(TAG, "System ready");
+    /* GNSS reader — polls modem for position every 60s */
+    ESP_LOGI(TAG, "boot: starting gnss_reader");
+    err = gnss_reader_start();
+    if (err != ESP_OK)
+        ESP_LOGW(TAG, "gnss_reader_start failed: %s", esp_err_to_name(err));
+
+    ESP_LOGI(TAG, "System ready — Cellular X1");
     ESP_LOGI(TAG, "  Wi-Fi scanner:  ch %d-%d, %dms dwell",
              g_config.ch_2g_start, g_config.ch_2g_stop, WSD_WIFI_DWELL_MS);
-    ESP_LOGI(TAG, "  BLE relay:      %s",
-             g_config.mode == WSD_MODE_RELAY ? "active" : "disabled");
-    ESP_LOGI(TAG, "  Detection adv:  handle 2, company 0x08FF");
+    ESP_LOGI(TAG, "  BLE scanner:    passive (relay TX disabled)");
+    ESP_LOGI(TAG, "  Cellular:       SIM7600G-H via UART1");
     ESP_LOGI(TAG, "  Config portal:  WestshoreWatch-XXXX → http://192.168.4.1");
 
-    /* One-shot timer: if we survive WSD_OTA_VALIDATE_DELAY_S with all core
-     * services up, commit the current image and cancel pending rollback.
-     * If we crash before the timer fires, the bootloader will revert on the
-     * next boot. */
+    /* OTA validate timer */
     esp_timer_handle_t ota_validate_timer = NULL;
     const esp_timer_create_args_t targs = {
         .callback = &ota_mark_valid_cb,
@@ -192,13 +204,41 @@ void app_main(void)
         ESP_LOGW(TAG, "OTA: failed to arm validate timer");
     }
 
-    // Register the main task with the task WDT. With ESP_TASK_WDT_PANIC=y,
-    // if the loop ever stops feeding (e.g. main task gets stuck in a syscall),
-    // the chip resets instead of sitting silent forever. 3000 ms feed inside
-    // the 5000 ms timeout gives ~2 s margin.
+    /* Main loop: WDT feed + upload watchdog + LED recency check.
+     *
+     * Upload watchdog triggers reboot only when the network is totally dead
+     * (no HTTP response at all for 10 min).  Backend 4xx/5xx errors do NOT
+     * trigger reboot — the backend might be down during the event but we
+     * don't want reboot loops. */
     esp_task_wdt_add(NULL);
     while (true) {
         esp_task_wdt_reset();
+
+        /* Upload watchdog: reboot if no HTTP response (any status) in 10 min */
+        TickType_t last_resp = cellular_uploader_last_response();
+        if (last_resp > 0) {
+            uint32_t elapsed_ms = (xTaskGetTickCount() - last_resp) * portTICK_PERIOD_MS;
+            if (elapsed_ms > UPLOAD_WDT_TIMEOUT_MS) {
+                ESP_LOGE(TAG, "UPLOAD WATCHDOG: no HTTP response in %lums — rebooting",
+                         (unsigned long)elapsed_ms);
+                vTaskDelay(pdMS_TO_TICKS(500));
+                esp_restart();
+            }
+        }
+
+        /* LED recency: green only if PPP up AND last upload <2 min ago */
+        if (modem_manager_is_connected()) {
+            TickType_t last_ok = cellular_uploader_last_success();
+            if (last_ok > 0) {
+                uint32_t since_upload_ms = (xTaskGetTickCount() - last_ok) * portTICK_PERIOD_MS;
+                if (since_upload_ms > 2 * 60 * 1000) {
+                    status_led_set(STATUS_LED_BLINK_YELLOW);
+                } else {
+                    status_led_set(STATUS_LED_GREEN);
+                }
+            }
+        }
+
         vTaskDelay(pdMS_TO_TICKS(3000));
     }
 }

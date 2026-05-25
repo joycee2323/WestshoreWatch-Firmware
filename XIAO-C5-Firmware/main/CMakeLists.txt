@@ -6,11 +6,17 @@ idf_component_register(
         "wifi_scanner.c"
         "ble_scanner.c"
         "ble_relay.c"
-        "output.c"
-        "led.c"
+        "output.c"      # compiled but not started — no constructors, no boot-time side effects
+        "led.c"         # compiled but not started — onboard LED unused, status_led replaces it
         "config_server.c"
         "dns_server.c"
         "ota_handler.c"
+        "status_led.c"
+        "cellular_uart.c"
+        "modem_manager.c"
+        "detection_queue.c"
+        "cellular_uploader.c"
+        "gnss_reader.c"
     INCLUDE_DIRS "."
     REQUIRES
         nvs_flash
@@ -25,4 +31,6 @@ idf_component_register(
         driver
         mbedtls
         lwip
+        esp_modem
+        spiffs
 )
