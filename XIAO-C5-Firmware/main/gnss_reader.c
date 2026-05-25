@@ -99,6 +99,11 @@ esp_err_t gnss_reader_start(void)
  * would disrupt upload reliability.
  *
  * The node is stationary, so we acquire one fix and cache it forever.
+ * This approach is ONLY valid for stationary deployments.  A mobile
+ * Cellular X1 would need NMEA URC streaming (AT+CGPSINFO with
+ * unsolicited output) enabled before PPP, or periodic mode-switch
+ * (which disrupts upload reliability on the single-UART link).
+ *
  * Best-effort: if GNSS doesn't fix within max_attempts, uploads
  * proceed without node_position.
  *
