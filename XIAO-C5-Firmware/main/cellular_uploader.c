@@ -4,6 +4,7 @@
 #include "gnss_reader.h"
 #include "odid_decoder.h"
 #include "status_led.h"
+#include "config.h"
 #include "esp_log.h"
 #include "esp_http_client.h"
 #include "nvs.h"

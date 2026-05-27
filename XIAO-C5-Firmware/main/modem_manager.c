@@ -2,6 +2,7 @@
 #include "cellular_uart.h"
 #include "gnss_reader.h"
 #include "status_led.h"
+#include "config.h"
 #include "esp_log.h"
 #include "esp_netif.h"
 #include "esp_event.h"
