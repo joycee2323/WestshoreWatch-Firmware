@@ -93,6 +93,11 @@ static bool at_phase(void)
     set_state(MODEM_STATE_BOOTING);
     ESP_LOGI(TAG, "waiting for modem auto-boot (TEL0162 PWRKEY tied to GND)");
 
+    /* Autobaud wake burst + baud scan.
+     * SIM7600 default AT+IPR=0 (autobaud) needs rapid AT\r cadence to lock
+     * onto the host rate — the 2s polling loop below alone never syncs. */
+    cellular_uart_wake_and_lock_baud();
+
     /* Wait for modem to respond to AT (modem takes 5-15s after VBAT applied) */
     bool at_ok = false;
     for (int i = 0; i < 15; i++) {

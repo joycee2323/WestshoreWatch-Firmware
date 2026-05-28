@@ -1,6 +1,7 @@
 #pragma once
 
 #include "esp_err.h"
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -30,4 +31,21 @@ void cellular_uart_deinit(void);
  */
 esp_err_t cellular_uart_send_at(const char *cmd, char *resp,
                                 size_t resp_size, uint32_t timeout_ms);
+
+/** Change UART baud rate on the fly and flush stale RX data. */
+esp_err_t cellular_uart_set_baud(uint32_t baud);
+
+/**
+ * Wake the SIM7600 via autobaud burst, scan common bauds if needed, and
+ * leave the link at 115200.
+ *
+ * SIM7600 default IPR=0 (autobaud) requires several quick AT\\r cycles at
+ * the host baud to lock on.  This function emits that burst, and if no
+ * response is seen, scans other common bauds — when one responds, it
+ * issues AT+IPR=115200 + AT&W to persist the host baud in modem NVRAM.
+ *
+ * @return true if the modem responded (link is now at 115200), false if
+ *         no baud yielded a response.
+ */
+bool cellular_uart_wake_and_lock_baud(void);
 

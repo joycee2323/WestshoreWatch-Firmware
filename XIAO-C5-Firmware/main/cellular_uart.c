@@ -50,6 +50,114 @@ void cellular_uart_deinit(void)
     ESP_LOGI(TAG, "UART%d driver released for esp_modem handoff", CELL_UART_NUM);
 }
 
+esp_err_t cellular_uart_set_baud(uint32_t baud)
+{
+    esp_err_t err = uart_set_baudrate(CELL_UART_NUM, baud);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "uart_set_baudrate(%lu) failed: %s",
+                 (unsigned long)baud, esp_err_to_name(err));
+        return err;
+    }
+    uart_flush_input(CELL_UART_NUM);
+    return ESP_OK;
+}
+
+/* Format up to 16 bytes as space-separated hex for diagnostic logging. */
+static void format_hex_preview(char *out, size_t out_size,
+                                const char *buf, int n)
+{
+    int max = n > 16 ? 16 : n;
+    int pos = 0;
+    for (int i = 0; i < max && pos < (int)out_size - 4; i++) {
+        pos += snprintf(out + pos, out_size - pos, "%02x ",
+                        (unsigned char)buf[i]);
+    }
+    if (pos > 0) out[pos - 1] = '\0';
+    else out[0] = '\0';
+}
+
+/* Send "AT\r" and accumulate any RX bytes for up to read_ms.
+ * Returns total bytes received. */
+static int wake_probe(char *resp, size_t resp_size, uint32_t read_ms)
+{
+    uart_flush_input(CELL_UART_NUM);
+    uart_write_bytes(CELL_UART_NUM, "AT\r", 3);
+
+    resp[0] = '\0';
+    size_t total = 0;
+    TickType_t deadline = xTaskGetTickCount() + pdMS_TO_TICKS(read_ms);
+    while (xTaskGetTickCount() < deadline) {
+        int remaining_ms = (int)(deadline - xTaskGetTickCount()) *
+                           portTICK_PERIOD_MS;
+        if (remaining_ms <= 0) break;
+        uint8_t byte;
+        int got = uart_read_bytes(CELL_UART_NUM, &byte, 1,
+                                  pdMS_TO_TICKS(remaining_ms < 50 ? remaining_ms : 50));
+        if (got > 0 && total < resp_size - 1) {
+            resp[total++] = (char)byte;
+            resp[total] = '\0';
+        }
+    }
+    return (int)total;
+}
+
+bool cellular_uart_wake_and_lock_baud(void)
+{
+    char resp[128];
+    char hex[64];
+
+    /* Phase 1: rapid wake burst at 115200 — SIM7600 autobaud needs this
+     * cadence to lock onto the host rate. */
+    ESP_LOGI(TAG, "wake burst at 115200 baud (15 × AT @ 200ms)");
+    cellular_uart_set_baud(115200);
+    for (int i = 0; i < 15; i++) {
+        int n = wake_probe(resp, sizeof(resp), 300);
+        if (n > 0) {
+            format_hex_preview(hex, sizeof(hex), resp, n);
+            ESP_LOGI(TAG, "modem responded at 115200 (%d bytes ascii='%.*s' hex=[%s])",
+                     n, n > 60 ? 60 : n, resp, hex);
+            return true;
+        }
+        vTaskDelay(pdMS_TO_TICKS(200));
+    }
+    ESP_LOGW(TAG, "wake burst at 115200 got nothing — scanning other bauds");
+
+    /* Phase 2: baud scan fallback.  If the modem was previously locked
+     * to a non-default baud (e.g. by prior provisioning), find it and
+     * re-lock to 115200 via AT+IPR=115200 + AT&W. */
+    static const uint32_t bauds[] = { 9600, 57600, 38400, 19200, 460800 };
+    for (size_t b = 0; b < sizeof(bauds) / sizeof(bauds[0]); b++) {
+        uint32_t baud = bauds[b];
+        ESP_LOGI(TAG, "trying %lu baud...", (unsigned long)baud);
+        cellular_uart_set_baud(baud);
+        for (int i = 0; i < 5; i++) {
+            int n = wake_probe(resp, sizeof(resp), 300);
+            if (n > 0) {
+                format_hex_preview(hex, sizeof(hex), resp, n);
+                ESP_LOGI(TAG, "modem responded at %lu baud (%d bytes ascii='%.*s' hex=[%s]) — locking to 115200",
+                         (unsigned long)baud, n,
+                         n > 60 ? 60 : n, resp, hex);
+                /* Persist 115200 in modem NVRAM.  AT+IPR response is sent
+                 * at the OLD baud, then the modem switches.  We give it a
+                 * brief settle delay, swap UART, then AT&W at 115200. */
+                uart_flush_input(CELL_UART_NUM);
+                uart_write_bytes(CELL_UART_NUM, "AT+IPR=115200\r", 14);
+                vTaskDelay(pdMS_TO_TICKS(500));
+                cellular_uart_set_baud(115200);
+                vTaskDelay(pdMS_TO_TICKS(100));
+                uart_write_bytes(CELL_UART_NUM, "AT&W\r", 5);
+                vTaskDelay(pdMS_TO_TICKS(500));
+                uart_flush_input(CELL_UART_NUM);
+                return true;
+            }
+            vTaskDelay(pdMS_TO_TICKS(200));
+        }
+    }
+    ESP_LOGE(TAG, "ERROR — no response at any baud, check UART");
+    cellular_uart_set_baud(115200);
+    return false;
+}
+
 esp_err_t cellular_uart_send_at(const char *cmd, char *resp,
                                 size_t resp_size, uint32_t timeout_ms)
 {
