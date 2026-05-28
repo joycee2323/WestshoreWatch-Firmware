@@ -10,8 +10,8 @@ static const char *TAG = "CELL_UART";
 
 /* ── Pin assignments (XIAO ESP32-C5 header labels) ────────────────────────── */
 #define CELL_UART_NUM       UART_NUM_1
-#define CELL_UART_TX_GPIO   7       /* header D5 — C5 TX → modem RX (swapped to compensate for straight-through JST wiring) */
-#define CELL_UART_RX_GPIO   6       /* header D4 — modem TX → C5 RX (swapped to compensate for straight-through JST wiring) */
+#define CELL_UART_TX_GPIO   6       /* header D4 — C5 TX → modem RX (modem connector "T" pin, labeled from host perspective) */
+#define CELL_UART_RX_GPIO   7       /* header D5 — modem TX → C5 RX (modem connector "R" pin, labeled from host perspective) */
 #define CELL_UART_BAUD      115200
 
 #define CELL_UART_BUF_SIZE  2048

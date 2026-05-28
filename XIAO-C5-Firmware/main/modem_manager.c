@@ -25,8 +25,8 @@ static const char *TAG = "MODEM_MGR";
 #define RESP_BUF_SIZE            256
 
 /* ── esp_modem UART pins (must match cellular_uart) ───────────────────────── */
-#define CELL_UART_TX_GPIO   7
-#define CELL_UART_RX_GPIO   6
+#define CELL_UART_TX_GPIO   6
+#define CELL_UART_RX_GPIO   7
 
 /* ── State ────────────────────────────────────────────────────────────────── */
 static volatile modem_state_t s_state = MODEM_STATE_OFF;
