@@ -90,25 +90,20 @@ static bool at_phase(void)
     char resp[RESP_BUF_SIZE];
     TickType_t phase_start = xTaskGetTickCount();
 
-    /* Power on the modem */
     set_state(MODEM_STATE_BOOTING);
-    cellular_uart_pwrkey_pulse();
+    ESP_LOGI(TAG, "waiting for modem auto-boot (TEL0162 PWRKEY tied to GND)");
 
-    /* Wait for modem to respond to AT */
+    /* Wait for modem to respond to AT (modem takes 5-15s after VBAT applied) */
     bool at_ok = false;
-    for (int i = 0; i < 30; i++) {
-        vTaskDelay(pdMS_TO_TICKS(1000));
+    for (int i = 0; i < 15; i++) {
+        vTaskDelay(pdMS_TO_TICKS(2000));
         if (cellular_uart_send_at("AT", resp, sizeof(resp), AT_TIMEOUT_MS) == ESP_OK) {
             at_ok = true;
             break;
         }
-        if ((xTaskGetTickCount() - phase_start) * portTICK_PERIOD_MS > STATE_STUCK_TIMEOUT_MS) {
-            ESP_LOGE(TAG, "boot stuck > 5 min — hard reset");
-            return false;
-        }
     }
     if (!at_ok) {
-        ESP_LOGE(TAG, "modem not responding to AT after 30 attempts");
+        ESP_LOGE(TAG, "modem not responding after 30s — check 5V on TEL0162 Power IN");
         return false;
     }
     ESP_LOGI(TAG, "modem responding to AT");
@@ -146,7 +141,7 @@ static bool at_phase(void)
             return false;
         }
         if ((xTaskGetTickCount() - phase_start) * portTICK_PERIOD_MS > STATE_STUCK_TIMEOUT_MS) {
-            ESP_LOGE(TAG, "registration stuck > 5 min — hard reset");
+            ESP_LOGE(TAG, "registration stuck > 5 min — will attempt AT+CFUN=1,1");
             return false;
         }
         vTaskDelay(pdMS_TO_TICKS(2000));
@@ -225,11 +220,12 @@ static void modem_task(void *arg)
 
         if (!at_phase()) {
             set_state(MODEM_STATE_ERROR);
-            ESP_LOGE(TAG, "AT phase failed — will retry in 10s");
-            cellular_uart_pwrkey_pulse();
-            vTaskDelay(pdMS_TO_TICKS(3000));
-            cellular_uart_pwrkey_pulse();
-            vTaskDelay(pdMS_TO_TICKS(10000));
+            ESP_LOGE(TAG, "AT phase failed — sending AT+CFUN=1,1 reset");
+            char reset_resp[RESP_BUF_SIZE];
+            cellular_uart_send_at("AT+CFUN=1,1", reset_resp, sizeof(reset_resp), AT_TIMEOUT_MS);
+            // TODO: add MOSFET-based power-cycle if AT+CFUN=1,1 is insufficient
+            ESP_LOGW(TAG, "waiting 60s before retry...");
+            vTaskDelay(pdMS_TO_TICKS(60000));
             continue;
         }
 

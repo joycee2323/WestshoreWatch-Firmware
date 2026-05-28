@@ -1,6 +1,5 @@
 #include "cellular_uart.h"
 #include "driver/uart.h"
-#include "driver/gpio.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -14,7 +13,6 @@ static const char *TAG = "CELL_UART";
 #define CELL_UART_TX_GPIO   6       /* header D4 — C5 TX → modem RX */
 #define CELL_UART_RX_GPIO   7       /* header D5 — modem TX → C5 RX */
 #define CELL_UART_BAUD      115200
-#define CELL_PWRKEY_GPIO    11      /* header D6 — modem PWRKEY (active-low pulse) */
 
 #define CELL_UART_BUF_SIZE  2048
 #define AT_LINE_MAX         512
@@ -40,20 +38,9 @@ esp_err_t cellular_uart_init(void)
     uart_set_pin(CELL_UART_NUM, CELL_UART_TX_GPIO, CELL_UART_RX_GPIO,
                  UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 
-    /* PWRKEY GPIO — default HIGH (modem idles with PWRKEY released) */
-    gpio_config_t pwrkey_cfg = {
-        .pin_bit_mask = 1ULL << CELL_PWRKEY_GPIO,
-        .mode         = GPIO_MODE_OUTPUT,
-        .pull_up_en   = GPIO_PULLUP_DISABLE,
-        .pull_down_en = GPIO_PULLDOWN_DISABLE,
-        .intr_type    = GPIO_INTR_DISABLE,
-    };
-    gpio_config(&pwrkey_cfg);
-    gpio_set_level(CELL_PWRKEY_GPIO, 1);
-
-    ESP_LOGI(TAG, "init: UART%d TX=GPIO%d RX=GPIO%d %d baud, PWRKEY=GPIO%d",
+    ESP_LOGI(TAG, "init: UART%d TX=GPIO%d RX=GPIO%d %d baud",
              CELL_UART_NUM, CELL_UART_TX_GPIO, CELL_UART_RX_GPIO,
-             CELL_UART_BAUD, CELL_PWRKEY_GPIO);
+             CELL_UART_BAUD);
     return ESP_OK;
 }
 
@@ -61,14 +48,6 @@ void cellular_uart_deinit(void)
 {
     uart_driver_delete(CELL_UART_NUM);
     ESP_LOGI(TAG, "UART%d driver released for esp_modem handoff", CELL_UART_NUM);
-}
-
-void cellular_uart_pwrkey_pulse(void)
-{
-    ESP_LOGI(TAG, "PWRKEY pulse: LOW 100ms");
-    gpio_set_level(CELL_PWRKEY_GPIO, 0);
-    vTaskDelay(pdMS_TO_TICKS(100));
-    gpio_set_level(CELL_PWRKEY_GPIO, 1);
 }
 
 esp_err_t cellular_uart_send_at(const char *cmd, char *resp,

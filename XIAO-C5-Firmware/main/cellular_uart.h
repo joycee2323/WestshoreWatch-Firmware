@@ -31,5 +31,3 @@ void cellular_uart_deinit(void);
 esp_err_t cellular_uart_send_at(const char *cmd, char *resp,
                                 size_t resp_size, uint32_t timeout_ms);
 
-/** Pulse PWRKEY low for 100 ms to power-toggle the modem (GPIO11, header D6). */
-void cellular_uart_pwrkey_pulse(void);
