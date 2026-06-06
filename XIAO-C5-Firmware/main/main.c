@@ -160,6 +160,14 @@ void app_main(void)
     /* Deliberately NOT calling ble_relay_start() — no BLE relay TX */
     ESP_LOGI(TAG, "boot: BLE scanner active, relay TX disabled");
 
+    /* GNSS reader — init the position cache BEFORE the modem task starts.
+     * modem_manager polls AT+CGPSINFO during the pre-PPP AT phase
+     * (time-boxed) and feeds responses here; off the upload critical path. */
+    ESP_LOGI(TAG, "boot: starting gnss_reader");
+    err = gnss_reader_start();
+    if (err != ESP_OK)
+        ESP_LOGW(TAG, "gnss_reader_start failed: %s", esp_err_to_name(err));
+
     /* Cellular modem — starts the SIM7600 state machine in a background task */
     ESP_LOGI(TAG, "boot: starting modem_manager");
     err = modem_manager_start();
@@ -175,12 +183,6 @@ void app_main(void)
     err = cellular_uploader_start(detect_queue);
     if (err != ESP_OK)
         ESP_LOGW(TAG, "cellular_uploader_start failed: %s", esp_err_to_name(err));
-
-    /* GNSS reader — polls modem for position every 60s */
-    ESP_LOGI(TAG, "boot: starting gnss_reader");
-    err = gnss_reader_start();
-    if (err != ESP_OK)
-        ESP_LOGW(TAG, "gnss_reader_start failed: %s", esp_err_to_name(err));
 
     ESP_LOGI(TAG, "System ready — Cellular X1");
     ESP_LOGI(TAG, "  Wi-Fi scanner:  ch %d-%d, %dms dwell",

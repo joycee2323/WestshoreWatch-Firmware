@@ -14,6 +14,7 @@ idf_component_register(
         "status_led.c"
         "cellular_uart.c"
         "modem_manager.c"
+        "modem_data_resume.cpp"   # C++ shim: esp_modem RESUME_DATA_MODE (not in C API)
         "detection_queue.c"
         "cellular_uploader.c"
         "gnss_reader.c"

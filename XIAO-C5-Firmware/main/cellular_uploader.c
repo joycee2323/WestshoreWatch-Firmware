@@ -117,13 +117,20 @@ static int build_payload(odid_detection_t *batch, int count, char *buf, size_t s
     }
     n += snprintf(buf + n, sz - n, "]");
 
-    /* Attach node position if GNSS has a fix */
+    /* Attach node position if GNSS has a fix.
+     * hdop is OMITTED when unknown (0) rather than sent as 0 — AT+CGPSINFO
+     * carries no HDOP, and a literal 0 would read as "perfect accuracy" if
+     * a backend ever persists this field. Absent field = unknown. A real
+     * HDOP is always > 0, so this only emits hdop when genuinely measured. */
     gnss_position_t pos;
     if (gnss_reader_get_position(&pos)) {
         n += snprintf(buf + n, sz - n,
-            ",\"node_position\":{\"lat\":%.7f,\"lon\":%.7f,"
-            "\"alt_m\":%.1f,\"hdop\":%.1f}",
-            pos.lat, pos.lon, pos.alt_m, pos.hdop);
+            ",\"node_position\":{\"lat\":%.7f,\"lon\":%.7f,\"alt_m\":%.1f",
+            pos.lat, pos.lon, pos.alt_m);
+        if (pos.hdop > 0.0f) {
+            n += snprintf(buf + n, sz - n, ",\"hdop\":%.1f", pos.hdop);
+        }
+        n += snprintf(buf + n, sz - n, "}");
     }
 
     n += snprintf(buf + n, sz - n, "}");
