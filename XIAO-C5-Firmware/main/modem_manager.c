@@ -23,6 +23,10 @@ static const char *TAG = "MODEM_MGR";
 #define PPP_CONNECT_TIMEOUT_MS   (30 * 1000)
 #define GNSS_POLL_INTERVAL_MS    (5 * 1000)   /* CGPSINFO poll cadence over CMUX until first fix */
 #define RESP_BUF_SIZE            256
+/* CMUX stabilization Step 1: run the UART faster than 115200 so CMUX has
+ * headroom to frame PPP + AT on one wire without Rx Breaks (UART starvation
+ * is the suspected cause of the CMUX state-machine restarts). */
+#define CMUX_UART_BAUD           460800
 
 /* ── esp_modem UART pins (must match cellular_uart) ───────────────────────── */
 /* Must match cellular_uart.c. Verified XIAO ESP32-C5 mapping from the
@@ -174,6 +178,31 @@ static bool ppp_phase(void)
 {
     set_state(MODEM_STATE_PPP_CONNECTING);
 
+    /* Step 1: raise the link to CMUX_UART_BAUD before the esp_modem handoff.
+     * AT+IPR=<rate> sets the SESSION baud only — it is NOT persisted to
+     * NVRAM unless followed by AT&W, which we deliberately do NOT send. So a
+     * power-cycle reverts the modem to its NVRAM-locked 115200, and
+     * cellular_uart_wake_and_lock_baud() re-establishes 115200 each boot
+     * before we raise it again here. The "OK" comes back at the old (115200)
+     * rate, then the modem switches, so we send this while still at 115200,
+     * give it a moment to apply, then hand the UART to esp_modem at the new
+     * rate. If the modem rejects it, we fall back to 115200 for CMUX. */
+    int cmux_baud = 115200;
+    {
+        char ipr_resp[RESP_BUF_SIZE];
+        char ipr_cmd[24];
+        snprintf(ipr_cmd, sizeof(ipr_cmd), "AT+IPR=%d", CMUX_UART_BAUD);
+        if (cellular_uart_send_at(ipr_cmd, ipr_resp, sizeof(ipr_resp),
+                                  AT_TIMEOUT_MS) == ESP_OK) {
+            cmux_baud = CMUX_UART_BAUD;
+            vTaskDelay(pdMS_TO_TICKS(300));  /* let the modem apply the new UART rate */
+            ESP_LOGI(TAG, "UART raised to %d for CMUX headroom (session only)", cmux_baud);
+        } else {
+            ESP_LOGW(TAG, "AT+IPR=%d rejected — staying at 115200 for CMUX",
+                     CMUX_UART_BAUD);
+        }
+    }
+
     /* Release our UART driver so esp_modem can take over */
     cellular_uart_deinit();
 
@@ -195,7 +224,7 @@ static bool ppp_phase(void)
     dte_config.uart_config.port_num    = UART_NUM_1;
     dte_config.uart_config.tx_io_num   = CELL_UART_TX_GPIO;
     dte_config.uart_config.rx_io_num   = CELL_UART_RX_GPIO;
-    dte_config.uart_config.baud_rate   = 115200;
+    dte_config.uart_config.baud_rate   = cmux_baud;   /* match the modem's session rate (Step 1) */
 
     esp_modem_dce_config_t dce_config = ESP_MODEM_DCE_DEFAULT_CONFIG(apn);
     s_dce = esp_modem_new_dev(ESP_MODEM_DCE_SIM7600, &dte_config,
