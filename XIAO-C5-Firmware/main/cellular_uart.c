@@ -10,8 +10,15 @@ static const char *TAG = "CELL_UART";
 
 /* ── Pin assignments (XIAO ESP32-C5 header labels) ────────────────────────── */
 #define CELL_UART_NUM       UART_NUM_1
-#define CELL_UART_TX_GPIO   6       /* header D4 — C5 TX → modem RX (modem connector "T" pin, labeled from host perspective) */
-#define CELL_UART_RX_GPIO   7       /* header D5 — modem TX → C5 RX (modem connector "R" pin, labeled from host perspective) */
+/* XIAO ESP32-C5 header→GPIO map verified against the official Seeed
+ * pins_arduino.h (symbol dump + physical pin-toggle test): D4=GPIO23,
+ * D5=GPIO24. The earlier 6/7 values were a wrong guess (D4/D5 are not
+ * sequential with the silicon GPIOs) — do NOT trust forum pinout tables.
+ * GPIO23/24 are the XIAO's default I2C SDA/SCL pads, general-purpose and
+ * UART-capable via the GPIO matrix; neither is a C5 strapping pin
+ * (strapping = GPIO2/7/27/28). */
+#define CELL_UART_TX_GPIO   23      /* header D4 — C5 TX → modem RX (modem connector "R" pin) */
+#define CELL_UART_RX_GPIO   24      /* header D5 — modem TX (modem connector "T" pin) → C5 RX */
 #define CELL_UART_BAUD      115200
 
 #define CELL_UART_BUF_SIZE  2048

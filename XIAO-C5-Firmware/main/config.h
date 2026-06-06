@@ -40,6 +40,9 @@
 // XIAO ESP32-C5: header D6 = GPIO11 (UART TX), D7 = GPIO12 (UART RX)
 // per Seeed's pin multiplex table.  Secondary UART on D8/D9 = GPIO8/9
 // (unused, kept for parity with baseline).
+// NOTE: the cellular modem UART (UART1) is NOT defined here — its pins
+// live in cellular_uart.c / modem_manager.c: D4=GPIO23 (TX), D5=GPIO24
+// (RX), verified against the official XIAO ESP32-C5 pins_arduino.h.
 #define WSD_UART_PRIMARY_TX         11
 #define WSD_UART_PRIMARY_RX         12
 #define WSD_UART_SECONDARY_TX       8

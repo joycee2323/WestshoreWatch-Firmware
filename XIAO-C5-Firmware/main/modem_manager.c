@@ -21,12 +21,16 @@ static const char *TAG = "MODEM_MGR";
 #define AT_RETRY_DELAY_MS        2000
 #define AT_TIMEOUT_MS            5000
 #define PPP_CONNECT_TIMEOUT_MS   (30 * 1000)
-#define GNSS_FIX_ATTEMPTS        24      /* 5s × 24 = 2 min max GNSS wait */
+#define GNSS_POLL_INTERVAL_MS    (5 * 1000)   /* CGPSINFO poll cadence over CMUX until first fix */
 #define RESP_BUF_SIZE            256
 
 /* ── esp_modem UART pins (must match cellular_uart) ───────────────────────── */
-#define CELL_UART_TX_GPIO   6
-#define CELL_UART_RX_GPIO   7
+/* Must match cellular_uart.c. Verified XIAO ESP32-C5 mapping from the
+ * official pins_arduino.h: D4=GPIO23 (C5 TX → modem R), D5=GPIO24
+ * (modem T → C5 RX). esp_modem reuses these same pins after the AT-phase
+ * handoff (cellular_uart_deinit → esp_modem_new_dev). */
+#define CELL_UART_TX_GPIO   23
+#define CELL_UART_RX_GPIO   24
 
 /* ── State ────────────────────────────────────────────────────────────────── */
 static volatile modem_state_t s_state = MODEM_STATE_OFF;
@@ -152,11 +156,14 @@ static bool at_phase(void)
         vTaskDelay(pdMS_TO_TICKS(2000));
     }
 
-    /* Enable GNSS and acquire fix BEFORE PPP handoff.
-     * The node is stationary so one fix is cached permanently.
-     * This runs on cellular_uart which we still own — no mode-switching. */
-    cellular_uart_send_at("AT+CGNSPWR=1", resp, sizeof(resp), AT_TIMEOUT_MS);
-    gnss_reader_acquire_fix(GNSS_FIX_ATTEMPTS);
+    /* Power on GNSS now (single non-blocking command) so the receiver
+     * warms up during PPP negotiation. SIM7600 dialect: AT+CGPS=1 starts
+     * a standalone GPS session (NOT SIM800's AT+CGNSPWR). We do NOT block
+     * waiting for a fix here — that kept detection→upload off the air for
+     * up to 2 min. The fix is read opportunistically post-PPP over CMUX
+     * (see modem_task). If GPS is already running, this returns ERROR,
+     * which is harmless. */
+    cellular_uart_send_at("AT+CGPS=1", resp, sizeof(resp), AT_TIMEOUT_MS);
 
     set_state(MODEM_STATE_REGISTERED);
     return true;
@@ -198,9 +205,12 @@ static bool ppp_phase(void)
         return false;
     }
 
-    esp_err_t err = esp_modem_set_mode(s_dce, ESP_MODEM_MODE_DATA);
+    /* CMUX (not plain DATA): multiplexes the PPP data channel and an AT
+     * command channel over the one UART, so we can poll GNSS (AT+CGPSINFO)
+     * via esp_modem_at() WITHOUT dropping the upload link. */
+    esp_err_t err = esp_modem_set_mode(s_dce, ESP_MODEM_MODE_CMUX);
     if (err != ESP_OK) {
-        ESP_LOGE(TAG, "set_mode(DATA) failed: %s", esp_err_to_name(err));
+        ESP_LOGE(TAG, "set_mode(CMUX) failed: %s", esp_err_to_name(err));
         return false;
     }
 
@@ -250,8 +260,20 @@ static void modem_task(void *arg)
             continue;
         }
 
+        /* Connected. Opportunistically read GNSS over the CMUX command
+         * channel until we get one fix (node is stationary → cache forever,
+         * then stop polling). This never gates or interrupts uploads: the
+         * uploader task is already POSTing over the PPP channel, and it
+         * attaches node_position only once a fix exists. */
         while (s_ppp_connected) {
-            vTaskDelay(pdMS_TO_TICKS(5000));
+            if (!gnss_reader_have_fix() && s_dce) {
+                char gnss_resp[RESP_BUF_SIZE];
+                if (esp_modem_at(s_dce, "AT+CGPSINFO", gnss_resp,
+                                 AT_TIMEOUT_MS) == ESP_OK) {
+                    gnss_reader_submit_response(gnss_resp);
+                }
+            }
+            vTaskDelay(pdMS_TO_TICKS(GNSS_POLL_INTERVAL_MS));
         }
 
         ESP_LOGW(TAG, "PPP link lost — restarting modem sequence");

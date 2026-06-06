@@ -6,30 +6,42 @@
 /**
  * GNSS position reader.
  *
- * Fix is acquired ONCE during the pre-PPP AT command phase (before
- * the UART is handed to esp_modem).  The node is stationary so the
- * cached position is used for all subsequent uploads.  This avoids
- * switching the modem out of PPP data mode for AT commands.
+ * Position is read OPPORTUNISTICALLY after PPP is up, over the CMUX
+ * command channel (PPP data and AT commands run concurrently, so GNSS
+ * never blocks or interrupts uploads).  modem_manager polls
+ * AT+CGPSINFO via esp_modem_at and feeds the raw response to
+ * gnss_reader_submit_response().  The node is stationary, so once a fix
+ * is parsed it is cached forever and polling stops.
+ *
+ * GNSS is NEVER on the detection→upload critical path: uploads start as
+ * soon as PPP connects and attach node_position only once a fix exists.
  */
 typedef struct {
     double  lat;
     double  lon;
     float   alt_m;          /* metres MSL */
-    float   hdop;
+    float   hdop;           /* 0 = unknown (AT+CGPSINFO carries no HDOP) */
     bool    valid;          /* true once first fix acquired */
 } gnss_position_t;
 
-/** Initialize state.  Call before gnss_reader_acquire_fix(). */
+/** Initialize state.  Call before the modem manager starts polling. */
 esp_err_t gnss_reader_start(void);
 
 /**
- * Acquire a GNSS fix via AT+CGPSINF, blocking.
+ * Parse one AT+CGPSINFO response and, on a valid fix, cache it.
  *
- * Must be called while cellular_uart is still active (pre-PPP).
- * Polls every 5s up to max_attempts times.  Best-effort: if no fix
- * is acquired, uploads proceed without node_position.
+ * SIM7600 format:
+ *   +CGPSINFO: <lat>,<N/S>,<lon>,<E/W>,<date>,<utc>,<alt>,<speed>,<course>
+ * (lat/lon are NMEA ddmm.mmmm / dddmm.mmmm; a no-fix line is all empty
+ * fields).  Safe to call repeatedly with junk — it ignores anything
+ * that isn't a valid fix.
+ *
+ * @return true if a valid fix was parsed and cached, false otherwise.
  */
-void gnss_reader_acquire_fix(int max_attempts);
+bool gnss_reader_submit_response(const char *resp);
+
+/** @return true once a valid fix has been cached. */
+bool gnss_reader_have_fix(void);
 
 /**
  * Copy the cached position.

@@ -25,14 +25,19 @@ attached to every detection upload as `node_position`.
 ### Pin Assignments (XIAO header → ESP32-C5 GPIO)
 | Header | GPIO | Function |
 |--------|------|----------|
-| D4 | GPIO6 | Modem UART TX (C5 → modem RX) |
-| D5 | GPIO7 | Modem UART RX (modem TX → C5) |
+| D4 | GPIO23 | Modem UART TX (C5 → modem RX "R") |
+| D5 | GPIO24 | Modem UART RX (modem TX "T" → C5) |
 | D6 | GPIO11 | Modem PWRKEY (active-low pulse) |
 | D7 | GPIO12 | Status LED red element |
 | D8 | GPIO8 | Status LED green element |
 
-**IMPORTANT:** XIAO Dx header labels ≠ GPIO numbers. D4 = GPIO6,
-D5 = GPIO7, D6 = GPIO11, D7 = GPIO12, D8 = GPIO8.
+**IMPORTANT:** XIAO Dx header labels ≠ GPIO numbers. D4 = GPIO23,
+D5 = GPIO24, D6 = GPIO11, D7 = GPIO12, D8 = GPIO8. These are verified
+against the official Seeed XIAO ESP32-C5 `pins_arduino.h` (symbol dump +
+physical pin-toggle test) — NOT forum pinout tables. D4/D5 are the
+board's default I2C SDA/SCL pads; UART works on them via the GPIO
+matrix. The earlier "D4=GPIO6 / D5=GPIO7" was a wrong guess that left
+the modem UART listening on an unconnected pin (zero RX bytes).
 
 ### Power
 Battery → MH-CD42 → latching switch → 5V rail → C5 5V + modem VCC.
