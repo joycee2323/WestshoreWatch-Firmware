@@ -23,13 +23,18 @@ static const char *TAG = "CELL_UP";
 #define RETRY_COUNT             3
 #define RETRY_BASE_MS           1000
 
-/* Idle heartbeat keeps the node 'online' when no drones are in range.
- * The backend marks a node offline after node_type-keyed inactivity: x1
- * nodes (this one) get 120 s (server.js offline cron). 30 s gives 4×
- * headroom — the same safety ratio the Sentinel runs (3600 s heartbeat vs
- * its 14400 s sentinel threshold). Same /api/nodes/heartbeat endpoint and
- * X-Node-API-Key auth the Sentinel uses. */
-#define HEARTBEAT_INTERVAL_MS   30000
+/* Idle heartbeat keeps the node 'online' when no drones are in range AND
+ * carries the node's live GPS so a MOBILE node's map position stays current
+ * between detections. Cadence is matched to the GNSS re-poll interval
+ * (~15 s, modem_manager GNSS_REPOLL_EVERY) so heartbeat-driven position
+ * granularity isn't bottlenecked below the rate the cache actually refreshes
+ * — every fresh fix gets reported on the next beat.
+ *
+ * The backend marks an x1 node offline after 120 s of inactivity (server.js
+ * offline cron), so 15 s keeps 8× headroom — comfortably safe. The extra
+ * traffic is negligible: a ~67-byte POST every 15 s. Same
+ * /api/nodes/heartbeat endpoint and X-Node-API-Key auth the Sentinel uses. */
+#define HEARTBEAT_INTERVAL_MS   15000
 
 static QueueHandle_t   s_queue;
 static volatile TickType_t s_last_success;
@@ -209,12 +214,24 @@ static bool post_detections(const char *json, int json_len)
 }
 
 /* ── Heartbeat (idle keep-alive) ──────────────────────────────────────────────
- * Matches the Sentinel exactly: POST /api/nodes/heartbeat with X-Node-API-Key
- * auth and a {connection_type, firmware_version} body (the fields the backend
- * heartbeat handler consumes). Routed through modem_http_post() so it shares
- * the native-AT-HTTP transport (and the HTTPDATA path). A successful beat
- * refreshes the node's last_seen/online state and keeps the status LED green
- * + the upload watchdog fed while idle. */
+ * POST /api/nodes/heartbeat with X-Node-API-Key auth. Body carries
+ * {connection_type, firmware_version} plus the node's live GPS as top-level
+ * lat/lon — this is a MOBILE node, so its map position must stay current
+ * during quiet (no-detection) periods via the heartbeat, not just on
+ * detections. lat/lon are the exact fields the backend heartbeat handler
+ * consumes (it updates nodes.last_lat/last_lon for non-sentinel nodes);
+ * absent position leaves the stored value untouched (backend COALESCE).
+ *
+ * The position comes from gnss_reader_get_position() — a pure read of the
+ * cache the modem monitor loop re-polls every ~15s under the AT mutex. The
+ * read touches no UART/AT channel itself, so no new locking is needed; the
+ * POST below still serializes through modem_http_post()'s UART lock as
+ * before. On no fix we omit lat/lon (gnss_reader keeps last-known-good once
+ * it has one, so a momentary dropout still sends the last position).
+ *
+ * Routed through modem_http_post() so it shares the native-AT-HTTP transport.
+ * A successful beat refreshes the node's last_seen/online state and keeps the
+ * status LED green + the upload watchdog fed while idle. */
 static bool post_heartbeat(void)
 {
     char url[URL_BUF_SIZE];
@@ -223,10 +240,20 @@ static bool post_heartbeat(void)
     char auth[160];
     snprintf(auth, sizeof(auth), "X-Node-API-Key: %s", s_api_key);
 
-    char body[160];
-    int len = snprintf(body, sizeof(body),
-        "{\"connection_type\":\"cellular\",\"firmware_version\":\"%s\"}",
-        s_fw_version);
+    char body[224];
+    gnss_position_t pos;
+    int len;
+    if (gnss_reader_get_position(&pos)) {
+        /* 7 dp matches the detection path's node_position precision. */
+        len = snprintf(body, sizeof(body),
+            "{\"connection_type\":\"cellular\",\"firmware_version\":\"%s\","
+            "\"lat\":%.7f,\"lon\":%.7f}",
+            s_fw_version, pos.lat, pos.lon);
+    } else {
+        len = snprintf(body, sizeof(body),
+            "{\"connection_type\":\"cellular\",\"firmware_version\":\"%s\"}",
+            s_fw_version);
+    }
 
     modem_http_result_t r;
     esp_err_t err = modem_http_post(url, auth, body, len, &r);
@@ -302,7 +329,7 @@ static void uploader_task(void *arg)
             for (int i = 0; i < count; i++) {
                 detection_queue_push(&batch[i]);
             }
-            status_led_set(STATUS_LED_BLINK_YELLOW);
+            status_led_set(STATUS_LED_WARMING);   /* slow-blink yellow: offline buffering */
             continue;
         }
 

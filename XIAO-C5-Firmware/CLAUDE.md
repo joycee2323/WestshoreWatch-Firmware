@@ -61,24 +61,27 @@ Always-on PPP mode (no PSM, no light sleep).
 - Modem GNSS: external u.FL helix (Bingfu via SMA bulkhead)
 
 ## Status LED States
-| State | Color | Meaning |
-|-------|-------|---------|
-| Off | — | System off / pre-init |
-| Solid green | Green | Healthy: online, recent upload |
-| Solid yellow | R+G | Warming up: boot / registering |
-| Solid red | Red | Error: data session down / HW fault |
-| Blink yellow 1Hz | R+G | Offline, buffering detections |
-| Blink red 1Hz | Red | Degraded: online but detection POSTs failing |
+RED/YELLOW two-color LED — **there is no green element**. One element lit at a
+time (driving both makes red dominate); blink rate distinguishes the
+look-alike colors.
 
-**Wiring note:** the bi-color LED's leads are reversed vs the D7=red /
-D8=green silk — GPIO8 physically drives RED, GPIO12 GREEN (verified on
-hardware; boot commands yellow and shows yellow, but commanding green lit
-red). status_led.c's pin `#define`s reflect the ACTUAL element each GPIO
-lights. Common cathode (boot-yellow rules out common-anode).
+| State | Element | Meaning |
+|-------|---------|---------|
+| Off | — | System off / pre-init |
+| Solid yellow | Yellow | Healthy: data session up, detections + heartbeats OK |
+| Slow-blink yellow (~0.8 Hz) | Yellow | Warming up (boot/registering) or offline buffering |
+| Fast-blink red (~3.3 Hz) | Red | Degraded: online + heartbeating but detection POSTs failing |
+| Solid red | Red | Data session down / hardware fault |
+
+**Wiring note:** GPIO8 (header D8) drives RED, GPIO12 (header D7) drives
+YELLOW — verified on hardware. Common cathode, active HIGH. No green lead
+exists; an earlier "green" assumption was wrong (commanding green lit the
+yellow element). Red and yellow look similar, so the blink pattern — not the
+hue — is what makes a fault unmistakable from healthy at a glance.
 
 ## Key Source Files (Cellular-Specific)
-- `status_led.c/.h` — bi-color LED driver (red=GPIO8, green=GPIO12; leads
-  swapped vs silk)
+- `status_led.c/.h` — red/yellow LED driver (red=GPIO8, yellow=GPIO12;
+  one element at a time + blink rate, no green)
 - `cellular_uart.c/.h` — UART1 AT engine + recursive AT-channel mutex
   (lock/unlock, send_at, send_expect, write_raw, collect)
 - `modem_manager.c/.h` — SIM7600 state machine: wake/SIM/registration →

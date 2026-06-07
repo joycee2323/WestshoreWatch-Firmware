@@ -107,6 +107,6 @@ esp_err_t gnss_reader_start(void)
 {
     memset(&s_position, 0, sizeof(s_position));
     s_valid = false;
-    ESP_LOGI(TAG, "GNSS reader initialized (time-boxed pre-PPP CGPSINFO)");
+    ESP_LOGI(TAG, "GNSS reader initialized (CGPSINFO: pre-net fix + continuous re-poll)");
     return ESP_OK;
 }

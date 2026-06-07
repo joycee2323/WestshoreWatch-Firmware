@@ -84,7 +84,7 @@ void app_main(void)
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "boot: status_led_init failed: %s", esp_err_to_name(err));
     }
-    status_led_set(STATUS_LED_YELLOW);
+    status_led_set(STATUS_LED_WARMING);   /* slow-blink yellow: booting */
 
     /* Load config — falls back to defaults on first boot */
     wsd_config_load(&g_config);
@@ -113,7 +113,7 @@ void app_main(void)
 
     if (!raw_queue || !detect_queue) {
         ESP_LOGE(TAG, "Queue creation failed — halting");
-        status_led_set(STATUS_LED_RED);
+        status_led_set(STATUS_LED_FAULT);   /* solid red: hardware fault */
         while (true) vTaskDelay(pdMS_TO_TICKS(1000));
     }
 
@@ -137,7 +137,7 @@ void app_main(void)
     err = wifi_scanner_start(raw_queue);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Wi-Fi scanner failed: %d — will retry then restart", err);
-        status_led_set(STATUS_LED_RED);
+        status_led_set(STATUS_LED_FAULT);   /* solid red: hardware fault */
         for (int retry = 0; retry < 3; retry++) {
             vTaskDelay(pdMS_TO_TICKS(2000));
             err = wifi_scanner_start(raw_queue);
@@ -237,9 +237,9 @@ void app_main(void)
         }
 
         /* LED recency (only while the cellular data session is up):
-         *   blink red  — degraded: detections attempted recently but failing
-         *   blink yellow — no successful upload (detection OR heartbeat) in 2 min
-         *   green      — healthy */
+         *   fast-blink red    — degraded: detections attempted recently but failing
+         *   slow-blink yellow — no successful upload (detection OR heartbeat) in 2 min
+         *   solid yellow      — healthy */
         if (modem_manager_is_connected()) {
             TickType_t now = xTaskGetTickCount();
             TickType_t det_try = cellular_uploader_last_det_attempt();
@@ -252,15 +252,15 @@ void app_main(void)
                  (now - det_ok) * portTICK_PERIOD_MS > DET_SUCCESS_STALE_MS);
 
             if (det_failing) {
-                status_led_set(STATUS_LED_BLINK_RED);
+                status_led_set(STATUS_LED_DEGRADED);    /* fast-blink red */
             } else {
                 TickType_t last_ok = cellular_uploader_last_success();
                 if (last_ok > 0) {
                     uint32_t since_upload_ms = (now - last_ok) * portTICK_PERIOD_MS;
                     if (since_upload_ms > 2 * 60 * 1000) {
-                        status_led_set(STATUS_LED_BLINK_YELLOW);
+                        status_led_set(STATUS_LED_WARMING);   /* slow-blink yellow */
                     } else {
-                        status_led_set(STATUS_LED_GREEN);
+                        status_led_set(STATUS_LED_HEALTHY);   /* solid yellow */
                     }
                 }
             }

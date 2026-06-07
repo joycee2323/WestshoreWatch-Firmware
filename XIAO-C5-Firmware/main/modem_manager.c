@@ -21,16 +21,20 @@ static const char *TAG = "MODEM_MGR";
 #define RESP_BUF_SIZE            256
 
 /* Pre-net GPS is best-effort and time-boxed so it never delays bring-up:
- * power GPS, try briefly for a fix, then proceed regardless. A stationary
- * node only needs one fix; the monitor loop keeps polling afterward until it
- * lands one, so a cold first boot that gets nothing here is fine. */
+ * power GPS, try briefly for a fix, then proceed regardless. A cold first
+ * boot that gets nothing here is fine — the monitor loop keeps polling until
+ * it lands one, then re-polls on a cadence (this is a MOBILE node, so its
+ * position must keep tracking movement, not freeze at the boot fix). */
 #define GNSS_PRENET_ATTEMPTS     5       /* ~5 s max */
 #define GNSS_PRENET_INTERVAL_MS  1000
 
 /* Monitor loop: poll cadence + how often to run the heavier health check
- * (NETOPEN? + registration).  GPS is polled every tick until a fix lands. */
+ * (NETOPEN? + registration).  GPS is polled every tick until the first fix,
+ * then re-polled every GNSS_REPOLL_EVERY ticks so a mobile node's reported
+ * position keeps up with where it actually is. */
 #define MONITOR_POLL_MS          5000
 #define HEALTH_CHECK_EVERY       3       /* ~15 s between health checks */
+#define GNSS_REPOLL_EVERY        3       /* re-poll GPS every ~15 s after first fix */
 
 /* ── State ────────────────────────────────────────────────────────────────── */
 static volatile modem_state_t s_state  = MODEM_STATE_OFF;
@@ -47,10 +51,10 @@ static void set_state(modem_state_t new_state)
     s_state = new_state;
 
     switch (new_state) {
-    case MODEM_STATE_ONLINE: status_led_set(STATUS_LED_GREEN);  break;
-    case MODEM_STATE_ERROR:  status_led_set(STATUS_LED_RED);    break;
-    case MODEM_STATE_OFF:    status_led_set(STATUS_LED_OFF);    break;
-    default:                 status_led_set(STATUS_LED_YELLOW); break;
+    case MODEM_STATE_ONLINE: status_led_set(STATUS_LED_HEALTHY); break;  /* solid yellow */
+    case MODEM_STATE_ERROR:  status_led_set(STATUS_LED_FAULT);   break;  /* solid red    */
+    case MODEM_STATE_OFF:    status_led_set(STATUS_LED_OFF);     break;
+    default:                 status_led_set(STATUS_LED_WARMING); break;  /* slow-blink yellow */
     }
 }
 
@@ -286,13 +290,25 @@ static void modem_task(void *arg)
         set_state(MODEM_STATE_ONLINE);
         ESP_LOGI(TAG, "cellular data session UP — native AT HTTP ready");
 
-        /* Monitor loop: keep polling GPS until a fix lands, and periodically
-         * verify the data session + registration are still healthy.  All of
-         * these are AT commands serialized against HTTP POSTs by the UART
-         * mutex, so they queue cleanly rather than colliding. */
+        /* Monitor loop: re-poll GPS on a cadence so this MOBILE node's
+         * reported position tracks where it actually is (not just the boot
+         * fix), and periodically verify the data session + registration are
+         * still healthy.  All of these are AT commands serialized against
+         * HTTP POSTs by the UART mutex, so they queue cleanly rather than
+         * colliding. */
         int hc = 0;
+        int gc = 0;
         while (s_net_up) {
-            if (!gnss_reader_have_fix()) {
+            /* Before the first fix, poll every tick to acquire one fast.
+             * After that, re-poll every GNSS_REPOLL_EVERY ticks (~15 s) so the
+             * cached node_position attached to detection uploads keeps up with
+             * movement, without hammering the AT channel. gnss_poll_once()
+             * takes the UART mutex, so it never interleaves with an HTTP POST.
+             * On a momentary no-fix the reader keeps the last-known-good fix
+             * (it only overwrites on a valid parse), so a brief GPS dropout
+             * doesn't blank the position. */
+            if (!gnss_reader_have_fix() || ++gc >= GNSS_REPOLL_EVERY) {
+                gc = 0;
                 gnss_poll_once();
             }
             if (++hc >= HEALTH_CHECK_EVERY) {

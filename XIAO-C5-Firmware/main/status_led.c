@@ -5,36 +5,43 @@
 
 static const char *TAG = "STATUS_LED";
 
-/* The LED's leads are reversed vs the D7=red / D8=green silk. Verified on
- * hardware: at boot the firmware commands YELLOW (both pins HIGH) and the LED
- * shows yellow (both elements lit), but commanding GREEN (green pin HIGH, red
- * pin LOW) lit RED — so GPIO8 physically drives the RED element and GPIO12 the
- * GREEN element. (Boot-yellow rules out a common-anode part, which would read
- * dark with both pins HIGH.) The assignments below name the ACTUAL element. */
-#define LED_RED_GPIO    8       /* header D8 — physically the RED element   */
-#define LED_GREEN_GPIO  12      /* header D7 — physically the GREEN element */
+/* RED/YELLOW two-color LED — there is NO green element (red, yellow, black
+ * common-cathode leads; no green wire). Common cathode, active HIGH. Verified
+ * on hardware: driving GPIO8 lights RED, driving GPIO12 lights YELLOW. Driving
+ * BOTH together makes red dominate (no clean blend), so every state drives
+ * exactly one element (active HIGH, the other explicitly LOW) and blink rate
+ * separates the look-alike colors. */
+#define LED_RED_GPIO     8      /* header D8 — RED element    */
+#define LED_YELLOW_GPIO  12     /* header D7 — YELLOW element */
+
+/* Blink cadences: fast = urgent (degraded/red), slow = transient (warming/
+ * offline yellow). Distinct enough to read at a glance from across a room. */
+#define BLINK_FAST_US   150000  /* 150 ms  → ~3.3 Hz */
+#define BLINK_SLOW_US   600000  /* 600 ms  → ~0.8 Hz */
 
 static esp_timer_handle_t s_blink_timer;
 static bool s_blink_on;
-static bool s_blink_red;        /* element(s) lit on the blink's "on" phase */
-static bool s_blink_green;
+static bool s_blink_is_red;     /* which single element toggles while blinking */
 
-static void set_rgb(bool red, bool green)
+/* Drive both pins to definite levels. Callers pass at most one `true` so the
+ * red+yellow "both on" (red-dominant) state can never occur unintentionally. */
+static void drive(bool red_on, bool yellow_on)
 {
-    gpio_set_level(LED_RED_GPIO, red ? 1 : 0);
-    gpio_set_level(LED_GREEN_GPIO, green ? 1 : 0);
+    gpio_set_level(LED_RED_GPIO,    red_on    ? 1 : 0);
+    gpio_set_level(LED_YELLOW_GPIO, yellow_on ? 1 : 0);
 }
 
 static void blink_cb(void *arg)
 {
     s_blink_on = !s_blink_on;
-    set_rgb(s_blink_on && s_blink_red, s_blink_on && s_blink_green);
+    if (s_blink_is_red) drive(s_blink_on, false);   /* red blink, yellow off  */
+    else                drive(false, s_blink_on);    /* yellow blink, red off  */
 }
 
 esp_err_t status_led_init(void)
 {
     gpio_config_t io = {
-        .pin_bit_mask = (1ULL << LED_RED_GPIO) | (1ULL << LED_GREEN_GPIO),
+        .pin_bit_mask = (1ULL << LED_RED_GPIO) | (1ULL << LED_YELLOW_GPIO),
         .mode         = GPIO_MODE_OUTPUT,
         .pull_up_en   = GPIO_PULLUP_DISABLE,
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
@@ -55,45 +62,47 @@ esp_err_t status_led_init(void)
         ESP_LOGW(TAG, "blink timer create failed: %s", esp_err_to_name(err));
     }
 
-    set_rgb(false, false);
-    ESP_LOGI(TAG, "init: red=GPIO%d green=GPIO%d", LED_RED_GPIO, LED_GREEN_GPIO);
+    drive(false, false);
+    ESP_LOGI(TAG, "init: red=GPIO%d yellow=GPIO%d (no green element)",
+             LED_RED_GPIO, LED_YELLOW_GPIO);
     return ESP_OK;
 }
 
 void status_led_set(status_led_state_t state)
 {
-    /* Stop any active blink timer before changing state */
+    /* Stop any active blink timer before changing state. */
     if (s_blink_timer) {
         esp_timer_stop(s_blink_timer);
     }
 
     switch (state) {
     case STATUS_LED_OFF:
-        set_rgb(false, false);
+        drive(false, false);
         break;
-    case STATUS_LED_GREEN:
-        set_rgb(false, true);
+
+    case STATUS_LED_HEALTHY:        /* solid yellow */
+        drive(false, true);
         break;
-    case STATUS_LED_YELLOW:
-        set_rgb(true, true);
+
+    case STATUS_LED_FAULT:          /* solid red */
+        drive(true, false);
         break;
-    case STATUS_LED_RED:
-        set_rgb(true, false);
-        break;
-    case STATUS_LED_BLINK_YELLOW:
-        s_blink_red = true; s_blink_green = true;
+
+    case STATUS_LED_WARMING:        /* slow-blink yellow */
+        s_blink_is_red = false;
         s_blink_on = true;
-        set_rgb(true, true);
+        drive(false, true);
         if (s_blink_timer) {
-            esp_timer_start_periodic(s_blink_timer, 500000); /* 500 ms = 1 Hz */
+            esp_timer_start_periodic(s_blink_timer, BLINK_SLOW_US);
         }
         break;
-    case STATUS_LED_BLINK_RED:
-        s_blink_red = true; s_blink_green = false;
+
+    case STATUS_LED_DEGRADED:       /* fast-blink red */
+        s_blink_is_red = true;
         s_blink_on = true;
-        set_rgb(true, false);
+        drive(true, false);
         if (s_blink_timer) {
-            esp_timer_start_periodic(s_blink_timer, 500000); /* 500 ms = 1 Hz */
+            esp_timer_start_periodic(s_blink_timer, BLINK_FAST_US);
         }
         break;
     }
