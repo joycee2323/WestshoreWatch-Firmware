@@ -14,10 +14,12 @@ idf_component_register(
         "status_led.c"
         "cellular_uart.c"
         "modem_manager.c"
-        "modem_data_resume.cpp"   # C++ shim: esp_modem RESUME_DATA_MODE (not in C API)
+        "modem_http.c"            # native SIM7600 AT HTTP(S) POST transport
         "detection_queue.c"
         "cellular_uploader.c"
         "gnss_reader.c"
+        # modem_data_resume.cpp — PPP-only esp_modem shim; not built on the
+        # native-AT-HTTP transport (kept in tree for the PPP branch).
     INCLUDE_DIRS "."
     REQUIRES
         nvs_flash
@@ -32,6 +34,5 @@ idf_component_register(
         driver
         mbedtls
         lwip
-        esp_modem
         spiffs
 )

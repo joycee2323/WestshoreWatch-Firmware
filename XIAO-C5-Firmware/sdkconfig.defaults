@@ -94,30 +94,12 @@ CONFIG_COMPILER_OPTIMIZATION_ASSERTIONS_ENABLE=y
 CONFIG_MBEDTLS_SSL_PROTO_TLS1_3=n
 CONFIG_MBEDTLS_SSL_RENEGOTIATION=y
 
-# ── Cellular X1 variant (feature/cellular-x1 branch only) ───────────────────
-# PPP support for SIM7600G-H modem via esp_modem
-CONFIG_LWIP_PPP_SUPPORT=y
-CONFIG_LWIP_PPP_PAP_SUPPORT=y
-CONFIG_LWIP_PPP_CHAP_SUPPORT=y
-
-# esp_modem C-API copies AT responses to a fixed buffer capped at this size.
-# Default 128 truncated multi-line replies (e.g. AT+CGDCONT? lists one line
-# per PDP context) to the first line, hiding later contexts. Raised so the
-# full readback is captured for context verification. Caller buffers passed
-# to esp_modem_at()/at_raw() MUST be >= this value.
-CONFIG_ESP_MODEM_C_API_STR_MAX=512
-
-# DIAGNOSTIC (remove before deployment): lwIP PPP debug to console. Without
-# LWIP_DEBUG_ESP_LOG these print via printf, so the LCP exchange is visible
-# regardless of ESP_LOG level (LOG_MAXIMUM_LEVEL=INFO compiles out ESP_LOGD).
-CONFIG_LWIP_DEBUG=y
-CONFIG_LWIP_PPP_DEBUG_ON=y
-
-# Hologram is IPv4-only and the modem's default context is dual-stack
-# (IPV4V6), which spawns an IPV6CP negotiation that fails ("Could not
-# determine remote LL address") and muddies teardown. Disable PPP IPv6 so
-# only IPCP runs. (Global CONFIG_LWIP_IPV6 stays on for other interfaces.)
-# CONFIG_LWIP_PPP_ENABLE_IPV6 is not set
+# ── Cellular X1 variant (native AT HTTP transport) ──────────────────────────
+# The SIM7600G-H is driven entirely over its UART AT interface using the
+# modem's built-in HTTP(S) stack (AT+HTTPINIT/HTTPACTION). No PPP, no
+# esp_modem, no lwIP-over-cellular — so the PPP/esp_modem build options that
+# the PPP branch set here are intentionally absent. TLS for the HTTPS POST is
+# handled inside the modem, not by mbedTLS on the ESP32.
 
 # SPIFFS for offline detection buffering
 CONFIG_SPIFFS_MAX_PARTITIONS=1

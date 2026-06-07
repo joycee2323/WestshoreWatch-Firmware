@@ -4,15 +4,17 @@
 
 /**
  * Bi-color LED states for the Cellular X1 status indicator.
- * GPIO12 (header D7) = red,  GPIO8 (header D8) = green.
- * Both on = yellow.  Common cathode to GND.
+ * Common cathode to GND. The red/green leads are reversed vs the silk:
+ * GPIO8 (header D8) physically drives RED, GPIO12 (header D7) drives GREEN
+ * (verified empirically — see status_led.c). Both on = yellow.
  */
 typedef enum {
-    STATUS_LED_OFF,             /* system off / pre-init           */
-    STATUS_LED_GREEN,           /* healthy: PPP up, recent upload  */
-    STATUS_LED_YELLOW,          /* warming up: boot / registering  */
-    STATUS_LED_RED,             /* error: failed reg, hw fault     */
-    STATUS_LED_BLINK_YELLOW,    /* offline: buffering detections   */
+    STATUS_LED_OFF,             /* system off / pre-init                 */
+    STATUS_LED_GREEN,           /* healthy: online + recent upload       */
+    STATUS_LED_YELLOW,          /* warming up: boot / registering        */
+    STATUS_LED_RED,             /* error: data session down / hw fault   */
+    STATUS_LED_BLINK_YELLOW,    /* offline: buffering detections         */
+    STATUS_LED_BLINK_RED,       /* degraded: online but detections fail  */
 } status_led_state_t;
 
 /** Configure GPIO12/GPIO8 as push-pull outputs, set initial OFF. */

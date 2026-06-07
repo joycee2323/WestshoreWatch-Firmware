@@ -1,3 +1,4 @@
-dependencies:
-  espressif/esp_modem:
-    version: "~2.0.1"
+# No managed components on the native-AT-HTTP transport.
+# (The PPP branch pulls espressif/esp_modem here; this branch talks to the
+# SIM7600 over UART with the modem's native AT HTTP(S) stack and needs none.)
+dependencies: {}

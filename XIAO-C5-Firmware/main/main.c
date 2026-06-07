@@ -32,6 +32,13 @@ static const char *TAG = "MAIN";
 /* Upload watchdog — full system reboot if no successful upload in 10 min */
 #define UPLOAD_WDT_TIMEOUT_MS    (10 * 60 * 1000)
 
+/* "Degraded" LED: data session up + heartbeats fine, but detection POSTs are
+ * failing. Trigger when we've ATTEMPTED a detection batch recently yet have no
+ * recent detection SUCCESS. Detection attempts only happen when drones are in
+ * range, so an idle node never trips this. */
+#define DET_ATTEMPT_RECENT_MS    (60 * 1000)
+#define DET_SUCCESS_STALE_MS     (30 * 1000)
+
 static void ota_mark_valid_cb(void *arg)
 {
     (void)arg;
@@ -161,8 +168,9 @@ void app_main(void)
     ESP_LOGI(TAG, "boot: BLE scanner active, relay TX disabled");
 
     /* GNSS reader — init the position cache BEFORE the modem task starts.
-     * modem_manager polls AT+CGPSINFO during the pre-PPP AT phase
-     * (time-boxed) and feeds responses here; off the upload critical path. */
+     * modem_manager polls AT+CGPSINFO (pre-net, time-boxed, then again in its
+     * monitor loop until a fix lands) and feeds responses here; serialized
+     * with HTTP POSTs on the UART, off the upload critical path. */
     ESP_LOGI(TAG, "boot: starting gnss_reader");
     err = gnss_reader_start();
     if (err != ESP_OK)
@@ -178,7 +186,7 @@ void app_main(void)
         esp_restart();
     }
 
-    /* HTTPS uploader — drains detect_queue via cellular PPP */
+    /* HTTPS uploader — drains detect_queue via native modem AT HTTP */
     ESP_LOGI(TAG, "boot: starting cellular_uploader");
     err = cellular_uploader_start(detect_queue);
     if (err != ESP_OK)
@@ -228,15 +236,32 @@ void app_main(void)
             }
         }
 
-        /* LED recency: green only if PPP up AND last upload <2 min ago */
+        /* LED recency (only while the cellular data session is up):
+         *   blink red  — degraded: detections attempted recently but failing
+         *   blink yellow — no successful upload (detection OR heartbeat) in 2 min
+         *   green      — healthy */
         if (modem_manager_is_connected()) {
-            TickType_t last_ok = cellular_uploader_last_success();
-            if (last_ok > 0) {
-                uint32_t since_upload_ms = (xTaskGetTickCount() - last_ok) * portTICK_PERIOD_MS;
-                if (since_upload_ms > 2 * 60 * 1000) {
-                    status_led_set(STATUS_LED_BLINK_YELLOW);
-                } else {
-                    status_led_set(STATUS_LED_GREEN);
+            TickType_t now = xTaskGetTickCount();
+            TickType_t det_try = cellular_uploader_last_det_attempt();
+            TickType_t det_ok  = cellular_uploader_last_det_success();
+
+            bool det_active  = det_try > 0 &&
+                (now - det_try) * portTICK_PERIOD_MS < DET_ATTEMPT_RECENT_MS;
+            bool det_failing = det_active &&
+                (det_ok == 0 ||
+                 (now - det_ok) * portTICK_PERIOD_MS > DET_SUCCESS_STALE_MS);
+
+            if (det_failing) {
+                status_led_set(STATUS_LED_BLINK_RED);
+            } else {
+                TickType_t last_ok = cellular_uploader_last_success();
+                if (last_ok > 0) {
+                    uint32_t since_upload_ms = (now - last_ok) * portTICK_PERIOD_MS;
+                    if (since_upload_ms > 2 * 60 * 1000) {
+                        status_led_set(STATUS_LED_BLINK_YELLOW);
+                    } else {
+                        status_led_set(STATUS_LED_GREEN);
+                    }
                 }
             }
         }

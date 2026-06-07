@@ -1,12 +1,13 @@
 #include "cellular_uploader.h"
 #include "detection_queue.h"
 #include "modem_manager.h"
+#include "modem_http.h"
 #include "gnss_reader.h"
 #include "odid_decoder.h"
 #include "status_led.h"
 #include "config.h"
 #include "esp_log.h"
-#include "esp_http_client.h"
+#include "esp_app_desc.h"
 #include "nvs.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -22,12 +23,29 @@ static const char *TAG = "CELL_UP";
 #define RETRY_COUNT             3
 #define RETRY_BASE_MS           1000
 
+/* Idle heartbeat keeps the node 'online' when no drones are in range.
+ * The backend marks a node offline after node_type-keyed inactivity: x1
+ * nodes (this one) get 120 s (server.js offline cron). 30 s gives 4×
+ * headroom — the same safety ratio the Sentinel runs (3600 s heartbeat vs
+ * its 14400 s sentinel threshold). Same /api/nodes/heartbeat endpoint and
+ * X-Node-API-Key auth the Sentinel uses. */
+#define HEARTBEAT_INTERVAL_MS   30000
+
 static QueueHandle_t   s_queue;
 static volatile TickType_t s_last_success;
 static volatile TickType_t s_last_response;  /* any HTTP reply, even 4xx/5xx */
+static volatile TickType_t s_last_heartbeat; /* tick of last heartbeat attempt */
+/* Detection-POST health, tracked separately from s_last_success (which the
+ * heartbeat also refreshes). Lets the LED show "online but detections failing"
+ * — a degraded state the heartbeat would otherwise paper over. */
+static volatile TickType_t s_last_det_attempt;  /* last detection batch POST tried */
+static volatile TickType_t s_last_det_success;  /* last detection batch POST 2xx   */
+static char s_fw_version[32];                /* app version for heartbeat payload */
 
 TickType_t cellular_uploader_last_success(void) { return s_last_success; }
 TickType_t cellular_uploader_last_response(void) { return s_last_response; }
+TickType_t cellular_uploader_last_det_attempt(void) { return s_last_det_attempt; }
+TickType_t cellular_uploader_last_det_success(void) { return s_last_det_success; }
 
 /* ── NVS config ───────────────────────────────────────────────────────────── */
 static char s_device_id[64];
@@ -66,44 +84,43 @@ static void load_config(void)
 }
 
 /* ── JSON serialization ───────────────────────────────────────────────────── */
+/* Emit ONE drone object in the canonical schema the backend ingest path reads
+ * (routes/nodes.js + routes/detections.js) and the Android node sends
+ * (DetectionUploader.kt): {id, lat, lon, alt, spd, hdg, op_lat, op_lon}.
+ *
+ * CRITICAL: the backend keys on `drone.id` and does `if (!uas_id) continue;`,
+ * so the field MUST be "id" (not "uas_id") or the drone is silently dropped
+ * (HTTP 200, stored:0). Likewise altitude/speed/heading must be "alt"/"spd"/
+ * "hdg". `alt` is the GEODETIC altitude (Android maps alt = altGeo). Fields
+ * the backend ignores (id_type, baro alt, height, vertical speed, status,
+ * rssi, mac, …) are omitted to match the canonical body exactly and keep the
+ * cellular payload small. `ts` (ODID self-clock) and `nickname` are omitted —
+ * the firmware doesn't have them; the backend treats them as null (same as the
+ * Sentinel path), so the coalescer/stale gate behaves identically. */
 static int format_detection_json(const odid_detection_t *det, char *buf, size_t sz)
 {
     int n = 0;
-    n += snprintf(buf + n, sz - n, "{");
 
-    if (det->has_basic_id) {
-        n += snprintf(buf + n, sz - n,
-            "\"uas_id\":\"%s\",\"id_type\":%d,\"ua_type\":%d,",
-            det->basic_id.uas_id, det->basic_id.id_type, det->basic_id.ua_type);
-    }
+    /* id is mandatory — without it the backend skips the drone. */
+    n += snprintf(buf + n, sz - n, "{\"id\":\"%s\"",
+                  det->has_basic_id ? det->basic_id.uas_id : "");
 
     if (det->has_location) {
         n += snprintf(buf + n, sz - n,
-            "\"lat\":%.7f,\"lon\":%.7f,"
-            "\"alt_baro\":%.1f,\"alt_geo\":%.1f,\"height\":%.1f,"
-            "\"speed_h\":%.1f,\"speed_v\":%.1f,\"heading\":%u,"
-            "\"status\":%d,",
+            ",\"lat\":%.7f,\"lon\":%.7f,\"alt\":%.1f,\"spd\":%.1f,\"hdg\":%u",
             det->location.lat, det->location.lon,
-            det->location.alt_baro, det->location.alt_geo,
-            det->location.height,
-            det->location.speed_horiz, det->location.speed_vert,
-            det->location.heading, det->location.status);
+            det->location.alt_geo,        /* canonical alt = geodetic altitude */
+            det->location.speed_horiz,    /* spd = horizontal speed */
+            det->location.heading);       /* hdg */
     }
 
     if (det->has_system) {
         n += snprintf(buf + n, sz - n,
-            "\"op_lat\":%.7f,\"op_lon\":%.7f,\"op_alt\":%.1f,",
-            det->system.operator_lat, det->system.operator_lon,
-            det->system.operator_alt_geo);
+            ",\"op_lat\":%.7f,\"op_lon\":%.7f",
+            det->system.operator_lat, det->system.operator_lon);
     }
 
-    n += snprintf(buf + n, sz - n,
-        "\"rssi\":%d,\"source\":%d,"
-        "\"mac\":\"%02x:%02x:%02x:%02x:%02x:%02x\"}",
-        det->rssi, det->source,
-        det->mac[0], det->mac[1], det->mac[2],
-        det->mac[3], det->mac[4], det->mac[5]);
-
+    n += snprintf(buf + n, sz - n, "}");
     return n;
 }
 
@@ -137,47 +154,96 @@ static int build_payload(odid_detection_t *batch, int count, char *buf, size_t s
     return n;
 }
 
-/* ── HTTP POST with retry ─────────────────────────────────────────────────── */
+/* ── HTTP POST with retry (native modem AT HTTP transport) ────────────────────
+ * Transport is the SIM7600's built-in AT HTTP(S) stack (modem_http), shared
+ * with GPS polling on the one UART AT channel; modem_http holds the UART lock
+ * for the whole HTTPINIT…HTTPTERM transaction so nothing interleaves. Same
+ * endpoint, same X-Node-API-Key auth, same JSON body as the PPP uploader —
+ * only the transport changed. */
 static bool post_detections(const char *json, int json_len)
 {
     char url[URL_BUF_SIZE];
     snprintf(url, sizeof(url), "%s/api/nodes/%s/detections",
              s_backend_url, s_device_id);
 
+    /* Custom header line for AT+HTTPPARA "USERDATA" — same scheme the PPP
+     * uploader set via esp_http_client_set_header(). Content-Type is sent
+     * separately by modem_http via the CONTENT param. */
+    char auth[160];
+    snprintf(auth, sizeof(auth), "X-Node-API-Key: %s", s_api_key);
+
     for (int attempt = 0; attempt < RETRY_COUNT; attempt++) {
-        esp_http_client_config_t cfg = {
-            .url            = url,
-            .method         = HTTP_METHOD_POST,
-            .timeout_ms     = 10000,
-        };
-        esp_http_client_handle_t client = esp_http_client_init(&cfg);
-        if (!client) continue;
+        modem_http_result_t r;
+        esp_err_t err = modem_http_post(url, auth, json, json_len, &r);
 
-        esp_http_client_set_header(client, "Content-Type", "application/json");
-        esp_http_client_set_header(client, "X-Node-API-Key", s_api_key);
-        esp_http_client_set_post_field(client, json, json_len);
-
-        esp_err_t err = esp_http_client_perform(client);
-        int status = esp_http_client_get_status_code(client);
-        esp_http_client_cleanup(client);
-
-        if (err == ESP_OK) {
-            /* Got an HTTP response — network is alive regardless of status code */
+        /* Any real HTTP reply (even 4xx/5xx) proves the link is alive — feeds
+         * the upload watchdog so it only reboots on a totally dead network. A
+         * modem-side (7xx) error is NOT a network reply, so don't count it. */
+        if (r.http_status >= 0) {
             s_last_response = xTaskGetTickCount();
-
-            if (status >= 200 && status < 300) {
-                ESP_LOGI(TAG, "POST %s → %d (%d bytes)", url, status, json_len);
-                return true;
-            }
         }
 
-        ESP_LOGW(TAG, "POST attempt %d failed: err=%s status=%d",
-                 attempt + 1, esp_err_to_name(err), status);
+        if (err == ESP_OK) {
+            ESP_LOGI(TAG, "POST %s → HTTP %d (%d bytes, attempt %d/%d)",
+                     url, r.http_status, json_len, attempt + 1, RETRY_COUNT);
+            return true;
+        }
+
+        if (r.modem_err) {
+            ESP_LOGW(TAG, "POST attempt %d/%d: modem error %d (715=TLS fail, etc.)",
+                     attempt + 1, RETRY_COUNT, r.modem_err);
+        } else if (r.http_status >= 0) {
+            ESP_LOGW(TAG, "POST attempt %d/%d: HTTP %d",
+                     attempt + 1, RETRY_COUNT, r.http_status);
+        } else {
+            ESP_LOGW(TAG, "POST attempt %d/%d: AT/transport failure (%s)",
+                     attempt + 1, RETRY_COUNT, esp_err_to_name(err));
+        }
 
         if (attempt < RETRY_COUNT - 1) {
             int delay = RETRY_BASE_MS * (1 << attempt);
             vTaskDelay(pdMS_TO_TICKS(delay));
         }
+    }
+    return false;
+}
+
+/* ── Heartbeat (idle keep-alive) ──────────────────────────────────────────────
+ * Matches the Sentinel exactly: POST /api/nodes/heartbeat with X-Node-API-Key
+ * auth and a {connection_type, firmware_version} body (the fields the backend
+ * heartbeat handler consumes). Routed through modem_http_post() so it shares
+ * the native-AT-HTTP transport (and the HTTPDATA path). A successful beat
+ * refreshes the node's last_seen/online state and keeps the status LED green
+ * + the upload watchdog fed while idle. */
+static bool post_heartbeat(void)
+{
+    char url[URL_BUF_SIZE];
+    snprintf(url, sizeof(url), "%s/api/nodes/heartbeat", s_backend_url);
+
+    char auth[160];
+    snprintf(auth, sizeof(auth), "X-Node-API-Key: %s", s_api_key);
+
+    char body[160];
+    int len = snprintf(body, sizeof(body),
+        "{\"connection_type\":\"cellular\",\"firmware_version\":\"%s\"}",
+        s_fw_version);
+
+    modem_http_result_t r;
+    esp_err_t err = modem_http_post(url, auth, body, len, &r);
+
+    if (r.http_status >= 0) {
+        s_last_response = xTaskGetTickCount();
+    }
+    if (err == ESP_OK) {
+        s_last_success = xTaskGetTickCount();   /* keep LED green when idle */
+        ESP_LOGI(TAG, "heartbeat → HTTP %d", r.http_status);
+        return true;
+    }
+    if (r.modem_err) {
+        ESP_LOGW(TAG, "heartbeat failed: modem error %d", r.modem_err);
+    } else {
+        ESP_LOGW(TAG, "heartbeat failed: http=%d err=%s",
+                 r.http_status, esp_err_to_name(err));
     }
     return false;
 }
@@ -189,6 +255,10 @@ static void uploader_task(void *arg)
     odid_detection_t batch[BATCH_MAX];
 
     load_config();
+
+    /* Firmware version for the heartbeat payload (captured once). */
+    const esp_app_desc_t *desc = esp_app_get_description();
+    strlcpy(s_fw_version, desc ? desc->version : "unknown", sizeof(s_fw_version));
 
     while (true) {
         /* Wait for at least one detection or timeout */
@@ -210,11 +280,25 @@ static void uploader_task(void *arg)
             batch[count++] = det;
         }
 
+        /* Idle heartbeat: fires on its own interval regardless of detections,
+         * so the node stays 'online' when no drone is in range. The loop wakes
+         * at least every UPLOAD_INTERVAL_MS (queue timeout), so this is checked
+         * ~every 2 s. Stamp the attempt time even on failure to avoid retrying
+         * every loop; the 4× headroom absorbs an occasional miss. */
+        if (modem_manager_is_connected()) {
+            TickType_t now = xTaskGetTickCount();
+            if (s_last_heartbeat == 0 ||
+                (now - s_last_heartbeat) * portTICK_PERIOD_MS >= HEARTBEAT_INTERVAL_MS) {
+                s_last_heartbeat = now;
+                post_heartbeat();
+            }
+        }
+
         if (count == 0) continue;
 
         if (!modem_manager_is_connected()) {
             /* Offline — buffer to SPIFFS */
-            ESP_LOGW(TAG, "PPP down — buffering %d detections to SPIFFS", count);
+            ESP_LOGW(TAG, "cellular link down — buffering %d detections to SPIFFS", count);
             for (int i = 0; i < count; i++) {
                 detection_queue_push(&batch[i]);
             }
@@ -224,8 +308,11 @@ static void uploader_task(void *arg)
 
         /* Build JSON payload and POST */
         int len = build_payload(batch, count, json_buf, sizeof(json_buf));
+        s_last_det_attempt = xTaskGetTickCount();
         if (post_detections(json_buf, len)) {
-            s_last_success = xTaskGetTickCount();
+            TickType_t now = xTaskGetTickCount();
+            s_last_success     = now;
+            s_last_det_success = now;
             ESP_LOGI(TAG, "uploaded %d detections (%d buffered)",
                      count, detection_queue_count());
         } else {

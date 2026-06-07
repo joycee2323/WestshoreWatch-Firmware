@@ -5,11 +5,19 @@
 
 static const char *TAG = "STATUS_LED";
 
-#define LED_RED_GPIO    12      /* header D7 */
-#define LED_GREEN_GPIO  8       /* header D8 */
+/* The LED's leads are reversed vs the D7=red / D8=green silk. Verified on
+ * hardware: at boot the firmware commands YELLOW (both pins HIGH) and the LED
+ * shows yellow (both elements lit), but commanding GREEN (green pin HIGH, red
+ * pin LOW) lit RED — so GPIO8 physically drives the RED element and GPIO12 the
+ * GREEN element. (Boot-yellow rules out a common-anode part, which would read
+ * dark with both pins HIGH.) The assignments below name the ACTUAL element. */
+#define LED_RED_GPIO    8       /* header D8 — physically the RED element   */
+#define LED_GREEN_GPIO  12      /* header D7 — physically the GREEN element */
 
 static esp_timer_handle_t s_blink_timer;
 static bool s_blink_on;
+static bool s_blink_red;        /* element(s) lit on the blink's "on" phase */
+static bool s_blink_green;
 
 static void set_rgb(bool red, bool green)
 {
@@ -20,7 +28,7 @@ static void set_rgb(bool red, bool green)
 static void blink_cb(void *arg)
 {
     s_blink_on = !s_blink_on;
-    set_rgb(s_blink_on, s_blink_on);   /* yellow when on */
+    set_rgb(s_blink_on && s_blink_red, s_blink_on && s_blink_green);
 }
 
 esp_err_t status_led_init(void)
@@ -73,8 +81,17 @@ void status_led_set(status_led_state_t state)
         set_rgb(true, false);
         break;
     case STATUS_LED_BLINK_YELLOW:
+        s_blink_red = true; s_blink_green = true;
         s_blink_on = true;
         set_rgb(true, true);
+        if (s_blink_timer) {
+            esp_timer_start_periodic(s_blink_timer, 500000); /* 500 ms = 1 Hz */
+        }
+        break;
+    case STATUS_LED_BLINK_RED:
+        s_blink_red = true; s_blink_green = false;
+        s_blink_on = true;
+        set_rgb(true, false);
         if (s_blink_timer) {
             esp_timer_start_periodic(s_blink_timer, 500000); /* 500 ms = 1 Hz */
         }
