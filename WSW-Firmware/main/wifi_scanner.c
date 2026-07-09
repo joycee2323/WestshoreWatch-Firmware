@@ -148,6 +148,11 @@ static void promiscuous_cb(void *buf, wifi_promiscuous_pkt_type_t type)
     const uint8_t *payload = ppkt->payload;
     uint16_t       pkt_len = ppkt->rx_ctrl.sig_len;
     int8_t         rssi    = ppkt->rx_ctrl.rssi;
+    /* Capture-time band/channel provenance, straight from this frame's radio
+     * metadata (stamped by the driver at reception — no shared state, no race
+     * with the hop task). On C5 rx_ctrl.channel is 8-bit so it carries 5 GHz
+     * channels (149-165); on C6 it is 4-bit (1-14), always 2.4 GHz. */
+    uint8_t        rx_ch   = ppkt->rx_ctrl.channel;
 
     if (pkt_len < sizeof(ieee80211_hdr_t) + 1) return;
     if (ppkt->rx_ctrl.rx_state != 0) return;
@@ -188,14 +193,18 @@ static void promiscuous_cb(void *buf, wifi_promiscuous_pkt_type_t type)
 
     if (!odid_payload || odid_len < 25) return;
 
-    ESP_LOGI(TAG, "ODID frame! RSSI=%d len=%d", rssi, odid_len);
+    ESP_LOGI(TAG, "ODID frame! ch=%u band=%s RSSI=%d len=%d",
+             rx_ch, (rx_ch > 14) ? "5G" : "2G4", rssi, odid_len);
     led_set_detecting(true);
 
     odid_detection_t det;
     memset(&det, 0, sizeof(det));
-    det.source = src;
-    det.rssi   = rssi;
+    det.source  = src;
+    det.rssi    = rssi;
     memcpy(det.mac, hdr->addr2, 6);
+    /* Wi-Fi channels 1-14 are 2.4 GHz; anything above is a 5 GHz channel. */
+    det.channel = rx_ch;
+    det.band    = (rx_ch > 14) ? ODID_BAND_5G : ODID_BAND_2G4;
 
     int ret = odid_parse_pack(odid_payload, odid_len, &det);
     if (ret == 0) ret = odid_parse_message(odid_payload, odid_len, &det);

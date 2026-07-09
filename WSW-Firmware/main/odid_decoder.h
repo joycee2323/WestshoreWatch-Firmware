@@ -63,6 +63,16 @@ typedef enum {
     ODID_SRC_WIFI_N     = 3,   // Wi-Fi 802.11n
 } odid_source_t;
 
+// ── Radio band of detection (orthogonal to source/PHY above) ──────────────────
+// Populated at frame-capture time so a detection record is self-describing:
+// a 5 GHz catch is evident from the payload, not inferred from a peek log.
+typedef enum {
+    ODID_BAND_UNKNOWN = 0,
+    ODID_BAND_2G4     = 1,   // 2.4 GHz Wi-Fi
+    ODID_BAND_5G      = 2,   // 5 GHz Wi-Fi
+    ODID_BAND_BLE     = 3,   // Bluetooth LE
+} odid_band_t;
+
 // ── Decoded message structs ───────────────────────────────────────────────────
 #define ODID_STR_LEN    24
 
@@ -115,6 +125,8 @@ typedef struct {
     odid_source_t   source;
     int8_t          rssi;
     uint8_t         mac[6];
+    uint8_t         channel;   // primary channel at capture time; 0 = none/sentinel (BLE)
+    uint8_t         band;      // odid_band_t value — radio band at capture time
     bool            has_basic_id;
     bool            has_location;
     bool            has_self_id;

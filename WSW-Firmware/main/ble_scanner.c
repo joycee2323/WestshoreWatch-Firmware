@@ -60,9 +60,13 @@ static int gap_event_cb(struct ble_gap_event *event, void *arg)
 
     odid_detection_t det;
     memset(&det, 0, sizeof(det));
-    det.source = ODID_SRC_BT_LEGACY;
-    det.rssi   = rssi;
+    det.source  = ODID_SRC_BT_LEGACY;
+    det.rssi    = rssi;
     memcpy(det.mac, mac, 6);
+    /* BLE has no Wi-Fi channel — tag band=BLE, channel=0 sentinel so the
+     * detection record is meaningful for this source too. */
+    det.band    = ODID_BAND_BLE;
+    det.channel = 0;
 
     uint8_t msg_type = (payload[0] >> 4) & 0x0F;
     int ret = (msg_type == ODID_MSG_PACK)
