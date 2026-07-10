@@ -11,7 +11,10 @@ static const char *TAG = "DET_QUEUE";
 /* ── On-disk layout ───────────────────────────────────────────────────────── */
 #define RING_PATH      "/storage/det_ring.bin"
 #define RING_MAGIC     0x44455451   /* "DETQ" */
-#define RING_VERSION   1
+/* v2: odid_detection_t grew band/channel fields, so SLOT_SIZE changed. The
+ * resume check keys on version (not slot size), so bump this to discard any
+ * pre-existing v1 buffer whose slot layout no longer matches. */
+#define RING_VERSION   2
 #define SLOT_SIZE      sizeof(odid_detection_t)
 
 typedef struct __attribute__((packed)) {

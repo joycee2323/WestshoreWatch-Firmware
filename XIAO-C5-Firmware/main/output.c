@@ -28,6 +28,17 @@ static const char *source_str(odid_source_t src)
     }
 }
 
+/* Radio band at capture time — orthogonal to source_str() above. */
+static const char *band_str(uint8_t band)
+{
+    switch (band) {
+        case ODID_BAND_2G4: return "2.4GHz";
+        case ODID_BAND_5G:  return "5GHz";
+        case ODID_BAND_BLE: return "BLE";
+        default:            return "?";
+    }
+}
+
 /* ─────────────────────────────────────────────────────────────────────────────
  * UART0 initialisation
  * ───────────────────────────────────────────────────────────────────────────── */
@@ -122,6 +133,8 @@ static int format_json(const odid_detection_t *d, char *buf, int max_len)
         "{"
         "\"ts\":%lu,"
         "\"src\":\"%s\","
+        "\"band\":\"%s\","
+        "\"channel\":%d,"
         "\"rssi\":%d,"
         "\"mac\":\"%02X:%02X:%02X:%02X:%02X:%02X\","
         "\"id_type\":%d,"
@@ -144,6 +157,8 @@ static int format_json(const odid_detection_t *d, char *buf, int max_len)
         "}\n",
         (unsigned long)xTaskGetTickCount(),
         source_str(d->source),
+        band_str(d->band),
+        (int)d->channel,
         (int)d->rssi,
         d->mac[0], d->mac[1], d->mac[2],
         d->mac[3], d->mac[4], d->mac[5],
