@@ -42,11 +42,37 @@ static const char *TAG = "WIFI_SCAN";
 #define FIVE_GHZ_INTERVAL_MS  5000   /* how often to peek at 5 GHz */
 #define FIVE_GHZ_DWELL_MS     400    /* length of each 5 GHz peek    */
 
+/* ── Adaptive 5 GHz channel-lock (C5 only) ───────────────────────────────
+ * Once a 5 GHz ODID beacon is decoded during a peek, bias the peek toward that
+ * channel so we hold the track. This re-targets ONLY the existing 5 GHz peek
+ * slot — it never changes FIVE_GHZ_INTERVAL_MS / FIVE_GHZ_DWELL_MS or the
+ * 2.4 GHz sweep, so the 2.4 GHz/BLE (DJI) radio budget is untouched. The lock
+ * is channel-level (keyed on the 5 GHz channel, not on any drone/MAC).
+ *
+ *  - FIVE_GHZ_RELEASE_MISSES: consecutive peeks ON the locked channel with no
+ *    decode before the lock releases and even 149-165 round-robin resumes.
+ *  - FIVE_GHZ_LOCK_ACTIVE_PER_SWEEP: while locked, hold the active channel for
+ *    this many peeks, then spend ONE peek sweeping the other channels (round-
+ *    robin) so a drone that hops 5 GHz channel is re-acquired before the full
+ *    release timeout. 0 = never sweep (pure hold). Default 4 = 4 active : 1
+ *    sweep. Sweep-peek misses do NOT count toward the release counter. */
+#define FIVE_GHZ_RELEASE_MISSES        5
+#define FIVE_GHZ_LOCK_ACTIVE_PER_SWEEP 4
+
 /* 5 GHz U-NII-3 channels Skydio Standard RID anchors on (full group). ONE
  * channel is visited per peek, round-robin, so a full-band sweep spans 5 peeks.
  * Per-peek dwell/interval are unchanged, so this stays budget-neutral.
  * Requires a US regulatory domain (set at init). */
 static const uint8_t FIVE_GHZ_CHANS[] = { 149, 153, 157, 161, 165 };
+
+/* Adaptive channel-lock state. Written by promiscuous_cb on a 5 GHz decode,
+ * read/managed by channel_hop_task. Single-word writes are atomic on this core;
+ * the cb only records a sighting while the hop task owns the miss/release
+ * transitions, so s_5g_active_channel has one writer per peek. */
+static volatile uint8_t    s_5g_active_channel = 0;  /* 0 = unlocked; else locked 5G channel  */
+static volatile TickType_t s_5g_last_seen_tick = 0;  /* tick of the last 5G ODID decode        */
+static uint32_t            s_5g_miss_count     = 0;  /* consecutive locked-channel peek misses  */
+static uint32_t            s_5g_lock_peek_n    = 0;  /* locked-peek counter for the sweep ratio */
 #endif /* CONFIG_IDF_TARGET_ESP32C5 */
 
 static QueueHandle_t  s_output_queue = NULL;
@@ -211,6 +237,15 @@ static void promiscuous_cb(void *buf, wifi_promiscuous_pkt_type_t type)
 
     if (ret >= 0) {
         xQueueSend(s_output_queue, &det, pdMS_TO_TICKS(5));
+#if CONFIG_IDF_TARGET_ESP32C5
+        /* 5 GHz ODID decode → arm/refresh the channel lock (channel-level). The
+         * hop task reads these to hold/release the 5 GHz peek target. Guarded so
+         * the 2.4 GHz-only C6 build compiles this out. */
+        if (rx_ch > 14) {
+            s_5g_active_channel = rx_ch;
+            s_5g_last_seen_tick = xTaskGetTickCount();
+        }
+#endif /* CONFIG_IDF_TARGET_ESP32C5 */
     } else {
         static TickType_t last_dump = 0;
         TickType_t now = xTaskGetTickCount();
@@ -269,13 +304,38 @@ static void channel_hop_task(void *arg)
         if (!s_paused &&
             (uint32_t)((now - last_peek) * portTICK_PERIOD_MS) >= FIVE_GHZ_INTERVAL_MS) {
 
-            uint8_t ch5 = FIVE_GHZ_CHANS[peek_idx];
-            peek_idx = (peek_idx + 1) % n_5g;
+            /* ── Pick the 5 GHz channel for THIS peek ─────────────────────
+             * Unlocked: even 149-165 round-robin (unchanged). Locked: hold the
+             * active channel, but every (ACTIVE_PER_SWEEP+1)th peek spend one on
+             * a round-robin sweep so a channel-hopping drone is re-acquired
+             * before the release timeout. This changes ONLY which channel the
+             * existing peek slot visits — never its interval or dwell, so the
+             * 2.4 GHz/BLE budget is untouched. */
+            bool locked = (s_5g_active_channel != 0);
+            bool sweep  = false;
+            if (locked) {
+                s_5g_lock_peek_n++;
+                if (FIVE_GHZ_LOCK_ACTIVE_PER_SWEEP > 0 &&
+                    (s_5g_lock_peek_n % (FIVE_GHZ_LOCK_ACTIVE_PER_SWEEP + 1)) == 0) {
+                    sweep = true;
+                }
+            }
 
+            uint8_t ch5;
+            if (locked && !sweep) {
+                ch5 = s_5g_active_channel;
+            } else {
+                ch5 = FIVE_GHZ_CHANS[peek_idx];
+                peek_idx = (peek_idx + 1) % n_5g;
+            }
+
+            TickType_t peek_start = xTaskGetTickCount();
             esp_err_t e = esp_wifi_set_channel(ch5, WIFI_SECOND_CHAN_NONE);
 
             if (e == ESP_OK) {
-                ESP_LOGD(TAG, "5GHz peek ch%u (%dms)", ch5, FIVE_GHZ_DWELL_MS);
+                ESP_LOGD(TAG, "5GHz peek ch%u%s (%dms)", ch5,
+                         locked ? (sweep ? " sweep" : " lock") : "",
+                         FIVE_GHZ_DWELL_MS);
                 vTaskDelay(pdMS_TO_TICKS(FIVE_GHZ_DWELL_MS));
             } else {
                 ESP_LOGW(TAG, "5GHz peek failed: 0x%x (%s)",
@@ -284,6 +344,24 @@ static void channel_hop_task(void *arg)
 
             /* No band-mode restore — the next loop's esp_wifi_set_channel(ch)
              * on a 2.4 GHz channel brings the radio back to 2.4 GHz. */
+
+            /* ── Lock transition: did a 5 GHz decode land during this peek? ──
+             * The cb stamps s_5g_last_seen_tick (and s_5g_active_channel) on any
+             * 5 GHz decode. A hit refreshes the lock; a miss ON the held channel
+             * counts toward release; sweep-peek misses are not counted (we were
+             * off the active channel). */
+            bool hit = (s_5g_last_seen_tick != 0) &&
+                       ((int32_t)(s_5g_last_seen_tick - peek_start) >= 0);
+            if (hit) {
+                s_5g_miss_count = 0;               /* cb has (re)set active_channel */
+            } else if (locked && !sweep) {
+                if (++s_5g_miss_count >= FIVE_GHZ_RELEASE_MISSES) {
+                    s_5g_active_channel = 0;        /* release → resume even round-robin */
+                    s_5g_miss_count     = 0;
+                    s_5g_lock_peek_n    = 0;
+                    ESP_LOGD(TAG, "5GHz lock released — resuming round-robin");
+                }
+            }
 
             /* Reset interval AFTER the peek so the next 5 GHz visit is
              * FIVE_GHZ_INTERVAL_MS of 2.4 GHz dwell away. */
