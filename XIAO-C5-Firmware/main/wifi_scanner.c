@@ -23,6 +23,26 @@ static const char *TAG = "WIFI_SCAN";
  * channel hopper drags the radio off-channel and the AP beacon drops. */
 #define WSD_AP_CHANNEL 6
 
+/* ── Dual-band scan tunables ─────────────────────────────────────────────
+ * The C5 is dual-band but shares ONE antenna, time-division-multiplexed
+ * across 2.4 and 5 GHz — it cannot listen to both at once. We keep a
+ * continuous 2.4 GHz sniff loop and inject a short, infrequent 5 GHz "peek"
+ * so the radio can catch Skydio (Standard Remote ID via WiFi Beacon on the
+ * 5 GHz U-NII-3 band: ch149, X10 hops 149/153). At 400 ms every 5000 ms the
+ * peek costs ~8% of on-air time — enough to catch a loitering Skydio within
+ * ~10-20 s while leaving 2.4 GHz essentially continuous.
+ *
+ * FIVE_GHZ_INTERVAL_MS is the main lever: raise it for more 2.4 GHz dwell,
+ * lower it to catch a transient Skydio faster (at the cost of 2.4 coverage). */
+#define FIVE_GHZ_INTERVAL_MS  5000   /* how often to peek at 5 GHz */
+#define FIVE_GHZ_DWELL_MS     400    /* length of each 5 GHz peek    */
+
+/* 5 GHz U-NII-3 channels Skydio Standard RID anchors on (full UNII-3 group;
+ * X10 hops within 149/153). ONE channel is visited per peek, round-robin,
+ * so a full-band sweep spans 5 peeks. Per-peek dwell/interval are unchanged,
+ * so this stays budget-neutral. Requires a US regulatory domain. */
+static const uint8_t FIVE_GHZ_CHANS[] = { 149, 153, 157, 161, 165 };
+
 static QueueHandle_t  s_output_queue = NULL;
 static bool           s_running      = false;
 static bool           s_paused       = false;
@@ -192,25 +212,68 @@ static void promiscuous_cb(void *buf, wifi_promiscuous_pkt_type_t type)
  * ───────────────────────────────────────────────────────────────────────────── */
 static void channel_hop_task(void *arg)
 {
-    uint8_t ch_min = g_config.ch_2g_start;
-    uint8_t ch_max = g_config.ch_2g_stop;
+    /* 2.4 GHz primary rotation — ch6 weighted heaviest (best ODID overlap,
+     * and where the softAP beacons), with light touches on 1 and 11 to catch
+     * edge-channel broadcasters. Each slot dwells WSD_WIFI_DWELL_MS, matching
+     * the legacy hop cadence. */
+    static const uint8_t primary_24[] = { 6, 6, 6, 1, 6, 6, 6, 11 };
+    const size_t n_primary = sizeof(primary_24) / sizeof(primary_24[0]);
+    const size_t n_5g      = sizeof(FIVE_GHZ_CHANS) / sizeof(FIVE_GHZ_CHANS[0]);
 
-    if (ch_min < 1)  ch_min = 1;
-    if (ch_max > 13) ch_max = 13;
-    if (ch_min > ch_max) ch_min = ch_max;
-
-    uint8_t ch = ch_min;
-    wifi_second_chan_t second = WIFI_SECOND_CHAN_NONE;
+    size_t     idx       = 0;   /* index into primary_24                  */
+    size_t     peek_idx  = 0;   /* round-robin index into FIVE_GHZ_CHANS   */
+    TickType_t last_peek = xTaskGetTickCount();
 
     while (s_running) {
-        /* If paused, wait until resumed */
+        /* If paused (config-portal client connected), wait until resumed.
+         * Never peek to 5 GHz while paused — that would drag the radio off
+         * the softAP's 2.4 GHz channel and drop the portal beacon. */
         if (s_paused) {
             vTaskDelay(pdMS_TO_TICKS(50));
+            last_peek = xTaskGetTickCount();   /* don't peek the instant we resume */
             continue;
         }
-        esp_wifi_set_channel(ch, second);
+
+        /* ── 2.4 GHz primary dwell ──────────────────────────────────────── */
+        /* Channel number selects the band: a 2.4 GHz channel keeps (or returns)
+         * the radio on 2.4 GHz — after a 5 GHz peek this is what brings it back,
+         * with no esp_wifi_set_band_mode() call. */
+        esp_wifi_set_channel(primary_24[idx], WIFI_SECOND_CHAN_NONE);
         vTaskDelay(pdMS_TO_TICKS(WSD_WIFI_DWELL_MS));
-        if (++ch > ch_max) ch = ch_min;
+        if (++idx >= n_primary) idx = 0;
+
+        /* ── 5 GHz peek — short, infrequent interjection ────────────────────
+         * The band is selected by the CHANNEL NUMBER alone: a single
+         * esp_wifi_set_channel() with a 5 GHz channel moves the radio to 5 GHz
+         * (band mode stays at the SoC default AUTO — no esp_wifi_set_band_mode()).
+         * The single C5 antenna follows automatically (no GPIO to drive). ONE
+         * channel per peek, round-robin over FIVE_GHZ_CHANS (…165 wraps to 149). */
+        TickType_t now = xTaskGetTickCount();
+        if (!s_paused &&
+            (uint32_t)((now - last_peek) * portTICK_PERIOD_MS) >= FIVE_GHZ_INTERVAL_MS) {
+
+            uint8_t ch5 = FIVE_GHZ_CHANS[peek_idx];
+            peek_idx = (peek_idx + 1) % n_5g;
+
+            esp_err_t e = esp_wifi_set_channel(ch5, WIFI_SECOND_CHAN_NONE);
+
+            if (e == ESP_OK) {
+                ESP_LOGD(TAG, "5GHz peek ch%u (%dms)", ch5, FIVE_GHZ_DWELL_MS);
+                vTaskDelay(pdMS_TO_TICKS(FIVE_GHZ_DWELL_MS));
+            } else {
+                ESP_LOGW(TAG, "5GHz peek failed: 0x%x (%s)",
+                         e, esp_err_to_name(e));
+            }
+
+            /* No band-mode call to return to 2.4 GHz — the next loop iteration's
+             * 2.4 GHz primary dwell re-selects a 2.4 channel via
+             * esp_wifi_set_channel(), which brings the radio back on its own. */
+
+            /* Reset the interval timer AFTER the peek so the next 5 GHz visit
+             * is FIVE_GHZ_INTERVAL_MS of 2.4 GHz dwell away, not measured from
+             * the start of this peek. */
+            last_peek = xTaskGetTickCount();
+        }
     }
     vTaskDelete(NULL);
 }
@@ -315,15 +378,35 @@ esp_err_t wifi_scanner_start(QueueHandle_t output_queue)
     ESP_LOGI(TAG, "step: esp_wifi_start");
     ESP_ERROR_CHECK(esp_wifi_start());
 
-    /* ESP32-C5 is dual-band; lock to 2.4 GHz since ODID beacons only
-     * transmit on 2.4 GHz. Must be called AFTER esp_wifi_start — the API
-     * returns ESP_ERR_WIFI_NOT_STARTED otherwise. */
-    ESP_LOGI(TAG, "step: esp_wifi_set_band_mode(2G_ONLY)");
-    esp_err_t bm_err = esp_wifi_set_band_mode(WIFI_BAND_MODE_2G_ONLY);
-    if (bm_err != ESP_OK) {
-        ESP_LOGW(TAG, "esp_wifi_set_band_mode failed: 0x%x (%s)",
-                 bm_err, esp_err_to_name(bm_err));
+    /* US regulatory domain — REQUIRED for the 5 GHz U-NII-3 channels
+     * (149/153) the dual-band scout peeks at; without it esp_wifi_set_channel
+     * rejects them. Must be called AFTER esp_wifi_start. */
+    ESP_LOGI(TAG, "step: esp_wifi_set_country_code(US)");
+    esp_err_t cc_err = esp_wifi_set_country_code("US", true);
+    if (cc_err != ESP_OK) {
+        ESP_LOGW(TAG, "esp_wifi_set_country_code failed: 0x%x (%s)",
+                 cc_err, esp_err_to_name(cc_err));
     }
+
+    /* ESP32-C5 is dual-band but time-shares ONE antenna. Band mode is left at
+     * the SoC default (AUTO / 2.4G+5G) — we deliberately do NOT call
+     * esp_wifi_set_band_mode() anywhere. The channel_hop_task drives the band
+     * purely by CHANNEL NUMBER via esp_wifi_set_channel(): 2.4 GHz channels for
+     * the continuous sniff, short 5 GHz peeks (see FIVE_GHZ_INTERVAL_MS /
+     * FIVE_GHZ_DWELL_MS) to catch Skydio's 5 GHz Standard RID Beacon. The
+     * repeated 2G<->5G band-mode toggle was the suspected cause of 5 GHz
+     * capturing nothing, so it is removed. The softAP still comes up on ch6
+     * (set via esp_wifi_set_config above). */
+
+    /* HT20 (20 MHz) on both interfaces — a clean, narrow primary-channel
+     * capture is best for decoding the RID beacon IE on the exact channel,
+     * and 5 GHz peeks set WIFI_SECOND_CHAN_NONE for the same reason.
+     * NOTE: under band mode AUTO these singular esp_wifi_set_bandwidth() calls
+     * may return ESP_ERR_NOT_SUPPORTED (esp_wifi_set_bandwidths() is the AUTO-
+     * mode form). HT20 is already the reset default, so this is intentionally
+     * left as-is and unchecked — out of scope of the band-mode removal. */
+    esp_wifi_set_bandwidth(WIFI_IF_AP,  WIFI_BW_HT20);
+    esp_wifi_set_bandwidth(WIFI_IF_STA, WIFI_BW_HT20);
 
     /* Start the HTTP config server (non-blocking) */
     ESP_LOGI(TAG, "step: config_server_start_http");
