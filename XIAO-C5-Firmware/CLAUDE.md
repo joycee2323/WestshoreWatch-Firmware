@@ -22,8 +22,18 @@ stream and uploads to the backend.
 - **User LED "L":** GPIO27, **active LOW** (LOW = on)
 - **Power LED:** hardware-wired, not firmware-controlled
 - **Console:** USB Serial/JTAG (built-in, no GPIO needed)
-- **Antenna:** 2.4 GHz-only U.FL whip (fine for RID; dual-band needs
-  separate antenna)
+- **Antenna:** Seeed FPC Antenna A-01 (2.4/5 GHz combo, u.FL) — **dual-band**,
+  not 2.4-only. The A-01 is silkscreened "2.4G", but that is a model-line label,
+  not a band limit; per Seeed it is a 2.4/5 GHz combo part. The M1 is therefore
+  dual-band in both radio (ESP32-C5, internal band switch, no GPIO) and antenna,
+  so the hardware can receive both 2.4 GHz drones and 5 GHz Skydio (Standard
+  Remote ID via WiFi Beacon on U-NII-3, ch149/153). NOTE: 5 GHz reception also
+  requires the firmware 5 GHz scout, which is **not yet on `main`** (tracked
+  separately) — this bullet documents the antenna hardware, not current scan
+  behavior. Any future antenna swap MUST stay a 2.4/5 GHz dual-band u.FL part: a
+  2.4-only antenna disables Skydio detection, a 5-only antenna disables 2.4 GHz
+  drone detection. Verify any new antenna against known Beacon sources on both
+  ch6 (2.4) and ch149 (5) before field use.
 - **IDF version:** ESP-IDF v5.5 or later
 
 ## LED Behavior
