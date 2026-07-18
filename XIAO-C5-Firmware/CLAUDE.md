@@ -22,9 +22,37 @@ stream and uploads to the backend.
 - **User LED "L":** GPIO27, **active LOW** (LOW = on)
 - **Power LED:** hardware-wired, not firmware-controlled
 - **Console:** USB Serial/JTAG (built-in, no GPIO needed)
-- **Antenna:** 2.4 GHz-only U.FL whip (fine for RID; dual-band needs
-  separate antenna)
+- **Antenna:** Seeed FPC Antenna A-01 (2.4/5 GHz combo, u.FL). The M1 is
+  dual-band in both radio (XIAO ESP32-C5, internal band switch, no GPIO) and
+  antenna, so it detects both 2.4 GHz drones and 5 GHz Skydio (Standard Remote
+  ID via WiFi Beacon on U-NII-3, ch149/153). Note: the A-01 is silkscreened
+  "2.4G" but is a 2.4/5 GHz combo part per Seeed — the silkscreen is a
+  model-line label, not a band limit.
+  Any future antenna swap MUST remain a 2.4/5 GHz dual-band u.FL part. A
+  2.4-GHz-only antenna disables Skydio detection; a 5-GHz-only antenna disables
+  2.4 GHz drone detection. Verify any new antenna against known Beacon sources
+  on both ch6 (2.4) and ch149 (5) before field use.
 - **IDF version:** ESP-IDF v5.5 or later
+
+## Wi-Fi Scan Behavior (dual-band scout)
+The channel hopper in `wifi_scanner.c` runs a continuous 2.4 GHz sweep and,
+on the C5, interjects a short 5 GHz "peek" so a single time-shared radio
+catches both bands:
+- **2.4 GHz primary:** the existing linear sweep, unchanged.
+- **5 GHz peek:** every `FIVE_GHZ_INTERVAL_MS` (default **5000**) the radio
+  switches to 5 GHz for one `FIVE_GHZ_DWELL_MS` dwell (default **400**),
+  alternating ch **149/153** (Skydio Standard RID, U-NII-3), then returns to
+  the 2.4 GHz sweep where it left off. ~8% of on-air time on 5 GHz; catches a
+  loitering Skydio within ~10–20 s. Both constants live at the top of
+  `wifi_scanner.c`; `FIVE_GHZ_INTERVAL_MS` is the main lever.
+- **Band switch** is the C5 internal switch (`esp_wifi_set_band_mode()` before
+  `esp_wifi_set_channel()`) — no GPIO. `country_code("US")` + HT20 are set at
+  init (US regulatory domain is required for ch149/153).
+- **Portal suppression:** the peek is skipped while a config-portal client is
+  connected (`s_paused`), so it can't drag the radio off the softAP's ch6 and
+  drop the portal beacon.
+- **Guard:** all 5 GHz code is behind `#if CONFIG_IDF_TARGET_ESP32C5`, kept
+  identical to the custom-PCB X1 source so the two scanners stay diff-clean.
 
 ## LED Behavior
 - Steady **ON** when idle (no RID packet in last ~50 ms)
@@ -60,6 +88,9 @@ idf.py set-target esp32c5
 idf.py build
 idf.py -p COMx flash monitor
 ```
+
+M1 Skydio (5 GHz) detection: firmware + antenna both dual-band ready.
+Bench-confirm 5 GHz range vs the Alfa X1 before quoting coverage.
 
 ## Hardware Revision
 Compile-time constant `HW_REVISION` (in `main/config.h`) = `"xiao_esp32c5_v1"`.

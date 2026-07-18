@@ -23,6 +23,34 @@ static const char *TAG = "WIFI_SCAN";
  * channel hopper drags the radio off-channel and the AP beacon drops. */
 #define WSD_AP_CHANNEL 6
 
+/* ── 5 GHz peek tunables (ESP32-C5 only) ─────────────────────────────────
+ * The 2.4 GHz sweep below is UNCHANGED. On the C5 only, we interrupt that
+ * sweep every FIVE_GHZ_INTERVAL_MS for one short FIVE_GHZ_DWELL_MS peek on the
+ * 5 GHz U-NII-3 channels Skydio broadcasts Standard Remote ID on (ch149, X10
+ * hops 149/153), then resume the 2.4 GHz sweep exactly where it left off. At
+ * 400 ms every 5000 ms the peek costs ~8% of on-air time — enough to catch a
+ * loitering Skydio within ~10-20 s. The C5 switches band on its single
+ * internal RF path (no antenna-select GPIO on this board).
+ *
+ * NOTE: 5 GHz detection range depends on a 5 GHz-capable antenna being fitted
+ * — the stock XIAO C5 whip is 2.4 GHz-tuned. The firmware peek is correct
+ * regardless; antenna efficiency at 5 GHz is the gating factor.
+ *
+ * Guarded by CONFIG_IDF_TARGET_ESP32C5 to mirror the custom-PCB X1 source
+ * (this XIAO fork is C5-only, so the guard is always true here, but kept
+ * identical so the two scanners stay diff-clean).
+ *
+ * FIVE_GHZ_INTERVAL_MS is the main lever: raise it for more 2.4 GHz dwell,
+ * lower it to catch a transient Skydio faster (at the cost of 2.4 coverage). */
+#if CONFIG_IDF_TARGET_ESP32C5
+#define FIVE_GHZ_INTERVAL_MS  5000   /* how often to peek at 5 GHz */
+#define FIVE_GHZ_DWELL_MS     400    /* length of each 5 GHz peek    */
+
+/* 5 GHz channels Skydio Standard RID anchors on; each peek alternates to the
+ * next entry. Requires a US regulatory domain (set at init). */
+static const uint8_t FIVE_GHZ_CHANS[] = { 149, 153 };
+#endif /* CONFIG_IDF_TARGET_ESP32C5 */
+
 static QueueHandle_t  s_output_queue = NULL;
 static bool           s_running      = false;
 static bool           s_paused       = false;
@@ -202,15 +230,58 @@ static void channel_hop_task(void *arg)
     uint8_t ch = ch_min;
     wifi_second_chan_t second = WIFI_SECOND_CHAN_NONE;
 
+#if CONFIG_IDF_TARGET_ESP32C5
+    /* 5 GHz peek state — C5 only. The 2.4 GHz sweep (ch/ch_min/ch_max) is
+     * untouched; the peek interjects between sweep steps and resumes at `ch`. */
+    const size_t n_5g      = sizeof(FIVE_GHZ_CHANS) / sizeof(FIVE_GHZ_CHANS[0]);
+    size_t       peek_idx  = 0;   /* alternates 149 / 153 across peeks */
+    TickType_t   last_peek = xTaskGetTickCount();
+#endif
+
     while (s_running) {
         /* If paused, wait until resumed */
         if (s_paused) {
             vTaskDelay(pdMS_TO_TICKS(50));
+#if CONFIG_IDF_TARGET_ESP32C5
+            last_peek = xTaskGetTickCount();   /* don't peek the instant we resume */
+#endif
             continue;
         }
         esp_wifi_set_channel(ch, second);
         vTaskDelay(pdMS_TO_TICKS(WSD_WIFI_DWELL_MS));
         if (++ch > ch_max) ch = ch_min;
+
+#if CONFIG_IDF_TARGET_ESP32C5
+        /* ── 5 GHz peek — short, infrequent interjection (C5 only) ─────────
+         * esp_wifi_set_band_mode() BEFORE esp_wifi_set_channel(); C5 switches
+         * band internally (no GPIO). Alternate 149/153, then restore 2.4 GHz
+         * so the next sweep step resumes on `ch`. */
+        TickType_t now = xTaskGetTickCount();
+        if (!s_paused &&
+            (uint32_t)((now - last_peek) * portTICK_PERIOD_MS) >= FIVE_GHZ_INTERVAL_MS) {
+
+            uint8_t ch5 = FIVE_GHZ_CHANS[peek_idx];
+            peek_idx = (peek_idx + 1) % n_5g;
+
+            esp_err_t e = esp_wifi_set_band_mode(WIFI_BAND_MODE_5G_ONLY);
+            if (e == ESP_OK) e = esp_wifi_set_channel(ch5, WIFI_SECOND_CHAN_NONE);
+
+            if (e == ESP_OK) {
+                ESP_LOGD(TAG, "5GHz peek ch%u (%dms)", ch5, FIVE_GHZ_DWELL_MS);
+                vTaskDelay(pdMS_TO_TICKS(FIVE_GHZ_DWELL_MS));
+            } else {
+                ESP_LOGW(TAG, "5GHz peek failed: 0x%x (%s)",
+                         e, esp_err_to_name(e));
+            }
+
+            /* Back to 2.4 GHz; the sweep resumes at `ch` on the next loop. */
+            esp_wifi_set_band_mode(WIFI_BAND_MODE_2G_ONLY);
+
+            /* Reset interval AFTER the peek so the next 5 GHz visit is
+             * FIVE_GHZ_INTERVAL_MS of 2.4 GHz dwell away. */
+            last_peek = xTaskGetTickCount();
+        }
+#endif /* CONFIG_IDF_TARGET_ESP32C5 */
     }
     vTaskDelete(NULL);
 }
@@ -315,6 +386,18 @@ esp_err_t wifi_scanner_start(QueueHandle_t output_queue)
     ESP_LOGI(TAG, "step: esp_wifi_start");
     ESP_ERROR_CHECK(esp_wifi_start());
 
+#if CONFIG_IDF_TARGET_ESP32C5
+    /* US regulatory domain — REQUIRED for the 5 GHz U-NII-3 channels (149/153)
+     * the peek visits; without it esp_wifi_set_channel rejects them. Must be
+     * called AFTER esp_wifi_start. */
+    ESP_LOGI(TAG, "step: esp_wifi_set_country_code(US)");
+    esp_err_t cc_err = esp_wifi_set_country_code("US", true);
+    if (cc_err != ESP_OK) {
+        ESP_LOGW(TAG, "esp_wifi_set_country_code failed: 0x%x (%s)",
+                 cc_err, esp_err_to_name(cc_err));
+    }
+#endif /* CONFIG_IDF_TARGET_ESP32C5 */
+
     /* ESP32-C5 is dual-band; lock to 2.4 GHz since ODID beacons only
      * transmit on 2.4 GHz. Must be called AFTER esp_wifi_start — the API
      * returns ESP_ERR_WIFI_NOT_STARTED otherwise. */
@@ -324,6 +407,13 @@ esp_err_t wifi_scanner_start(QueueHandle_t output_queue)
         ESP_LOGW(TAG, "esp_wifi_set_band_mode failed: 0x%x (%s)",
                  bm_err, esp_err_to_name(bm_err));
     }
+
+#if CONFIG_IDF_TARGET_ESP32C5
+    /* HT20 (20 MHz) for a clean narrow capture of the 5 GHz beacon IE during
+     * peeks. */
+    esp_wifi_set_bandwidth(WIFI_IF_AP,  WIFI_BW_HT20);
+    esp_wifi_set_bandwidth(WIFI_IF_STA, WIFI_BW_HT20);
+#endif /* CONFIG_IDF_TARGET_ESP32C5 */
 
     /* Start the HTTP config server (non-blocking) */
     ESP_LOGI(TAG, "step: config_server_start_http");
