@@ -23,6 +23,61 @@ static const char *TAG = "WIFI_SCAN";
  * channel hopper drags the radio off-channel and the AP beacon drops. */
 #define WSD_AP_CHANNEL 6
 
+/* ── 5 GHz peek tunables (ESP32-C5 only) ─────────────────────────────────
+ * The 2.4 GHz sweep below is UNCHANGED. On the C5 only, we interrupt that
+ * sweep every FIVE_GHZ_INTERVAL_MS for one short FIVE_GHZ_DWELL_MS peek on the
+ * 5 GHz U-NII-3 channels Skydio broadcasts Standard Remote ID on (ch149, X10
+ * hops 149/153), then resume the 2.4 GHz sweep exactly where it left off. At
+ * 400 ms every 5000 ms the peek costs ~8% of on-air time — enough to catch a
+ * loitering Skydio within ~10-20 s. The C5 switches band on its single
+ * internal RF path (no antenna-select GPIO on this board).
+ *
+ * NOTE: 5 GHz detection range depends on a 5 GHz-capable antenna being fitted
+ * — the stock XIAO C5 whip is 2.4 GHz-tuned. The firmware peek is correct
+ * regardless; antenna efficiency at 5 GHz is the gating factor.
+ *
+ * Guarded by CONFIG_IDF_TARGET_ESP32C5 to mirror the custom-PCB X1 source
+ * (this XIAO fork is C5-only, so the guard is always true here, but kept
+ * identical so the two scanners stay diff-clean).
+ *
+ * FIVE_GHZ_INTERVAL_MS is the main lever: raise it for more 2.4 GHz dwell,
+ * lower it to catch a transient Skydio faster (at the cost of 2.4 coverage). */
+#if CONFIG_IDF_TARGET_ESP32C5
+#define FIVE_GHZ_INTERVAL_MS  5000   /* how often to peek at 5 GHz */
+#define FIVE_GHZ_DWELL_MS     400    /* length of each 5 GHz peek    */
+
+/* 5 GHz channels Skydio Standard RID anchors on; each peek alternates to the
+ * next entry. Requires a US regulatory domain (set at init). */
+static const uint8_t FIVE_GHZ_CHANS[] = { 149, 153 };
+
+/* ── Adaptive 5 GHz channel-lock ─────────────────────────────────────────
+ * Once a 5 GHz ODID beacon is decoded during a peek, bias the peek toward
+ * that channel so we hold the track instead of only re-catching it every
+ * other round-robin peek. This re-targets ONLY which channel the existing
+ * peek slot visits — it never changes FIVE_GHZ_INTERVAL_MS / DWELL_MS or
+ * the 2.4 GHz primary sweep, so the radio budget is unchanged. The lock is
+ * channel-level (keyed on the 5 GHz channel, not on any drone/MAC).
+ *
+ *  - FIVE_GHZ_RELEASE_MISSES: consecutive peeks ON the locked channel with no
+ *    decode before the lock releases and even round-robin resumes.
+ *  - FIVE_GHZ_LOCK_ACTIVE_PER_SWEEP: while locked, hold the active channel
+ *    for this many peeks, then spend ONE peek sweeping the other channel(s)
+ *    (round-robin) so a drone that hops 5 GHz channel is re-acquired before
+ *    the full release timeout. 0 = never sweep (pure hold). Default 4 = 4
+ *    active : 1 sweep. Sweep-peek misses do NOT count toward release. */
+#define FIVE_GHZ_RELEASE_MISSES        5
+#define FIVE_GHZ_LOCK_ACTIVE_PER_SWEEP 4
+
+/* Adaptive channel-lock state. Written by promiscuous_cb on a 5 GHz decode,
+ * read/managed by channel_hop_task. Single-word writes are atomic on this
+ * core; the cb only records a sighting while the hop task owns the
+ * miss/release transitions, so s_5g_active_channel has one writer per peek. */
+static volatile uint8_t    s_5g_active_channel = 0;  /* 0 = unlocked; else locked 5G channel */
+static volatile TickType_t s_5g_last_seen_tick = 0;  /* tick of the last 5G ODID decode       */
+static uint32_t            s_5g_miss_count     = 0;  /* consecutive locked-channel peek misses */
+static uint32_t            s_5g_lock_peek_n    = 0;  /* locked-peek counter for the sweep ratio */
+#endif /* CONFIG_IDF_TARGET_ESP32C5 */
+
 static QueueHandle_t  s_output_queue = NULL;
 static bool           s_running      = false;
 static bool           s_paused       = false;
@@ -176,6 +231,14 @@ static void promiscuous_cb(void *buf, wifi_promiscuous_pkt_type_t type)
 
     if (ret >= 0) {
         xQueueSend(s_output_queue, &det, pdMS_TO_TICKS(5));
+#if CONFIG_IDF_TARGET_ESP32C5
+        /* 5 GHz ODID decode → arm/refresh the channel lock (channel-level).
+         * channel_hop_task reads these to hold/release the 5 GHz peek target. */
+        if (ppkt->rx_ctrl.channel > 14) {
+            s_5g_active_channel = ppkt->rx_ctrl.channel;
+            s_5g_last_seen_tick = xTaskGetTickCount();
+        }
+#endif
     } else {
         static TickType_t last_dump = 0;
         TickType_t now = xTaskGetTickCount();
@@ -202,15 +265,103 @@ static void channel_hop_task(void *arg)
     uint8_t ch = ch_min;
     wifi_second_chan_t second = WIFI_SECOND_CHAN_NONE;
 
+#if CONFIG_IDF_TARGET_ESP32C5
+    /* 5 GHz peek state — C5 only. The 2.4 GHz sweep (ch/ch_min/ch_max) is
+     * untouched; the peek interjects between sweep steps and resumes at `ch`. */
+    const size_t n_5g      = sizeof(FIVE_GHZ_CHANS) / sizeof(FIVE_GHZ_CHANS[0]);
+    size_t       peek_idx  = 0;   /* alternates 149 / 153 across peeks */
+    TickType_t   last_peek = xTaskGetTickCount();
+#endif
+
     while (s_running) {
         /* If paused, wait until resumed */
         if (s_paused) {
             vTaskDelay(pdMS_TO_TICKS(50));
+#if CONFIG_IDF_TARGET_ESP32C5
+            last_peek = xTaskGetTickCount();   /* don't peek the instant we resume */
+#endif
             continue;
         }
         esp_wifi_set_channel(ch, second);
         vTaskDelay(pdMS_TO_TICKS(WSD_WIFI_DWELL_MS));
         if (++ch > ch_max) ch = ch_min;
+
+#if CONFIG_IDF_TARGET_ESP32C5
+        /* ── 5 GHz peek — short, infrequent interjection (C5 only) ─────────
+         * esp_wifi_set_band_mode() BEFORE esp_wifi_set_channel(); C5 switches
+         * band internally (no GPIO). Restore 2.4 GHz afterward so the next
+         * sweep step resumes on `ch`. Channel choice is lock-aware — see
+         * "Adaptive 5 GHz channel-lock" above. */
+        TickType_t now = xTaskGetTickCount();
+        if (!s_paused &&
+            (uint32_t)((now - last_peek) * portTICK_PERIOD_MS) >= FIVE_GHZ_INTERVAL_MS) {
+
+            /* ── Pick the 5 GHz channel for THIS peek ─────────────────────
+             * Unlocked: even round-robin over FIVE_GHZ_CHANS (unchanged).
+             * Locked: hold the active channel, but every
+             * (ACTIVE_PER_SWEEP+1)th peek spend one on a round-robin sweep so
+             * a drone that hops 5 GHz channel is re-acquired before the
+             * release timeout. This changes ONLY which channel the existing
+             * peek slot visits — never its interval or dwell. */
+            bool locked = (s_5g_active_channel != 0);
+            bool sweep  = false;
+            if (locked) {
+                s_5g_lock_peek_n++;
+                if (FIVE_GHZ_LOCK_ACTIVE_PER_SWEEP > 0 &&
+                    (s_5g_lock_peek_n % (FIVE_GHZ_LOCK_ACTIVE_PER_SWEEP + 1)) == 0) {
+                    sweep = true;
+                }
+            }
+
+            uint8_t ch5;
+            if (locked && !sweep) {
+                ch5 = s_5g_active_channel;
+            } else {
+                ch5 = FIVE_GHZ_CHANS[peek_idx];
+                peek_idx = (peek_idx + 1) % n_5g;
+            }
+
+            TickType_t peek_start = xTaskGetTickCount();
+            esp_err_t e = esp_wifi_set_band_mode(WIFI_BAND_MODE_5G_ONLY);
+            if (e == ESP_OK) e = esp_wifi_set_channel(ch5, WIFI_SECOND_CHAN_NONE);
+
+            if (e == ESP_OK) {
+                ESP_LOGD(TAG, "5GHz peek ch%u%s (%dms)", ch5,
+                         locked ? (sweep ? " sweep" : " lock") : "",
+                         FIVE_GHZ_DWELL_MS);
+                vTaskDelay(pdMS_TO_TICKS(FIVE_GHZ_DWELL_MS));
+            } else {
+                ESP_LOGW(TAG, "5GHz peek failed: 0x%x (%s)",
+                         e, esp_err_to_name(e));
+            }
+
+            /* Back to 2.4 GHz; the sweep resumes at `ch` on the next loop. */
+            esp_wifi_set_band_mode(WIFI_BAND_MODE_2G_ONLY);
+
+            /* ── Lock transition: did a 5 GHz decode land during this peek? ──
+             * promiscuous_cb stamps s_5g_last_seen_tick (and
+             * s_5g_active_channel) on any 5 GHz decode. A hit refreshes the
+             * lock; a miss ON the held channel counts toward release;
+             * sweep-peek misses are not counted (we were off the active
+             * channel). */
+            bool hit = (s_5g_last_seen_tick != 0) &&
+                       ((int32_t)(s_5g_last_seen_tick - peek_start) >= 0);
+            if (hit) {
+                s_5g_miss_count = 0;               /* cb has (re)set active_channel */
+            } else if (locked && !sweep) {
+                if (++s_5g_miss_count >= FIVE_GHZ_RELEASE_MISSES) {
+                    s_5g_active_channel = 0;        /* release → resume round-robin */
+                    s_5g_miss_count     = 0;
+                    s_5g_lock_peek_n    = 0;
+                    ESP_LOGD(TAG, "5GHz lock released — resuming round-robin");
+                }
+            }
+
+            /* Reset interval AFTER the peek so the next 5 GHz visit is
+             * FIVE_GHZ_INTERVAL_MS of 2.4 GHz dwell away. */
+            last_peek = xTaskGetTickCount();
+        }
+#endif /* CONFIG_IDF_TARGET_ESP32C5 */
     }
     vTaskDelete(NULL);
 }
@@ -315,6 +466,18 @@ esp_err_t wifi_scanner_start(QueueHandle_t output_queue)
     ESP_LOGI(TAG, "step: esp_wifi_start");
     ESP_ERROR_CHECK(esp_wifi_start());
 
+#if CONFIG_IDF_TARGET_ESP32C5
+    /* US regulatory domain — REQUIRED for the 5 GHz U-NII-3 channels (149/153)
+     * the peek visits; without it esp_wifi_set_channel rejects them. Must be
+     * called AFTER esp_wifi_start. */
+    ESP_LOGI(TAG, "step: esp_wifi_set_country_code(US)");
+    esp_err_t cc_err = esp_wifi_set_country_code("US", true);
+    if (cc_err != ESP_OK) {
+        ESP_LOGW(TAG, "esp_wifi_set_country_code failed: 0x%x (%s)",
+                 cc_err, esp_err_to_name(cc_err));
+    }
+#endif /* CONFIG_IDF_TARGET_ESP32C5 */
+
     /* ESP32-C5 is dual-band; lock to 2.4 GHz since ODID beacons only
      * transmit on 2.4 GHz. Must be called AFTER esp_wifi_start — the API
      * returns ESP_ERR_WIFI_NOT_STARTED otherwise. */
@@ -324,6 +487,13 @@ esp_err_t wifi_scanner_start(QueueHandle_t output_queue)
         ESP_LOGW(TAG, "esp_wifi_set_band_mode failed: 0x%x (%s)",
                  bm_err, esp_err_to_name(bm_err));
     }
+
+#if CONFIG_IDF_TARGET_ESP32C5
+    /* HT20 (20 MHz) for a clean narrow capture of the 5 GHz beacon IE during
+     * peeks. */
+    esp_wifi_set_bandwidth(WIFI_IF_AP,  WIFI_BW_HT20);
+    esp_wifi_set_bandwidth(WIFI_IF_STA, WIFI_BW_HT20);
+#endif /* CONFIG_IDF_TARGET_ESP32C5 */
 
     /* Start the HTTP config server (non-blocking) */
     ESP_LOGI(TAG, "step: config_server_start_http");
