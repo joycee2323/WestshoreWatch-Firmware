@@ -1,7 +1,7 @@
 # Westshore Watch Firmware — CLAUDE.md
 
 ## Project Overview
-ESP32-C6 firmware for the Westshore Watch X1 Remote ID receiver node by Westshore Drone Services. Detects FAA Remote ID broadcasts (WiFi Beacon and BLE) and streams detection JSON over UART to a connected Android phone running the Westshore Watch X1 app.
+ESP32-C5 firmware for the Westshore Watch X1 Remote ID receiver node by Westshore Drone Services (ESP32-C6 is a legacy/retired secondary target in the same source tree — see README.md). Detects FAA Remote ID broadcasts (WiFi Beacon and BLE) and streams detection JSON over UART to a connected Android phone running the Westshore Watch X1 app.
 
 ## Architecture
 **Detection path:** WiFi promiscuous + BLE scan → raw_queue → distributor → output_queue (UART JSON) + relay_queue (BLE relay)
@@ -9,7 +9,7 @@ ESP32-C6 firmware for the Westshore Watch X1 Remote ID receiver node by Westshor
 **No autonomous WiFi uploading.** The node does NOT connect to the internet or push data to the backend. All cloud sync is handled by the Android app (WestshoreWatch-App repo) which consumes the UART JSON stream and uploads to the backend.
 
 ## Hardware
-- **MCU:** ESP32-C6-WROOM-1 (internal antenna)
+- **MCU:** ESP32-C5-WROOM-1-N8R8 (internal antenna) — current field target. ESP32-C6-WROOM-1U-N4 is a legacy/retired secondary target, same source tree, picked via `idf.py set-target` — see README.md.
 - **UART JSON:** GPIO16/17, 115200 baud
 - **Status LED:** IO8 (orange)
 - **Config portal button:** GPIO9 (3-second hold post-boot)
@@ -46,6 +46,7 @@ ESP32-C6 firmware for the Westshore Watch X1 Remote ID receiver node by Westshor
 
 ## Build
 ```bash
+idf.py set-target esp32c5   # current field target; see README.md for the legacy C6 target
 idf.py build
 idf.py -p COM5 flash monitor
 ```
