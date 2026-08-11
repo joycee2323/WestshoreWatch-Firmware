@@ -1,6 +1,7 @@
 #include "ble_relay.h"
 #include "config.h"
 #include "nvs_config.h"
+#include "output.h"
 #include "esp_log.h"
 #include "esp_mac.h"
 #include "esp_random.h"
@@ -12,6 +13,7 @@
 #include "freertos/task.h"
 #include "led.h"
 #include <string.h>
+#include <stdio.h>
 
 /* 32 chosen as a pragmatic ceiling that covers realistic multi-drone
  * operations, stress scenarios, and adversarial cases without hitting
@@ -304,23 +306,40 @@ static void advertise_pack(const uint8_t *pack_payload)
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
- * Bridge identity beacon — exactly matches the real DroneScout Bridge hardware.
+ * Idle beacon — this node's online/offline presence signal for the Westshore
+ * Watch app, broadcast on handle 0 only while no drone is live (see the
+ * live==0 branch in relay_task() below), and reused verbatim by
+ * advertise_pack_idle_placeholder() for handle 1's idle content just below.
+ * The moment a drone appears, both handles switch to broadcasting that
+ * drone's real data instead — so this content and the detection advertiser
+ * (handle 2, company 0x08FF) are mutually exclusive by construction, giving
+ * the app continuous node-presence coverage across both states from two
+ * signals that never overlap.
  *
- * Captured from real bridge via nRF Connect:
- *   AD type 0x16 (Service Data), UUID 0xFFFA
- *   app_code=0x0D (single msg), Basic ID msg, version 2
- *   id_type=1 (Serial Number), ua_type=15 (Other)
- *   UAS ID = "DroneScout Bridge" padded to 20 bytes
+ * UAS ID = "WSW-" + this node's device_id (12-char hex, e.g.
+ * "WSW-AABBCCDDEEFF", 16 of the 20 available bytes) — output_get_device_id_hex(),
+ * the same cached value the detection advertiser's JSON uses. The "WSW-"
+ * prefix is a deliberate, unambiguous marker: no real drone's Remote ID
+ * UAS_ID will ever start with it, so the app can distinguish "this is our own
+ * idle beacon" from "this is a real drone" by prefix alone — replacing the
+ * previous exact-string match against a third-party-compatibility value
+ * ("DroneScout Bridge", chosen to mimic real DroneScout Bridge hardware —
+ * that compatibility is no longer wanted; see git history for the prior
+ * byte-for-byte capture this replaces).
  *
- * The app sees ua_type=Other + UAS ID="DroneScout Bridge" and shows green icon.
- * Broadcast continuously (not a periodic ping) at fast BLE interval.
+ * AD type 0x16 (Service Data), UUID 0xFFFA, app_code=0x0D, Basic ID msg,
+ * version 2, id_type=1 (Serial Number — still semantically accurate for a
+ * MAC-derived identifier), ua_type=15 (Other). Neither app-side ODID parser
+ * nor the backend validates on id_type/ua_type, so these are unchanged from
+ * before — only the UAS_ID content itself carries meaning here.
  * ───────────────────────────────────────────────────────────────────────────── */
 static void encode_bridge_beacon(uint8_t *buf)
 {
     memset(buf, 0, 25);
     buf[0] = (ODID_MSG_BASIC_ID << 4) | 0x02;  /* Basic ID, version 2 */
     buf[1] = (1 << 4) | 15;  /* id_type=1 (Serial Number), ua_type=15 (Other) */
-    const char *name = "DroneScout Bridge";
+    char name[21];
+    snprintf(name, sizeof(name), "WSW-%s", output_get_device_id_hex());
     memcpy(&buf[2], name, strlen(name));  /* padded with zeros to 20 bytes */
 }
 
@@ -329,11 +348,10 @@ static void encode_bridge_beacon(uint8_t *buf)
  * eviction. We can't rely on ble_gap_ext_adv_stop alone — on this NimBLE
  * build the host marks the instance inactive but the controller keeps
  * radiating the cached data buffer (see STALE_UAS_AUDIT_ROUND_3 for
- * details). Set + start with a Pack carrying a Basic ID with
- * UAS_ID="DroneScout Bridge" and msg_count=1; the WSW phone filter at
- * maybeEnqueueForUpload (BLEScannerService.kt:357) drops anything with
- * that UAS string, and DroneScout-compatible apps treat it as a bridge
- * marker (same semantics as handle 0). */
+ * details). Set + start with a Pack carrying a Basic ID with the same
+ * "WSW-<device_id>" idle content as handle 0 (see encode_bridge_beacon()
+ * above) and msg_count=1; the app's upload-guard drops anything with that
+ * UAS_ID prefix, same semantics as handle 0. */
 static void advertise_pack_idle_placeholder(void)
 {
     if (!s_pack_adv_configured) return;
@@ -341,7 +359,7 @@ static void advertise_pack_idle_placeholder(void)
     memset(pack_buf, 0, sizeof(pack_buf));
     pack_buf[0] = (ODID_MSG_PACK << 4) | 0x02;
     pack_buf[1] = 1;                          /* msg_count = 1 (just basic_id) */
-    encode_bridge_beacon(&pack_buf[2]);       /* basic_id = DroneScout Bridge */
+    encode_bridge_beacon(&pack_buf[2]);       /* basic_id = idle "WSW-<device_id>" */
     advertise_pack(pack_buf);
 }
 
@@ -616,8 +634,8 @@ static void relay_task(void *arg)
     uint8_t pack_buf[ODID_PACK_PAYLOAD] = {0};
     uint8_t cycle = 0;
 
-    /* Bridge beacon — Basic ID with UAS ID = "DroneScout Bridge", ua_type=Other.
-     * Broadcast when no slot is live, matching real bridge behavior. */
+    /* Idle beacon — Basic ID with UAS ID = "WSW-<device_id>". Broadcast when
+     * no slot is live; see encode_bridge_beacon()'s header comment. */
     uint8_t bridge_buf[25] = {0};
     encode_bridge_beacon(bridge_buf);
 

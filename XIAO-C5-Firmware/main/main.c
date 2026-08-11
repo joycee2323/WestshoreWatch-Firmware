@@ -14,6 +14,7 @@
 #include "nvs_config.h"
 #include "odid_decoder.h"
 #include "wifi_scanner.h"
+#include "output.h"
 #include "led.h"
 #include "ble_relay.h"
 #include "status_led.h"
@@ -88,6 +89,12 @@ void app_main(void)
 
     /* Load config — falls back to defaults on first boot */
     wsd_config_load(&g_config);
+
+    /* Cache this node's own device_id for source-tree consistency with the
+     * phone-paired variants — this build's cellular path never calls
+     * output_task_start()/ble_relay_start(), so it's unreachable dead code
+     * here, but keeping it present avoids main.c diverging further. */
+    output_cache_device_id();
 
     /* ── CELLULAR X1 MODE ──────────────────────────────────────────────────
      *

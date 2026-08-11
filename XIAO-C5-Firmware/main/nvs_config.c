@@ -17,10 +17,6 @@ void wsd_config_defaults(wsd_config_t *cfg)
 {
     memset(cfg, 0, sizeof(*cfg));
     cfg->mode              = WSD_MODE_RELAY;
-    cfg->relay_ping_en     = true;
-    strlcpy(cfg->relay_ping_label, "DroneScout Bridge",
-            sizeof(cfg->relay_ping_label));
-    cfg->self_id_override  = true;
     cfg->flash_led_en      = true;
     cfg->wifi_strategy     = WSD_WIFI_STRAT_BALANCED;
     cfg->ch_2g_start       = 1;
@@ -68,9 +64,6 @@ esp_err_t wsd_config_load(wsd_config_t *cfg)
 #define LOAD_STR(key, field) do { len = sizeof(cfg->field); nvs_get_str(h, key, cfg->field, &len); } while(0)
 
     LOAD_U8 ("mode",        mode);
-    LOAD_U8 ("ping_en",     relay_ping_en);
-    LOAD_STR("ping_label",  relay_ping_label);
-    LOAD_U8 ("self_id_ovr", self_id_override);
     LOAD_U8 ("led_en",      flash_led_en);
     LOAD_U8 ("wifi_strat",  wifi_strategy);
     LOAD_U8 ("ch_start",    ch_2g_start);
@@ -130,9 +123,6 @@ esp_err_t wsd_config_save(const wsd_config_t *cfg)
     }
 
     nvs_set_u8 (h, "mode",        cfg->mode);
-    nvs_set_u8 (h, "ping_en",     cfg->relay_ping_en);
-    nvs_set_str(h, "ping_label",  cfg->relay_ping_label);
-    nvs_set_u8 (h, "self_id_ovr", cfg->self_id_override);
     nvs_set_u8 (h, "led_en",      cfg->flash_led_en);
     nvs_set_u8 (h, "wifi_strat",  cfg->wifi_strategy);
     nvs_set_u8 (h, "ch_start",    cfg->ch_2g_start);

@@ -168,11 +168,13 @@ static int format_json(const odid_detection_t *d, char *buf, int max_len)
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
- * This node's own device_id — cached once at output_task startup, read by
- * every compact JSON build below. Lets the phone (Android and iOS alike)
- * attribute a detection to this node directly from the advert payload,
- * instead of recovering it separately from BLE scan-layer state (Android's
- * existing shortcut) or the handle-3 identity beacon (iOS's only path today).
+ * This node's own device_id — cached once at boot (from main(), before any
+ * BLE advertiser starts), read by every compact JSON build below AND by
+ * ble_relay.c's idle bridge-beacon content (via output_get_device_id_hex()).
+ * Lets the phone (Android and iOS alike) attribute a detection — or resolve
+ * which node is idle-but-present — directly from advert payloads, instead of
+ * recovering it separately from BLE scan-layer state (Android's existing
+ * shortcut) or the handle-3 identity beacon (unreliable on iOS).
  *
  * Uses ESP_MAC_BT, same as the identity beacon's own MAC in ble_relay.c —
  * the on-air BT public address, NOT the WiFi STA MAC (they differ by 2 bytes
@@ -182,13 +184,18 @@ static int format_json(const odid_detection_t *d, char *buf, int max_len)
  * ───────────────────────────────────────────────────────────────────────────── */
 static char s_device_id_hex[13] = {0};
 
-static void cache_device_id(void)
+void output_cache_device_id(void)
 {
     uint8_t mac[6];
     esp_read_mac(mac, ESP_MAC_BT);
     snprintf(s_device_id_hex, sizeof(s_device_id_hex),
              "%02X%02X%02X%02X%02X%02X",
              mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+}
+
+const char *output_get_device_id_hex(void)
+{
+    return s_device_id_hex;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -237,7 +244,9 @@ static void output_task(void *arg)
 {
     ESP_LOGI(TAG, "output_task: task entered");
 
-    cache_device_id();
+    /* Idempotent — main() already cached this before starting any BLE
+     * advertiser; re-caching here is a harmless no-op safety net. */
+    output_cache_device_id();
     ESP_LOGI(TAG, "output_task: device_id=%s", s_device_id_hex);
 
     static char json_buf[WSD_JSON_MAX_LEN];
