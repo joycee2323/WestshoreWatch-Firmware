@@ -35,3 +35,16 @@
  * }
  */
 esp_err_t output_task_start(QueueHandle_t detect_queue);
+
+/* Cache this node's own device_id (12-char uppercase hex, no separators,
+ * derived from ESP_MAC_BT) once at boot. Call early from main() — before
+ * ble_relay_start() — so it's ready for every consumer (the compact
+ * detection JSON's "device_id" field, and the idle bridge-beacon UAS_ID)
+ * regardless of FreeRTOS task scheduling order. Calling it again (e.g.
+ * output_task()'s own startup) is harmless/idempotent. */
+void output_cache_device_id(void);
+
+/* This node's own device_id, as cached by output_cache_device_id(). Returns
+ * a pointer to a static null-terminated buffer — empty string until
+ * output_cache_device_id() has run at least once. */
+const char *output_get_device_id_hex(void);
