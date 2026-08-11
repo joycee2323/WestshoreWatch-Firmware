@@ -10,7 +10,6 @@
 
 #define WSD_BLACKLIST_MAX    10
 #define WSD_SERIAL_MAX_LEN   32
-#define WSD_LABEL_MAX_LEN    32
 
 /* Westshore Watch upload config field sizes */
 #define WSD_WIFI_SSID_MAX    64
@@ -33,9 +32,6 @@ typedef enum {
 typedef struct {
     /* General */
     wsd_mode_t          mode;
-    bool                relay_ping_en;               /* broadcast bridge beacon  */
-    char                relay_ping_label[WSD_LABEL_MAX_LEN]; /* "DroneScout Bridge" */
-    bool                self_id_override;            /* inject Self-ID into relay */
     bool                flash_led_en;                /* LED flashes on detection  */
 
     /* Reception */

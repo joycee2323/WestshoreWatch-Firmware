@@ -77,6 +77,13 @@ void app_main(void)
     /* Load config — falls back to defaults on first boot */
     wsd_config_load(&g_config);
 
+    /* Cache this node's own device_id synchronously, before any consumer
+     * (output_task's compact JSON, ble_relay's idle bridge beacon) can run —
+     * output_task_start()/ble_relay_start() below spawn separate FreeRTOS
+     * tasks with no ordering guarantee relative to each other, so this can't
+     * be left to whichever task happens to call it first. */
+    output_cache_device_id();
+
     /* ── NORMAL OPERATION MODE ──────────────────────────────────────────────
      *
      * Config portal is always-on as a background soft-AP.
