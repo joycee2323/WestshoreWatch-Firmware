@@ -3,6 +3,7 @@
 #include "nvs_config.h"
 #include "ble_relay.h"
 #include "esp_log.h"
+#include "esp_mac.h"
 #include "driver/uart.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -182,9 +183,34 @@ static int format_json(const odid_detection_t *d, char *buf, int max_len)
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
+ * This node's own device_id — cached once at output_task startup, read by
+ * every compact JSON build below. Lets the phone (Android and iOS alike)
+ * attribute a detection to this node directly from the advert payload,
+ * instead of recovering it separately from BLE scan-layer state (Android's
+ * existing shortcut) or the handle-3 identity beacon (iOS's only path today).
+ *
+ * Uses ESP_MAC_BT, same as the identity beacon's own MAC in ble_relay.c —
+ * the on-air BT public address, NOT the WiFi STA MAC (they differ by 2 bytes
+ * on this chip; see the identity-advertiser comment in ble_relay.c). This is
+ * what makes the value match the device_id the backend already has on file
+ * for this node from the app's claim flow.
+ * ───────────────────────────────────────────────────────────────────────────── */
+static char s_device_id_hex[13] = {0};
+
+static void cache_device_id(void)
+{
+    uint8_t mac[6];
+    esp_read_mac(mac, ESP_MAC_BT);
+    snprintf(s_device_id_hex, sizeof(s_device_id_hex),
+             "%02X%02X%02X%02X%02X%02X",
+             mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
  * Compact JSON for GATT notify — fits in a single BLE ATT MTU.
  *
  * Fields:
+ *   device_id (this node's own identity — always present)
  *   id      (only when has_basic_id)
  *   lat, lon, alt, spd, hdg
  *   op_lat, op_lon  (only when has_system)
@@ -195,6 +221,8 @@ static int format_json_compact(const odid_detection_t *d, char *buf, int max_len
 {
     int n = 0;
     n += snprintf(buf + n, max_len - n, "{");
+
+    n += snprintf(buf + n, max_len - n, "\"device_id\":\"%s\",", s_device_id_hex);
 
     if (d->has_basic_id) {
         char esc_id[32];
@@ -223,6 +251,9 @@ static int format_json_compact(const odid_detection_t *d, char *buf, int max_len
 static void output_task(void *arg)
 {
     ESP_LOGI(TAG, "output_task: task entered");
+
+    cache_device_id();
+    ESP_LOGI(TAG, "output_task: device_id=%s", s_device_id_hex);
 
     static char json_buf[WSD_JSON_MAX_LEN];
     static char gatt_buf[256];
