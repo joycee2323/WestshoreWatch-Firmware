@@ -131,14 +131,24 @@ static void encode_location(const odid_detection_t *d, uint8_t *buf)
 static void encode_self_id_signal(const odid_detection_t *d, uint8_t *buf,
                                   int8_t rssi, odid_source_t src)
 {
-    (void)d; (void)rssi; (void)src;
+    (void)rssi; (void)src;
     memset(buf, 0, 25);
     buf[0] = (ODID_MSG_SELF_ID << 4) | 0x02;
     buf[1] = 0x00; /* description type: General text */
-    /* Override Self-ID with bridge name — tells DroneScout app this signal
-     * is being relayed by a bridge, which triggers the green bridge icon. */
-    const char *name = "DroneScout Bridge";
-    memcpy(&buf[2], name, strlen(name));
+    /* Pass through the drone's own Self-ID description verbatim when it sent
+     * one; otherwise leave it blank (buf stays zeroed from memset above).
+     * This used to unconditionally overwrite the field with the literal
+     * "DroneScout Bridge" so DroneScout Pro's app would show its green
+     * bridge icon — discarding whatever real description the drone actually
+     * broadcast. That compatibility is no longer wanted, and nothing in this
+     * app's own ODID parsers (Swift/Kotlin/TS) reads Self-ID content at all
+     * (msgType SELF_ID isn't handled in any of them), so leaving it blank
+     * when the drone didn't send one has no downstream consumer either. */
+    if (d->has_self_id && d->self_id.description[0]) {
+        size_t len = strnlen(d->self_id.description, sizeof(d->self_id.description));
+        if (len > 23) len = 23;  /* buf[2..24] — 23 bytes available after the 2-byte header */
+        memcpy(&buf[2], d->self_id.description, len);
+    }
 }
 
 static void encode_system(const odid_detection_t *d, uint8_t *buf)
