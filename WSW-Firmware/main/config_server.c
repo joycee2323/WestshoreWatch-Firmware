@@ -129,7 +129,13 @@ static esp_err_t handler_root_get(httpd_req_t *req)
     wsd_config_t *c = &g_config;
     char mac_str[18];
     uint8_t mac[6];
-    esp_read_mac(mac, ESP_MAC_WIFI_SOFTAP);
+    /* BT MAC — must match the identity this node actually uses over BLE
+     * (output.c's device_id cache and ble_relay.c's identity advertiser both
+     * read ESP_MAC_BT). Do not switch to WIFI_STA/WIFI_SOFTAP: ESP-IDF's
+     * four-address scheme offsets those from this by +1/+2 in the last
+     * octet, which silently breaks device_id matching for anyone who
+     * transcribes this displayed value into the dashboard by hand. */
+    esp_read_mac(mac, ESP_MAC_BT);
     snprintf(mac_str, sizeof(mac_str), "%02X:%02X:%02X:%02X:%02X:%02X",
              mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
@@ -277,7 +283,7 @@ static esp_err_t handler_root_get(httpd_req_t *req)
         "<tr><td>Firmware</td><td>%s</td></tr>"
         "<tr><td>HW revision</td><td>%s</td></tr>"
         "<tr><td>Built</td><td>%s %s</td></tr>"
-        "<tr><td>MAC</td><td>%s</td></tr>"
+        "<tr><td>MAC (Bluetooth)</td><td>%s</td></tr>"
         "<tr><td>IDF</td><td>%s</td></tr>"
         "<tr><td>Free heap</td><td>%lu</td></tr>"
         "</table></div></div>",
