@@ -86,3 +86,13 @@
 
 // ── Queue sizes ───────────────────────────────────────────────────────────────
 #define WSD_DETECT_QUEUE_DEPTH      32
+
+// ── Display status-screen emitter (Cellular X1 + SparkFun Thing Plus C6) ───────
+// Fire-and-forget UART telemetry tee, added alongside the detection/upload
+// path — see display_emit.c/.h. Uses WSD_UART_PRIMARY_NUM/TX/BAUD above
+// (UART0, GPIO11/D6, 115200) — that peripheral is otherwise unclaimed on
+// this branch (output.c's own use of these same constants is dead code:
+// output_task_start() is never called from main.c). RX intentionally not
+// used (WSD_UART_PRIMARY_RX/GPIO12 is the live status-LED YELLOW pin).
+// Set to 0 to compile the feature out entirely with no code changes elsewhere.
+#define WSD_DISPLAY_EMIT            1

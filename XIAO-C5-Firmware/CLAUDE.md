@@ -39,9 +39,9 @@ attached to every detection upload as `node_position`.
 |--------|------|----------|
 | D4 | GPIO23 | Modem UART TX (C5 → modem RX "R") |
 | D5 | GPIO24 | Modem UART RX (modem TX "T" → C5) |
-| D6 | GPIO11 | Modem PWRKEY (active-low pulse) |
-| D7 | GPIO12 | Status LED red element |
-| D8 | GPIO8 | Status LED green element |
+| D6 | GPIO11 | Status-screen UART0 TX, one-way (`WSD_DISPLAY_EMIT`, `display_emit.c`) — streams "D,"/"N," lines to a SparkFun Thing Plus C6. NOT modem PWRKEY (see Power note below); this pin was previously mislabeled here and was actually unused before this feature. |
+| D7 | GPIO12 | Status LED YELLOW element |
+| D8 | GPIO8 | Status LED RED element |
 
 **IMPORTANT:** XIAO Dx header labels ≠ GPIO numbers. D4 = GPIO23,
 D5 = GPIO24, D6 = GPIO11, D7 = GPIO12, D8 = GPIO8. These are verified
@@ -54,6 +54,12 @@ the modem UART listening on an unconnected pin (zero RX bytes).
 ### Power
 Battery → MH-CD42 → latching switch → 5V rail → C5 5V + modem VCC.
 Always-on PPP mode (no PSM, no light sleep).
+
+**Modem PWRKEY:** hardware-tied to GND (auto-boot on power-up) — not
+GPIO-controlled. No firmware anywhere drives a PWRKEY line; `modem_manager.c`
+just waits for the modem's own auto-boot. An earlier version of the pin
+table above incorrectly listed GPIO11/D6 as "Modem PWRKEY" — that pin was
+actually unused until `WSD_DISPLAY_EMIT` claimed it (see table above).
 
 ### Antennas
 - C5: external u.FL (ALFA AOA-2458-59-TM via N-type bulkhead)
@@ -92,6 +98,10 @@ hue — is what makes a fault unmistakable from healthy at a glance.
 - `gnss_reader.c/.h` — GNSS position parsing from AT+CGPSINFO responses
 - `modem_data_resume.cpp/.h` — PPP-only esp_modem shim; NOT compiled on this
   branch (CMakeLists omits it), kept for the PPP branch
+- `display_emit.c/.h` — `WSD_DISPLAY_EMIT` status-screen UART tee (UART0,
+  GPIO11/D6, TX-only, 115200). Fire-and-forget: bounded queue, drop-on-full,
+  never touches the modem UART/mutex/detection-upload path. See branch
+  `feature/cellular-x1-display`.
 
 ### Existing Files (Unchanged from main)
 - `ble_scanner.c/.h`, `odid_decoder.c/.h`, `ble_relay.c/.h`

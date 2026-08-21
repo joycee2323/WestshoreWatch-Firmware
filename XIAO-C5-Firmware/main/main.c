@@ -22,6 +22,7 @@
 #include "detection_queue.h"
 #include "cellular_uploader.h"
 #include "gnss_reader.h"
+#include "display_emit.h"
 
 static const char *TAG = "MAIN";
 
@@ -65,6 +66,14 @@ static void distributor_task(void *arg)
     while (true) {
         if (xQueueReceive(raw_queue, &det, portMAX_DELAY) == pdTRUE) {
             xQueueSend(detect_queue, &det, 0);
+
+            /* Best-effort tee to the status-screen UART emitter. Copies
+             * only the fields it needs into its own bounded queue and
+             * returns immediately (drop-on-full) — never gates or delays
+             * the detect_queue send above, which is the only thing the
+             * cellular upload path depends on. No-op entirely when
+             * WSD_DISPLAY_EMIT is 0. */
+            display_emit_submit_detection(&det);
         }
     }
 }
@@ -129,6 +138,18 @@ void app_main(void)
     err = detection_queue_init();
     if (err != ESP_OK)
         ESP_LOGW(TAG, "detection_queue_init failed: %s — offline buffering disabled",
+                 esp_err_to_name(err));
+
+    /* Status-screen UART emitter (SparkFun Thing Plus C6, GPIO11/D6, TX-only).
+     * Must be initialized before distributor_task starts calling
+     * display_emit_submit_detection() — harmless even if it weren't, since
+     * that call is a no-op until s_emit_queue exists, but this keeps init
+     * order obvious. Failure here is non-fatal to detection/upload: log and
+     * continue, same pattern as the other best-effort subsystems below. */
+    ESP_LOGI(TAG, "boot: display_emit_init");
+    err = display_emit_init();
+    if (err != ESP_OK)
+        ESP_LOGW(TAG, "display_emit_init failed: %s — status screen telemetry disabled",
                  esp_err_to_name(err));
 
     /* Distributor: fan-out raw detections to cellular upload queue */

@@ -18,6 +18,7 @@ idf_component_register(
         "detection_queue.c"
         "cellular_uploader.c"
         "gnss_reader.c"
+        "display_emit.c"           # WSD_DISPLAY_EMIT — status-screen UART tee (GPIO11/D6, TX-only)
         # modem_data_resume.cpp — PPP-only esp_modem shim; not built on the
         # native-AT-HTTP transport (kept in tree for the PPP branch).
     INCLUDE_DIRS "."
