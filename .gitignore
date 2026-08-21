@@ -6,3 +6,7 @@ idf_activate.bat
 .claude/
 sdkconfig
 dependencies.lock
+__pycache__/
+sdkconfig.old
+esptool.py
+idf.py
