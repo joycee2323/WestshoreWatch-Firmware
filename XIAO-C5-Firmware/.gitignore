@@ -11,3 +11,7 @@ managed_components/
 *.bin
 *.elf
 *.map
+
+# Real per-node cellular credentials (device_id/api_key) — never commit
+cell-provision.csv
+cell-provision.bin
