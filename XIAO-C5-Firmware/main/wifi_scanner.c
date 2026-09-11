@@ -46,9 +46,31 @@ static const char *TAG = "WIFI_SCAN";
 #define FIVE_GHZ_INTERVAL_MS  5000   /* how often to peek at 5 GHz */
 #define FIVE_GHZ_DWELL_MS     400    /* length of each 5 GHz peek    */
 
-/* 5 GHz channels Skydio Standard RID anchors on; each peek alternates to the
- * next entry. Requires a US regulatory domain (set at init). */
-static const uint8_t FIVE_GHZ_CHANS[] = { 149, 153 };
+/* Full US 5 GHz channel set — UNII-1, UNII-2A, UNII-2C, UNII-3 — matching
+ * BlueMark DroneScout ds110's own default scan range (36-165) and this
+ * repo's 5ghz-unii-channel-expansion-investigation.md findings: Skydio C2
+ * can land on any of these groups, not just UNII-3, so the previous 149/153-
+ * only sweep missed real traffic. Kept identical to the custom-PCB X1
+ * source's FIVE_GHZ_CHANS[] (see WSW-Firmware/main/wifi_scanner.c) so the
+ * two scanners stay diff-clean, per this file's own convention.
+ *
+ * ONE channel is visited per peek, round-robin, so a full-band sweep now
+ * spans 25 peeks instead of 2. Per-peek dwell/interval (FIVE_GHZ_DWELL_MS /
+ * FIVE_GHZ_INTERVAL_MS) are deliberately UNCHANGED — this is the "naive
+ * widen" the investigation scoped, not the smarter prioritized-sweep
+ * restructuring it also discussed. Worst-case cold-search time to first
+ * lock on an unknown 5 GHz signal goes from ~10s (this file's old 2-channel
+ * set) — or ~25s for the custom-PCB X1's old 5-channel UNII-3-only set — to
+ * ~125s (25 channels) here, a straight-line scale-up since round-robin
+ * period is linear in list length while dwell/interval aren't. Deliberate,
+ * documented tradeoff, not an oversight; revisit if that latency proves
+ * unacceptable in the field. Requires a US regulatory domain (set at init). */
+static const uint8_t FIVE_GHZ_CHANS[] = {
+    36, 40, 44, 48,                                             /* UNII-1  */
+    52, 56, 60, 64,                                             /* UNII-2A (DFS — RX-only, not a TX concern here) */
+    100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, /* UNII-2C (DFS) */
+    149, 153, 157, 161, 165,                                    /* UNII-3  */
+};
 
 /* ── Adaptive 5 GHz channel-lock ─────────────────────────────────────────
  * Once a 5 GHz ODID beacon is decoded during a peek, bias the peek toward
