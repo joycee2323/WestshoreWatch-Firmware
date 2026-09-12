@@ -54,11 +54,25 @@ static const char *TAG = "WIFI_SCAN";
 #define FIVE_GHZ_RELEASE_MISSES        5
 #define FIVE_GHZ_LOCK_ACTIVE_PER_SWEEP 4
 
-/* 5 GHz U-NII-3 channels Skydio Standard RID anchors on (full UNII-3 group;
- * X10 hops within 149/153). ONE channel is visited per peek, round-robin,
- * so a full-band sweep spans 5 peeks. Per-peek dwell/interval are unchanged,
- * so this stays budget-neutral. Requires a US regulatory domain. */
-static const uint8_t FIVE_GHZ_CHANS[] = { 149, 153, 157, 161, 165 };
+/* Full US 5 GHz channel set — UNII-1, UNII-2A, UNII-2C, UNII-3 — matching
+ * BlueMark DroneScout ds110's own default scan range (36-165) and the naive-
+ * widen approach applied to the sibling XIAO/custom-PCB scanners: Skydio C2
+ * can land on any of these groups, not just UNII-3, so a UNII-3-only sweep
+ * was missing real traffic. ONE channel is visited per peek, round-robin, so
+ * a full-band sweep now spans 25 peeks instead of 5. Per-peek dwell/interval
+ * (FIVE_GHZ_DWELL_MS / FIVE_GHZ_INTERVAL_MS) are deliberately UNCHANGED —
+ * this is the "naive widen," not a smarter prioritized-sweep restructuring.
+ * Worst-case cold-search time to first lock on an unknown 5 GHz signal goes
+ * from ~25s (5 channels) to ~125s (25 channels) — a straight-line 5x, since
+ * round-robin period scales linearly with list length while dwell/interval
+ * don't. Deliberate, documented tradeoff, not an oversight; revisit if that
+ * latency proves unacceptable in the field. Requires a US regulatory domain. */
+static const uint8_t FIVE_GHZ_CHANS[] = {
+    36, 40, 44, 48,                                             /* UNII-1  */
+    52, 56, 60, 64,                                             /* UNII-2A (DFS — RX-only, not a TX concern here) */
+    100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, /* UNII-2C (DFS) */
+    149, 153, 157, 161, 165,                                    /* UNII-3  */
+};
 
 /* Adaptive channel-lock state. Written by promiscuous_cb on a 5 GHz decode,
  * read/managed by channel_hop_task. Single-word writes are atomic on this core;
