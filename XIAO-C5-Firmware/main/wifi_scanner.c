@@ -310,10 +310,12 @@ static void channel_hop_task(void *arg)
 
 #if CONFIG_IDF_TARGET_ESP32C5
         /* ── 5 GHz peek — short, infrequent interjection (C5 only) ─────────
-         * esp_wifi_set_band_mode() BEFORE esp_wifi_set_channel(); C5 switches
-         * band internally (no GPIO). Restore 2.4 GHz afterward so the next
-         * sweep step resumes on `ch`. Channel choice is lock-aware — see
-         * "Adaptive 5 GHz channel-lock" above. */
+         * The band is selected by the CHANNEL NUMBER alone: a single
+         * esp_wifi_set_channel() with a 5 GHz channel moves the radio to
+         * 5 GHz (band mode stays at the SoC default AUTO — no
+         * esp_wifi_set_band_mode() call). The C5's single internal RF path
+         * follows automatically (no GPIO to drive). Channel choice is
+         * lock-aware — see "Adaptive 5 GHz channel-lock" above. */
         TickType_t now = xTaskGetTickCount();
         if (!s_paused &&
             (uint32_t)((now - last_peek) * portTICK_PERIOD_MS) >= FIVE_GHZ_INTERVAL_MS) {
@@ -344,8 +346,7 @@ static void channel_hop_task(void *arg)
             }
 
             TickType_t peek_start = xTaskGetTickCount();
-            esp_err_t e = esp_wifi_set_band_mode(WIFI_BAND_MODE_5G_ONLY);
-            if (e == ESP_OK) e = esp_wifi_set_channel(ch5, WIFI_SECOND_CHAN_NONE);
+            esp_err_t e = esp_wifi_set_channel(ch5, WIFI_SECOND_CHAN_NONE);
 
             if (e == ESP_OK) {
                 ESP_LOGD(TAG, "5GHz peek ch%u%s (%dms)", ch5,
@@ -357,8 +358,9 @@ static void channel_hop_task(void *arg)
                          e, esp_err_to_name(e));
             }
 
-            /* Back to 2.4 GHz; the sweep resumes at `ch` on the next loop. */
-            esp_wifi_set_band_mode(WIFI_BAND_MODE_2G_ONLY);
+            /* No band-mode call to return to 2.4 GHz — the next loop
+             * iteration's 2.4 GHz sweep step re-selects a 2.4 GHz channel via
+             * esp_wifi_set_channel(), which brings the radio back on its own. */
 
             /* ── Lock transition: did a 5 GHz decode land during this peek? ──
              * promiscuous_cb stamps s_5g_last_seen_tick (and
@@ -500,19 +502,24 @@ esp_err_t wifi_scanner_start(QueueHandle_t output_queue)
     }
 #endif /* CONFIG_IDF_TARGET_ESP32C5 */
 
-    /* ESP32-C5 is dual-band; lock to 2.4 GHz since ODID beacons only
-     * transmit on 2.4 GHz. Must be called AFTER esp_wifi_start — the API
-     * returns ESP_ERR_WIFI_NOT_STARTED otherwise. */
-    ESP_LOGI(TAG, "step: esp_wifi_set_band_mode(2G_ONLY)");
-    esp_err_t bm_err = esp_wifi_set_band_mode(WIFI_BAND_MODE_2G_ONLY);
-    if (bm_err != ESP_OK) {
-        ESP_LOGW(TAG, "esp_wifi_set_band_mode failed: 0x%x (%s)",
-                 bm_err, esp_err_to_name(bm_err));
-    }
+    /* ESP32-C5 is dual-band but time-shares ONE antenna. Band mode is left at
+     * the SoC default (AUTO / 2.4G+5G) — we deliberately do NOT call
+     * esp_wifi_set_band_mode() anywhere. channel_hop_task drives the band
+     * purely by CHANNEL NUMBER via esp_wifi_set_channel(): 2.4 GHz channels
+     * for the continuous sweep, short 5 GHz peeks (see FIVE_GHZ_INTERVAL_MS /
+     * FIVE_GHZ_DWELL_MS) to catch Skydio's 5 GHz Standard RID Beacon. The
+     * repeated 2G<->5G band-mode toggle (esp_wifi_set_band_mode(2G_ONLY) at
+     * init plus 5G_ONLY/2G_ONLY around each peek) was the suspected cause of
+     * 5 GHz capturing nothing on this tree, so it is removed here to match
+     * the already-fixed Sentinel and cellular-x1 XIAO scanners. The softAP
+     * still comes up on ch6 (set via esp_wifi_set_config above). */
 
 #if CONFIG_IDF_TARGET_ESP32C5
     /* HT20 (20 MHz) for a clean narrow capture of the 5 GHz beacon IE during
-     * peeks. */
+     * peeks. NOTE: under band mode AUTO these singular esp_wifi_set_bandwidth()
+     * calls may return ESP_ERR_NOT_SUPPORTED (esp_wifi_set_bandwidths() is the
+     * AUTO-mode form). HT20 is already the reset default, so this is
+     * intentionally left as-is and unchecked. */
     esp_wifi_set_bandwidth(WIFI_IF_AP,  WIFI_BW_HT20);
     esp_wifi_set_bandwidth(WIFI_IF_STA, WIFI_BW_HT20);
 #endif /* CONFIG_IDF_TARGET_ESP32C5 */

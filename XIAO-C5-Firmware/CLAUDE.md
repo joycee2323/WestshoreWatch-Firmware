@@ -55,9 +55,16 @@ catches both bands:
   re-acquired before the release timeout fires. The lock is channel-level
   (keyed on the 5 GHz channel, not a drone/MAC) and only changes which
   channel the existing peek slot visits — interval/dwell budget is unchanged.
-- **Band switch** is the C5 internal switch (`esp_wifi_set_band_mode()` before
-  `esp_wifi_set_channel()`) — no GPIO. `country_code("US")` + HT20 are set at
-  init (US regulatory domain is required for ch149/153).
+- **Band switch** is selected purely by CHANNEL NUMBER: a single
+  `esp_wifi_set_channel()` call with a 5 GHz channel moves the radio there —
+  band mode is left at the SoC default AUTO and `esp_wifi_set_band_mode()` is
+  never called anywhere in this file. (An earlier version of this firmware
+  forced `esp_wifi_set_band_mode(2G_ONLY)` at init and toggled
+  `5G_ONLY`/`2G_ONLY` around each peek — that was the suspected cause of
+  5 GHz capturing nothing and has been removed; this doc previously described
+  that toggle as intended design, which is how the bug went unnoticed.)
+  `country_code("US")` + HT20 are set at init (US regulatory domain is
+  required for these channels).
 - **Portal suppression:** the peek is skipped while a config-portal client is
   connected (`s_paused`), so it can't drag the radio off the softAP's ch6 and
   drop the portal beacon.
