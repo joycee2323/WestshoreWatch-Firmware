@@ -6,3 +6,4 @@ idf_activate.bat
 .claude/
 sdkconfig
 dependencies.lock
+build-*/
