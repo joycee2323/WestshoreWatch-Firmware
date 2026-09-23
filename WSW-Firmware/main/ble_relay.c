@@ -14,6 +14,7 @@
 #include "led.h"
 #include "relay_policy.h"
 #include "esp_system.h"
+#include "esp_app_desc.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -100,6 +101,14 @@ static uint8_t       s_counter      = 0;
  * Extended PDUs support up to ~1650 bytes, so the full 36-char UUID api_key
  * fits comfortably. 64 gives headroom for any future key format. */
 #define ID_API_KEY_MAX  64
+
+/* Firmware identity appended after the api_key, behind a 0x00 separator:
+ *   "fw=<PROJECT_VER>+<first 8 hex of the app ELF SHA-256>"
+ * e.g. "fw=1.3-westshore+1a2b3c4d". Lets the phone report firmware_version in
+ * its relayed heartbeat (the backend already stores it) so fielded units can
+ * be told apart without the portal. Parsers that only read the MAC are
+ * unaffected. */
+#define ID_FW_TAG_MAX   48
 
 static bool s_det_adv_configured  = false;
 static bool s_id_adv_configured   = false;
@@ -1006,14 +1015,25 @@ static int configure_id_advertiser(void)
      *   [3] company MSB (0x08 of 0x08FE)
      *   [4..9]  MAC
      *   [10..]  api_key prefix */
-    uint8_t buf[1 + 1 + 2 + 6 + ID_API_KEY_MAX];
-    size_t payload_len = 1 + 2 + 6 + key_len;  /* type + company + mac + key */
+    char fw_tag[ID_FW_TAG_MAX];
+    char sha[9] = {0};
+    esp_app_get_elf_sha256(sha, sizeof(sha));
+    int fw_len = snprintf(fw_tag, sizeof(fw_tag), "fw=%s+%s",
+                          esp_app_get_description()->version, sha);
+    if (fw_len < 0) fw_len = 0;
+    if (fw_len >= (int)sizeof(fw_tag)) fw_len = sizeof(fw_tag) - 1;
+
+    uint8_t buf[1 + 1 + 2 + 6 + ID_API_KEY_MAX + 1 + ID_FW_TAG_MAX];
+    /* type + company + mac + key + 0x00 separator + fw tag */
+    size_t payload_len = 1 + 2 + 6 + key_len + 1 + (size_t)fw_len;
     buf[0] = (uint8_t)payload_len;
     buf[1] = 0xFF;
     buf[2] = 0xFE;
     buf[3] = 0x08;
     memcpy(&buf[4],  mac, 6);
     memcpy(&buf[10], g_config.api_key, key_len);
+    buf[10 + key_len] = 0x00;
+    memcpy(&buf[10 + key_len + 1], fw_tag, (size_t)fw_len);
     size_t total = 1 + payload_len;
 
     struct os_mbuf *data = os_msys_get_pkthdr(total, 0);
@@ -1041,10 +1061,10 @@ static int configure_id_advertiser(void)
 
     s_id_adv_configured = true;
     ESP_LOGI(TAG,
-             "Identity advertiser started on handle %d mac=%02X:%02X:%02X:%02X:%02X:%02X key_len=%u",
+             "Identity advertiser started on handle %d mac=%02X:%02X:%02X:%02X:%02X:%02X key_len=%u %s",
              ID_ADV_HANDLE,
              mac[0], mac[1], mac[2], mac[3], mac[4], mac[5],
-             (unsigned)key_len);
+             (unsigned)key_len, fw_tag);
     return 0;
 }
 
