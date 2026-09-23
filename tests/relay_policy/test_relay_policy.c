@@ -110,6 +110,72 @@ static void test_hour_wrap_of_odid_ts_counts_as_advancing(void)
     TEST_ASSERT_EQUAL(RP_KEEP, rp_check_evict(&slot, S(18), &LIM));
 }
 
+/* Frames keep arriving (so no-frames never fires) but carry an unusable ts. */
+static void feed_invalid_ts(rp_tick_t from, rp_tick_t to, uint32_t bad_ts)
+{
+    for (rp_tick_t now = from; now <= to; now += S(1)) {
+        rp_note_frame(&slot, now);
+        rp_note_airborne_state(&slot, true, true, now);
+        rp_note_location_ts(&slot, bad_ts, now);
+    }
+}
+
+/* Frames keep arriving but carry no valid Location (Basic ID / System only),
+ * so ble_relay.c never calls rp_note_location_ts for them. */
+static void feed_no_location(rp_tick_t from, rp_tick_t to)
+{
+    for (rp_tick_t now = from; now <= to; now += S(1)) {
+        rp_note_frame(&slot, now);
+        rp_note_airborne_state(&slot, true, true, now);
+    }
+}
+
+static void test_ts_above_36000_never_frozen(void)
+{
+    feed_invalid_ts(S(0), S(120), 36001);
+    TEST_ASSERT_EQUAL(RP_KEEP, rp_check_evict(&slot, S(120), &LIM));
+    setUp();
+    feed_invalid_ts(S(0), S(120), 0xFFFE);
+    TEST_ASSERT_EQUAL(RP_KEEP, rp_check_evict(&slot, S(120), &LIM));
+}
+
+static void test_valid_then_unknown_ts_is_not_frozen(void)
+{
+    feed(S(0), S(10), 10, 24000, true);        /* genuine */
+    feed_invalid_ts(S(11), S(120), 0xFFFF);    /* then GPS time lost */
+    TEST_ASSERT_EQUAL(RP_KEEP, rp_check_evict(&slot, S(120), &LIM));
+}
+
+static void test_missing_location_stretch_is_not_frozen(void)
+{
+    feed(S(0), S(10), 10, 24000, true);        /* genuine, last ts at t=10 */
+    feed_no_location(S(11), S(120));           /* Basic ID only for 110 s */
+    TEST_ASSERT_EQUAL(RP_KEEP, rp_check_evict(&slot, S(120), &LIM));
+}
+
+static void test_frozen_ts_resumes_after_missing_location_counts_whole_span(void)
+{
+    /* The same ts seen at t=11 and again at t=45 IS frozen, even if frames
+     * without Location arrived in between. */
+    feed(S(0), S(10), 10, 24000, true);
+    feed(S(11), S(11), 0, 24721, true);
+    feed_no_location(S(12), S(44));
+    TEST_ASSERT_EQUAL(RP_KEEP, rp_check_evict(&slot, S(44), &LIM));
+    feed(S(45), S(45), 0, 24721, true);
+    TEST_ASSERT_EQUAL(RP_EVICT_FROZEN, rp_check_evict(&slot, S(45), &LIM));
+}
+
+static void test_reject_list_ignores_invalid_ts(void)
+{
+    rp_reject_list_t l;
+    rp_reject_init(&l, S(600));
+    rp_reject_add(&l, "UAS1", 0xFFFF, S(1));
+    rp_reject_add(&l, "UAS1", 36001, S(1));
+    TEST_ASSERT_FALSE(rp_reject_contains(&l, "UAS1", 0xFFFF, S(2)));
+    TEST_ASSERT_FALSE(rp_reject_contains(&l, "UAS1", 36001, S(2)));
+    for (int i = 0; i < RP_REJECT_SLOTS; i++) TEST_ASSERT_FALSE(l.e[i].used);
+}
+
 static void test_unknown_odid_ts_does_not_look_frozen(void)
 {
     /* ODID 0xFFFF = timestamp unknown. A real drone without GPS time must
@@ -245,6 +311,11 @@ int main(void)
     RUN_TEST(test_eviction_is_wrap_safe);
     RUN_TEST(test_hour_wrap_of_odid_ts_counts_as_advancing);
     RUN_TEST(test_unknown_odid_ts_does_not_look_frozen);
+    RUN_TEST(test_ts_above_36000_never_frozen);
+    RUN_TEST(test_valid_then_unknown_ts_is_not_frozen);
+    RUN_TEST(test_missing_location_stretch_is_not_frozen);
+    RUN_TEST(test_frozen_ts_resumes_after_missing_location_counts_whole_span);
+    RUN_TEST(test_reject_list_ignores_invalid_ts);
     RUN_TEST(test_reject_list_matches_exact_pair_until_ttl);
     RUN_TEST(test_reject_list_full_replaces_oldest);
     RUN_TEST(test_reject_list_ignores_empty_id);
