@@ -6,6 +6,7 @@ idf_component_register(
         "wifi_scanner.c"
         "ble_scanner.c"
         "ble_relay.c"
+        "relay_policy.c"
         "output.c"
         "led.c"
         "config_server.c"
@@ -26,3 +27,7 @@ idf_component_register(
         mbedtls
         lwip
 )
+# Bench-only: idf.py -DWSW_BENCH_RESET_TEST=1|2 build (see ble_relay.c).
+if(DEFINED WSW_BENCH_RESET_TEST)
+    target_compile_definitions(${COMPONENT_LIB} PRIVATE WSW_BENCH_RESET_TEST=${WSW_BENCH_RESET_TEST})
+endif()
