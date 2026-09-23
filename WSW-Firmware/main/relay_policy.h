@@ -15,9 +15,12 @@
  * payload does — and after a BLE host reset the overwrite silently no-op'd.
  * The pieces here:
  *   - rp_check_evict: land / silent / no-frames (unchanged semantics) plus
- *     FROZEN: slot's ODID location timestamp hasn't advanced for frozen_ticks
- *     while frames keep arriving. A real drone's GPS-stamped ts always
- *     advances; a stuck one doesn't.
+ *     FROZEN: the SAME valid ODID location timestamp is still being received
+ *     more than frozen_ticks after it first appeared. A real drone's
+ *     GPS-stamped ts always advances; a stuck one doesn't. Only frames that
+ *     carry a valid Location with a valid ts (0..36000) count: frames
+ *     without Location, and unknown/invalid ts (0xFFFF, >36000), neither
+ *     trip nor extend it — they are handled by the silent/no-frames rules.
  *   - rp_reject_*: small TTL list of (uas_id, ts) evicted as frozen, so the
  *     same frozen frames can't immediately re-arm a slot.
  *   - rp_radio_*: Pack advertiser health. Reconfigure when the host lost the
@@ -46,8 +49,9 @@ typedef struct {
     bool      has_grounded;
     rp_tick_t first_grounded_after_flight;
     bool      has_loc_ts;
-    uint32_t  loc_ts;              /* last ODID location timestamp seen */
+    uint32_t  loc_ts;              /* last valid ODID location timestamp seen */
     rp_tick_t loc_ts_changed_at;   /* tick when loc_ts last changed */
+    rp_tick_t loc_ts_last_seen_at; /* tick of the latest frame still carrying loc_ts */
 } rp_slot_timing_t;
 
 typedef enum {
@@ -71,7 +75,8 @@ void rp_note_frame(rp_slot_timing_t *t, rp_tick_t now);
 void rp_note_airborne_state(rp_slot_timing_t *t, bool airborne, bool airborne_ever, rp_tick_t now);
 /* A frame carrying a valid location with ODID timestamp ts (tenths of a second
  * since the UTC hour, 0..36000). An out-of-range / unknown ts (ODID 0xFFFF)
- * turns frozen tracking off for the slot rather than looking frozen. */
+ * turns frozen tracking off for the slot rather than looking frozen. Do NOT
+ * call it for frames without a valid Location. */
 void rp_note_location_ts(rp_slot_timing_t *t, uint32_t ts, rp_tick_t now);
 
 rp_evict_t  rp_check_evict(const rp_slot_timing_t *t, rp_tick_t now, const rp_limits_t *lim);
@@ -93,7 +98,10 @@ typedef struct {
 } rp_reject_list_t;
 
 void rp_reject_init(rp_reject_list_t *l, rp_tick_t ttl_ticks);
-/* Adds (or refreshes) an entry; when full, replaces the oldest. */
+/* Adds (or refreshes) an entry; when full, replaces the oldest. An invalid
+ * ts (>36000, e.g. ODID 0xFFFF "unknown") is never added, and never matches
+ * in rp_reject_contains — unknown timestamps are not evidence of a frozen
+ * frame. */
 void rp_reject_add(rp_reject_list_t *l, const char *uas_id, uint32_t ts, rp_tick_t now);
 /* True while an unexpired entry matches exactly. */
 bool rp_reject_contains(const rp_reject_list_t *l, const char *uas_id, uint32_t ts, rp_tick_t now);
