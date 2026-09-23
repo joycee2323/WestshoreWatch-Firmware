@@ -36,7 +36,8 @@ static void feed(rp_tick_t from, rp_tick_t to, int ts_step, uint32_t ts0, bool a
     uint32_t ts = ts0;
     for (rp_tick_t t = from; t <= to; t += S(1)) {
         rp_note_frame(&slot, t);
-        rp_note_airborne_state(&slot, airborne, true, t);
+        /* airborne_ever latches like drone_slot_t.airborne_ever does. */
+        rp_note_airborne_state(&slot, airborne, slot.has_airborne || airborne, t);
         rp_note_location_ts(&slot, ts, t);
         ts = (uint32_t)((int)ts + ts_step) % (RP_ODID_TS_MAX);
     }
