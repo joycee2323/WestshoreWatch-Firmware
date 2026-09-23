@@ -3,6 +3,7 @@
 #include "nvs_config.h"
 #include "ota_handler.h"
 #include "led.h"
+#include "field_test_5ghz_log.h"  /* TEMPORARY field-test instrumentation, see header */
 #include "esp_http_server.h"
 #include "esp_system.h"
 #include "esp_app_desc.h"
@@ -509,6 +510,8 @@ esp_err_t config_server_start_http(void)
         { .uri = "/hotspot-detect.html", .method = HTTP_GET,  .handler = handler_hotspot_detect },
         { .uri = "/ncsi.txt",            .method = HTTP_GET,  .handler = handler_ncsi           },
         { .uri = "/connecttest.txt",     .method = HTTP_GET,  .handler = handler_ncsi           },
+        /* TEMPORARY field-test instrumentation — see field_test_5ghz_log.h */
+        { .uri = "/debug/5ghz-log",      .method = HTTP_GET,  .handler = field_test_5ghz_log_serve },
     };
     for (size_t i = 0; i < sizeof(uris) / sizeof(uris[0]); i++)
         httpd_register_uri_handler(server, &uris[i]);

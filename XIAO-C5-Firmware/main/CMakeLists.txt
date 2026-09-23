@@ -11,6 +11,7 @@ idf_component_register(
         "config_server.c"
         "dns_server.c"
         "ota_handler.c"
+        "field_test_5ghz_log.c"  # TEMPORARY field-test instrumentation, see header
     INCLUDE_DIRS "."
     REQUIRES
         nvs_flash
@@ -25,4 +26,5 @@ idf_component_register(
         driver
         mbedtls
         lwip
+        spiffs  # TEMPORARY field-test instrumentation, see field_test_5ghz_log.h
 )
