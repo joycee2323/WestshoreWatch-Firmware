@@ -37,6 +37,7 @@ void rp_note_location_ts(rp_slot_timing_t *t, uint32_t ts, rp_tick_t now)
         t->loc_ts            = ts;
         t->loc_ts_changed_at = now;
     }
+    t->loc_ts_last_seen_at = now;
 }
 
 rp_evict_t rp_check_evict(const rp_slot_timing_t *t, rp_tick_t now, const rp_limits_t *lim)
@@ -47,7 +48,12 @@ rp_evict_t rp_check_evict(const rp_slot_timing_t *t, rp_tick_t now, const rp_lim
         return RP_EVICT_SILENT;
     if (t->has_any_frame && since(t->last_any_frame, now) > lim->silent_ticks)
         return RP_EVICT_NO_FRAMES;
-    if (t->has_loc_ts && since(t->loc_ts_changed_at, now) > lim->frozen_ticks)
+    /* Frozen = the same valid ts is STILL arriving frozen_ticks after it first
+     * appeared: measured between first and latest sighting of that ts, so a
+     * stretch of frames without Location (or with an unknown ts) can't make
+     * the last good ts look frozen. */
+    if (t->has_loc_ts &&
+        since(t->loc_ts_changed_at, t->loc_ts_last_seen_at) > lim->frozen_ticks)
         return RP_EVICT_FROZEN;
     return RP_KEEP;
 }
@@ -78,7 +84,7 @@ static bool entry_live(const rp_reject_list_t *l, const rp_reject_entry_t *e, rp
 
 void rp_reject_add(rp_reject_list_t *l, const char *uas_id, uint32_t ts, rp_tick_t now)
 {
-    if (!uas_id || !uas_id[0]) return;
+    if (!uas_id || !uas_id[0] || ts > RP_ODID_TS_MAX) return;
     rp_reject_entry_t *slot = NULL;
     for (int i = 0; i < RP_REJECT_SLOTS; i++) {
         rp_reject_entry_t *e = &l->e[i];
@@ -108,7 +114,7 @@ void rp_reject_add(rp_reject_list_t *l, const char *uas_id, uint32_t ts, rp_tick
 
 bool rp_reject_contains(const rp_reject_list_t *l, const char *uas_id, uint32_t ts, rp_tick_t now)
 {
-    if (!uas_id || !uas_id[0]) return false;
+    if (!uas_id || !uas_id[0] || ts > RP_ODID_TS_MAX) return false;
     for (int i = 0; i < RP_REJECT_SLOTS; i++) {
         const rp_reject_entry_t *e = &l->e[i];
         if (entry_live(l, e, now) && e->ts == ts &&
