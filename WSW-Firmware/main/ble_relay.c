@@ -12,6 +12,9 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "led.h"
+#include "relay_policy.h"
+#include "esp_system.h"
+#include "esp_app_desc.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -22,6 +25,38 @@
  * ESP_LOGI line will flag if this ceiling is ever exceeded in the field,
  * at which point bumping higher is a one-line change. */
 #define MAX_CONCURRENT_DRONES 32
+
+/* Relay safety net (incident 2026-09-22, see relay_policy.h): a node kept
+ * radiating one cached Pack with a frozen ODID timestamp for 30+ minutes.
+ *   RELAY_FROZEN_TS_MS   — evict a slot whose ODID location ts hasn't advanced
+ *                          this long while frames keep arriving.
+ *   RELAY_REJECT_TTL_MS  — after a frozen eviction, drop that exact
+ *                          (uas_id, ts) for this long so it can't re-arm.
+ *   PACK_WRITE_STUCK_MS  — Pack (handle 1) payload writes failing this long,
+ *                          or the host lost the instance ⇒ remove + reconfigure.
+ *   PACK_RESTART_MS      — still unhealthy this long after that ⇒ esp_restart()
+ *                          (a power-cycle is the one known recovery for a
+ *                          wedged controller buffer). */
+#define RELAY_FROZEN_TS_MS      30000
+#define RELAY_REJECT_TTL_MS    600000
+#define PACK_WRITE_STUCK_MS     30000
+#define PACK_RESTART_MS         60000
+#define PACK_RECONFIG_RETRY_MS   5000
+
+#ifdef WSW_BENCH_RESET_TEST
+/* BENCH-ONLY (never in a release build) — reproduces the on_reset hole.
+ * 20 s after a slot first goes live, force a BLE host reset and make Pack
+ * (handle 1) configuration fail:
+ *   WSW_BENCH_RESET_TEST=1  fail once (on_sync's reconfigure) — expect the
+ *                           watchdog to reconfigure within ~5 s and handle 1
+ *                           to carry live Packs / the placeholder again;
+ *   WSW_BENCH_RESET_TEST=2  fail every time — expect esp_restart() ~60 s later.
+ * Build: idf.py -DWSW_BENCH_RESET_TEST=1 build */
+static volatile int s_bench_fail_pack_config;   /* 0 off, 1 once, 2 always */
+static bool         s_bench_fired;
+static bool         s_bench_armed;
+static TickType_t   s_bench_live_since;
+#endif
 
 static const char *TAG = "BLE_RELAY";
 
@@ -67,12 +102,22 @@ static uint8_t       s_counter      = 0;
  * fits comfortably. 64 gives headroom for any future key format. */
 #define ID_API_KEY_MAX  64
 
+/* Firmware identity appended after the api_key, behind a 0x00 separator:
+ *   "fw=<PROJECT_VER>+<first 8 hex of the app ELF SHA-256>"
+ * e.g. "fw=1.3-westshore+1a2b3c4d". Lets the phone report firmware_version in
+ * its relayed heartbeat (the backend already stores it) so fielded units can
+ * be told apart without the portal. Parsers that only read the MAC are
+ * unaffected. */
+#define ID_FW_TAG_MAX   48
+
 static bool s_det_adv_configured  = false;
 static bool s_id_adv_configured   = false;
 static bool s_pack_adv_configured = false;
 
 /* Forward decls */
 static void relay_task(void *arg);
+static int  configure_pack_advertiser(void);
+static void reconfigure_pack_advertiser(void);
 
 /* ─────────────────────────────────────────────────────────────────────────────
  * Encode helpers
@@ -264,9 +309,11 @@ static void encode_pack(const odid_detection_t *d, uint8_t *buf)
  *   [4]       app code 0x0D
  *   [5]       rolling counter (shared s_counter with handle 0)
  *   [6..82]   77-byte pack payload */
-static void advertise_pack(const uint8_t *pack_payload)
+/* Returns true when the controller accepted the new payload (set_data), which
+ * is what replaces whatever it was radiating — see the Pack watchdog. */
+static bool advertise_pack(const uint8_t *pack_payload)
 {
-    if (!s_pack_adv_configured) return;
+    if (!s_pack_adv_configured) return false;
 
     const size_t ad_len = 1 + 1 + 2 + 2 + ODID_PACK_PAYLOAD;  /* 83 */
     uint8_t adv_raw[83];
@@ -281,12 +328,12 @@ static void advertise_pack(const uint8_t *pack_payload)
     struct os_mbuf *data = os_msys_get_pkthdr(ad_len, 0);
     if (!data) {
         ESP_LOGW(TAG, "pack msys_get_pkthdr failed");
-        return;
+        return false;
     }
     if (os_mbuf_append(data, adv_raw, ad_len) != 0) {
         ESP_LOGW(TAG, "pack mbuf_append failed");
         os_mbuf_free_chain(data);
-        return;
+        return false;
     }
 
     if (ble_gap_ext_adv_active(PACK_ADV_HANDLE)) {
@@ -296,13 +343,14 @@ static void advertise_pack(const uint8_t *pack_payload)
     int rc = ble_gap_ext_adv_set_data(PACK_ADV_HANDLE, data);
     if (rc != 0) {
         ESP_LOGE(TAG, "pack ext_adv_set_data failed: %d", rc);
-        return;
+        return false;
     }
 
     rc = ble_gap_ext_adv_start(PACK_ADV_HANDLE, 0, 0);
     if (rc != 0 && rc != BLE_HS_EALREADY) {
         ESP_LOGE(TAG, "pack ext_adv_start failed: %d", rc);
     }
+    return true;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -352,15 +400,15 @@ static void encode_bridge_beacon(uint8_t *buf)
  * "WSW-<device_id>" idle content as handle 0 (see encode_bridge_beacon()
  * above) and msg_count=1; the app's upload-guard drops anything with that
  * UAS_ID prefix, same semantics as handle 0. */
-static void advertise_pack_idle_placeholder(void)
+static bool advertise_pack_idle_placeholder(void)
 {
-    if (!s_pack_adv_configured) return;
+    if (!s_pack_adv_configured) return false;
     uint8_t pack_buf[ODID_PACK_PAYLOAD];
     memset(pack_buf, 0, sizeof(pack_buf));
     pack_buf[0] = (ODID_MSG_PACK << 4) | 0x02;
     pack_buf[1] = 1;                          /* msg_count = 1 (just basic_id) */
     encode_bridge_beacon(&pack_buf[2]);       /* basic_id = idle "WSW-<device_id>" */
-    advertise_pack(pack_buf);
+    return advertise_pack(pack_buf);
 }
 
 
@@ -382,13 +430,21 @@ typedef struct {
     odid_detection_t  acc;
     odid_system_t     sys_saved;
     bool              sys_saved_ok;
-    TickType_t        last_any_frame;
-    TickType_t        last_valid_airborne;
-    TickType_t        first_grounded_after_flight;
+    rp_slot_timing_t  timing;         /* frame / airborne / ODID-ts clocks (relay_policy) */
     bool              airborne_ever;  /* latched once we observe airborne */
 } drone_slot_t;
 
 static drone_slot_t s_slots[MAX_CONCURRENT_DRONES];
+
+/* (uas_id, ts) pairs evicted as frozen — see RELAY_REJECT_TTL_MS. */
+static rp_reject_list_t  s_reject;
+/* Pack (handle 1) advertiser health — see PACK_WRITE_STUCK_MS. */
+static rp_radio_health_t s_pack_health;
+static const rp_radio_limits_t k_pack_radio_limits = {
+    .stale_write_ticks    = pdMS_TO_TICKS(PACK_WRITE_STUCK_MS),
+    .restart_ticks        = pdMS_TO_TICKS(PACK_RESTART_MS),
+    .reconfig_retry_ticks = pdMS_TO_TICKS(PACK_RECONFIG_RETRY_MS),
+};
 
 #define LOC_VALID(d) ((d).has_location && \
                       (d).location.lat >= -90.0f && (d).location.lat <= 90.0f && \
@@ -451,11 +507,12 @@ static drone_slot_t *resolve_slot(const odid_detection_t *det, TickType_t now)
             if (s_slots[i].uas_id[0] == '\0') { claim = &s_slots[i]; break; }
         }
         if (!claim) {
-            TickType_t oldest = now;
+            TickType_t oldest_age = 0;
             for (int i = 0; i < MAX_CONCURRENT_DRONES; i++) {
-                if (s_slots[i].last_any_frame <= oldest) {
-                    oldest = s_slots[i].last_any_frame;
-                    claim  = &s_slots[i];
+                TickType_t age = now - s_slots[i].timing.last_any_frame;
+                if (!claim || age >= oldest_age) {
+                    oldest_age = age;
+                    claim      = &s_slots[i];
                 }
             }
             ESP_LOGI(TAG, "All %d slots full — evicting stalest for new uas_id=%s",
@@ -518,7 +575,9 @@ static void merge_into_slot(drone_slot_t *s, const odid_detection_t *det,
     if (LOC_VALID(*det))   { s->acc.location = det->location; s->acc.has_location = true; }
     if (det->has_system)   { s->acc.system   = det->system;   s->acc.has_system   = true; }
     if (det->has_self_id)  { s->acc.self_id  = det->self_id;  s->acc.has_self_id  = true; }
-    s->last_any_frame = now;
+    rp_note_frame(&s->timing, now);
+    if (LOC_VALID(*det))
+        rp_note_location_ts(&s->timing, det->location.timestamp, now);
 
     /* sys_saved rules — unchanged semantics, scoped per-slot. */
     if (s->acc.has_system && s->acc.has_basic_id) {
@@ -564,32 +623,34 @@ static void merge_into_slot(drone_slot_t *s, const odid_detection_t *det,
     }
 }
 
-/* Per-slot silence/landing eviction. Returns true if the slot was freed. */
+/* Per-slot eviction: landed / silent / no frames (unchanged thresholds) plus
+ * a frozen ODID timestamp. Returns true if the slot was freed. */
 static bool maybe_evict_slot(drone_slot_t *s, TickType_t now)
 {
     if (s->uas_id[0] == '\0') return false;
 
     /* Eviction thresholds come from g_config (captive-portal editable, NVS
-     * persisted). Defaults: land=5s, silent=15s. Previously hardcoded;
-     * the portal fields existed but were never read at runtime. */
-    uint32_t land_ms   = (uint32_t)g_config.land_timeout_s   * 1000U;
-    uint32_t silent_ms = (uint32_t)g_config.silent_timeout_s * 1000U;
+     * persisted). Defaults: land=5s, silent=15s. */
+    const rp_limits_t lim = {
+        .land_ticks   = pdMS_TO_TICKS((uint32_t)g_config.land_timeout_s   * 1000U),
+        .silent_ticks = pdMS_TO_TICKS((uint32_t)g_config.silent_timeout_s * 1000U),
+        .frozen_ticks = pdMS_TO_TICKS(RELAY_FROZEN_TS_MS),
+    };
 
-    bool landed = (s->first_grounded_after_flight != 0 &&
-                   (now - s->first_grounded_after_flight) > pdMS_TO_TICKS(land_ms));
-    bool silent = (s->last_valid_airborne != 0 &&
-                   (now - s->last_valid_airborne) > pdMS_TO_TICKS(silent_ms));
-    bool any_silent = (s->last_any_frame != 0 &&
-                       (now - s->last_any_frame) > pdMS_TO_TICKS(silent_ms));
+    rp_evict_t why = rp_check_evict(&s->timing, now, &lim);
+    if (why == RP_KEEP) return false;
 
-    if (landed || silent || any_silent) {
-        ESP_LOGI(TAG, "Drone %s %s — evicting slot",
-                 s->uas_id,
-                 landed ? "landed" : (silent ? "silent" : "no frames"));
-        memset(s, 0, sizeof(*s));
-        return true;
+    if (why == RP_EVICT_FROZEN) {
+        rp_reject_add(&s_reject, s->uas_id, s->timing.loc_ts, now);
+        ESP_LOGW(TAG, "Drone %s ODID ts %u not advancing for %ds — evicting slot, "
+                      "rejecting (uas, ts) for %ds",
+                 s->uas_id, (unsigned)s->timing.loc_ts,
+                 RELAY_FROZEN_TS_MS / 1000, RELAY_REJECT_TTL_MS / 1000);
+    } else {
+        ESP_LOGI(TAG, "Drone %s %s — evicting slot", s->uas_id, rp_evict_name(why));
     }
-    return false;
+    memset(s, 0, sizeof(*s));
+    return true;
 }
 
 static int count_live_slots(void)
@@ -608,6 +669,8 @@ static void relay_task(void *arg)
     ESP_LOGI(TAG, "Relay task running");
 
     memset(s_slots, 0, sizeof(s_slots));
+    rp_reject_init(&s_reject, pdMS_TO_TICKS(RELAY_REJECT_TTL_MS));
+    rp_radio_init(&s_pack_health);
 
     /* ── Relay strategy ────────────────────────────────────────────────────────
      * Two parallel emission paths:
@@ -644,21 +707,27 @@ static void relay_task(void *arg)
         bool got_frame = (xQueueReceive(s_queue, &det, pdMS_TO_TICKS(50)) == pdTRUE);
         TickType_t now = xTaskGetTickCount();
 
+        /* A frame whose exact (uas_id, ts) was just evicted as frozen must not
+         * re-arm a slot. BasicId-bearing frames are checked before a slot is
+         * claimed; MAC-fallback frames against the slot they resolve to. */
+        if (got_frame && det.has_basic_id && det.basic_id.uas_id[0] && LOC_VALID(det) &&
+            rp_reject_contains(&s_reject, det.basic_id.uas_id, det.location.timestamp, now)) {
+            got_frame = false;
+        }
+
         if (got_frame) {
             drone_slot_t *s = resolve_slot(&det, now);
+            if (s && !det.has_basic_id && LOC_VALID(det) &&
+                rp_reject_contains(&s_reject, s->uas_id, det.location.timestamp, now)) {
+                s = NULL;
+            }
             if (s) {
                 merge_into_slot(s, &det, now);
 
                 bool airborne = s->acc.has_location &&
                                 s->acc.location.status == OP_STATUS_AIRBORNE;
-                if (airborne) {
-                    s->last_valid_airborne = now;
-                    s->first_grounded_after_flight = 0;
-                    s->airborne_ever = true;
-                } else if (s->airborne_ever) {
-                    if (s->first_grounded_after_flight == 0)
-                        s->first_grounded_after_flight = now;
-                }
+                rp_note_airborne_state(&s->timing, airborne, s->airborne_ever, now);
+                if (airborne) s->airborne_ever = true;
             }
         }
 
@@ -668,10 +737,31 @@ static void relay_task(void *arg)
             maybe_evict_slot(&s_slots[i], now);
         }
 
+        /* Pack (handle 1) watchdog. A BLE host reset clears
+         * s_pack_adv_configured and every placeholder write then silently
+         * no-ops while the controller keeps radiating the last Pack. */
+        switch (rp_radio_check(&s_pack_health, s_pack_adv_configured, now, &k_pack_radio_limits)) {
+        case RP_RADIO_RECONFIGURE:
+            ESP_LOGW(TAG, "Pack advertiser unhealthy (configured=%d) — removing and "
+                          "reconfiguring handle %d", s_pack_adv_configured, PACK_ADV_HANDLE);
+            reconfigure_pack_advertiser();
+            rp_radio_note_reconfigure(&s_pack_health, now);
+            break;
+        case RP_RADIO_RESTART:
+            ESP_LOGE(TAG, "Pack advertiser still unhealthy after reconfigure — restarting "
+                          "to clear the controller's cached Pack");
+            vTaskDelay(pdMS_TO_TICKS(100));   /* let the log line drain */
+            esp_restart();
+            break;
+        default:
+            break;
+        }
+
         int live = count_live_slots();
         if (live == 0) {
             ble_gap_ext_adv_stop(ADV_HANDLE);             /* keep — pre-step for advertise_odid */
-            advertise_pack_idle_placeholder();            /* overwrite handle 1 (was: stop) */
+            rp_radio_note_write(&s_pack_health,
+                                advertise_pack_idle_placeholder(), now); /* overwrite handle 1 */
             ble_detection_advertise_stop();               /* now sets handle 2 to placeholder */
             led_set_detecting(false);
             advertise_odid(bridge_buf);
@@ -681,6 +771,19 @@ static void relay_task(void *arg)
         }
 
         led_set_detecting(true);
+#ifdef WSW_BENCH_RESET_TEST
+        if (!s_bench_fired) {
+            if (!s_bench_armed) {
+                s_bench_armed = true;
+                s_bench_live_since = now;
+            } else if (now - s_bench_live_since > pdMS_TO_TICKS(20000)) {
+                s_bench_fired = true;
+                s_bench_fail_pack_config = WSW_BENCH_RESET_TEST;
+                ESP_LOGW(TAG, "[bench] forcing BLE host reset (mode %d)", WSW_BENCH_RESET_TEST);
+                ble_hs_sched_reset(BLE_HS_ECONTROLLER);
+            }
+        }
+#endif
 
         /* Broadcast each live slot's full cycle back-to-back. Each burst is
          * self-consistent (basic_id + location + system all from one drone),
@@ -710,7 +813,7 @@ static void relay_task(void *arg)
              * legacy emission on handle 0 carry what we have. */
             if (loc_valid) {
                 encode_pack(&out, pack_buf);
-                advertise_pack(pack_buf);
+                rp_radio_note_write(&s_pack_health, advertise_pack(pack_buf), now);
             }
 
             /* Option A: basic_id now emits every cycle (not just cycle 0).
@@ -816,6 +919,13 @@ static int configure_detection_advertiser(void)
  * ───────────────────────────────────────────────────────────────────────────── */
 static int configure_pack_advertiser(void)
 {
+#ifdef WSW_BENCH_RESET_TEST
+    if (s_bench_fail_pack_config) {
+        ESP_LOGW(TAG, "[bench] simulating failed Pack configure (mode %d)", s_bench_fail_pack_config);
+        if (s_bench_fail_pack_config == 1) s_bench_fail_pack_config = 0;
+        return -1;
+    }
+#endif
     struct ble_gap_ext_adv_params params;
     memset(&params, 0, sizeof(params));
     params.legacy_pdu    = 0;        /* extended PDU — 83-byte AD exceeds legacy 31B cap */
@@ -840,6 +950,21 @@ static int configure_pack_advertiser(void)
     s_pack_adv_configured = true;
     ESP_LOGI(TAG, "Pack advertiser configured on handle %d", PACK_ADV_HANDLE);
     return 0;
+}
+
+/* Pack watchdog recovery: remove the advertising set outright (an HCI
+ * Remove Advertising Set also stops the controller transmitting its cached
+ * buffer, which a plain ext_adv_stop does not on this build) and configure it
+ * again. The next placeholder / pack write repopulates the payload. */
+static void reconfigure_pack_advertiser(void)
+{
+    ble_gap_ext_adv_stop(PACK_ADV_HANDLE);
+    int rc = ble_gap_ext_adv_remove(PACK_ADV_HANDLE);
+    if (rc != 0 && rc != BLE_HS_EALREADY) {
+        ESP_LOGW(TAG, "pack ext_adv_remove (handle %d) failed: %d", PACK_ADV_HANDLE, rc);
+    }
+    s_pack_adv_configured = false;
+    configure_pack_advertiser();
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -890,14 +1015,25 @@ static int configure_id_advertiser(void)
      *   [3] company MSB (0x08 of 0x08FE)
      *   [4..9]  MAC
      *   [10..]  api_key prefix */
-    uint8_t buf[1 + 1 + 2 + 6 + ID_API_KEY_MAX];
-    size_t payload_len = 1 + 2 + 6 + key_len;  /* type + company + mac + key */
+    char fw_tag[ID_FW_TAG_MAX];
+    char sha[9] = {0};
+    esp_app_get_elf_sha256(sha, sizeof(sha));
+    int fw_len = snprintf(fw_tag, sizeof(fw_tag), "fw=%s+%s",
+                          esp_app_get_description()->version, sha);
+    if (fw_len < 0) fw_len = 0;
+    if (fw_len >= (int)sizeof(fw_tag)) fw_len = sizeof(fw_tag) - 1;
+
+    uint8_t buf[1 + 1 + 2 + 6 + ID_API_KEY_MAX + 1 + ID_FW_TAG_MAX];
+    /* type + company + mac + key + 0x00 separator + fw tag */
+    size_t payload_len = 1 + 2 + 6 + key_len + 1 + (size_t)fw_len;
     buf[0] = (uint8_t)payload_len;
     buf[1] = 0xFF;
     buf[2] = 0xFE;
     buf[3] = 0x08;
     memcpy(&buf[4],  mac, 6);
     memcpy(&buf[10], g_config.api_key, key_len);
+    buf[10 + key_len] = 0x00;
+    memcpy(&buf[10 + key_len + 1], fw_tag, (size_t)fw_len);
     size_t total = 1 + payload_len;
 
     struct os_mbuf *data = os_msys_get_pkthdr(total, 0);
@@ -925,10 +1061,10 @@ static int configure_id_advertiser(void)
 
     s_id_adv_configured = true;
     ESP_LOGI(TAG,
-             "Identity advertiser started on handle %d mac=%02X:%02X:%02X:%02X:%02X:%02X key_len=%u",
+             "Identity advertiser started on handle %d mac=%02X:%02X:%02X:%02X:%02X:%02X key_len=%u %s",
              ID_ADV_HANDLE,
              mac[0], mac[1], mac[2], mac[3], mac[4], mac[5],
-             (unsigned)key_len);
+             (unsigned)key_len, fw_tag);
     return 0;
 }
 
@@ -975,6 +1111,9 @@ static void on_sync(void)
 
 static void on_reset(int reason)
 {
+    /* Clearing s_pack_adv_configured makes every Pack write a no-op until
+     * on_sync reconfigures handle 1. If that doesn't happen, the Pack
+     * watchdog in relay_task reconfigures (and ultimately restarts). */
     ESP_LOGW(TAG, "BLE host reset: %d", reason);
     s_det_adv_configured  = false;
     s_id_adv_configured   = false;
