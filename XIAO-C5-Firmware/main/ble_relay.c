@@ -23,6 +23,13 @@
  * at which point bumping higher is a one-line change. */
 #define MAX_CONCURRENT_DRONES 32
 
+/* Compile-time master switch for every advertiser this file owns. Defaults
+ * ON so phone-paired X1/M1 builds are unchanged; the Cellular X1 sets it to 0
+ * in config.h (see the comment there). */
+#ifndef WSD_BLE_ADV_TX
+#define WSD_BLE_ADV_TX 1
+#endif
+
 static const char *TAG = "BLE_RELAY";
 
 static QueueHandle_t s_queue        = NULL;
@@ -937,6 +944,14 @@ static int configure_id_advertiser(void)
  * ───────────────────────────────────────────────────────────────────────────── */
 static void on_sync(void)
 {
+    if (!WSD_BLE_ADV_TX) {
+        /* No advertiser is configured, so the *_adv_configured flags stay
+         * false and advertise_pack()/ble_detection_advertise() stay no-ops;
+         * the relay task can't spawn without ble_relay_start(). */
+        ESP_LOGI(TAG, "BLE host synced — advertising disabled (WSD_BLE_ADV_TX=0), no adverts");
+        return;
+    }
+
     ESP_LOGI(TAG, "BLE host synced — configuring extended advertisers");
 
     /* Handle 0 — non-connectable legacy PDU for ODID relay. */

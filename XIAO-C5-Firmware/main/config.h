@@ -96,3 +96,12 @@
 // used (WSD_UART_PRIMARY_RX/GPIO12 is the live status-LED YELLOW pin).
 // Set to 0 to compile the feature out entirely with no code changes elsewhere.
 #define WSD_DISPLAY_EMIT            1
+
+// ── BLE advertising (Cellular X1: OFF) ─────────────────────────────────────────
+// This variant uploads over cellular under its provisioned `cell` identity and
+// never calls ble_relay_start(). Before this guard, ble_relay.c's on_sync still
+// broadcast the 0x08FE identity advert (real BT MAC + api_key prefix), which
+// nearby phones relayed as a heartbeat for a second, stale node row keyed on
+// that BT MAC. 0 = on_sync configures/starts no advertisers at all. Phone-paired
+// X1/M1 trees don't define this; ble_relay.c defaults it to 1 (unchanged).
+#define WSD_BLE_ADV_TX              0
