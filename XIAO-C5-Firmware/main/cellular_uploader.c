@@ -4,6 +4,7 @@
 #include "modem_http.h"
 #include "gnss_reader.h"
 #include "odid_decoder.h"
+#include "detection_json.h"
 #include "status_led.h"
 #include "config.h"
 #include "upload_batch.h"
