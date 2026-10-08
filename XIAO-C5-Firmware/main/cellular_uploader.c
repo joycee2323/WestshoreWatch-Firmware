@@ -4,6 +4,7 @@
 #include "modem_http.h"
 #include "gnss_reader.h"
 #include "odid_decoder.h"
+#include "detection_json.h"
 #include "status_led.h"
 #include "config.h"
 #include "esp_log.h"
@@ -89,45 +90,9 @@ static void load_config(void)
 }
 
 /* ── JSON serialization ───────────────────────────────────────────────────── */
-/* Emit ONE drone object in the canonical schema the backend ingest path reads
- * (routes/nodes.js + routes/detections.js) and the Android node sends
- * (DetectionUploader.kt): {id, lat, lon, alt, spd, hdg, op_lat, op_lon}.
- *
- * CRITICAL: the backend keys on `drone.id` and does `if (!uas_id) continue;`,
- * so the field MUST be "id" (not "uas_id") or the drone is silently dropped
- * (HTTP 200, stored:0). Likewise altitude/speed/heading must be "alt"/"spd"/
- * "hdg". `alt` is the GEODETIC altitude (Android maps alt = altGeo). Fields
- * the backend ignores (id_type, baro alt, height, vertical speed, status,
- * rssi, mac, …) are omitted to match the canonical body exactly and keep the
- * cellular payload small. `ts` (ODID self-clock) and `nickname` are omitted —
- * the firmware doesn't have them; the backend treats them as null (same as the
- * Sentinel path), so the coalescer/stale gate behaves identically. */
-static int format_detection_json(const odid_detection_t *det, char *buf, size_t sz)
-{
-    int n = 0;
-
-    /* id is mandatory — without it the backend skips the drone. */
-    n += snprintf(buf + n, sz - n, "{\"id\":\"%s\"",
-                  det->has_basic_id ? det->basic_id.uas_id : "");
-
-    if (det->has_location) {
-        n += snprintf(buf + n, sz - n,
-            ",\"lat\":%.7f,\"lon\":%.7f,\"alt\":%.1f,\"spd\":%.1f,\"hdg\":%u",
-            det->location.lat, det->location.lon,
-            det->location.alt_geo,        /* canonical alt = geodetic altitude */
-            det->location.speed_horiz,    /* spd = horizontal speed */
-            det->location.heading);       /* hdg */
-    }
-
-    if (det->has_system) {
-        n += snprintf(buf + n, sz - n,
-            ",\"op_lat\":%.7f,\"op_lon\":%.7f",
-            det->system.operator_lat, det->system.operator_lon);
-    }
-
-    n += snprintf(buf + n, sz - n, "}");
-    return n;
-}
+/* One drone object: detection_json_format() (detection_json.c — pure, host-
+ * tested in test_host/). Adds status/height/vspd for the backend's
+ * grounded-aircraft state; invalid ODID values are sent as null. */
 
 static int build_payload(odid_detection_t *batch, int count, char *buf, size_t sz)
 {
@@ -135,7 +100,7 @@ static int build_payload(odid_detection_t *batch, int count, char *buf, size_t s
     n += snprintf(buf + n, sz - n, "{\"drones\":[");
     for (int i = 0; i < count; i++) {
         if (i > 0) n += snprintf(buf + n, sz - n, ",");
-        n += format_detection_json(&batch[i], buf + n, sz - n);
+        n += detection_json_format(&batch[i], buf + n, sz - n);
     }
     n += snprintf(buf + n, sz - n, "]");
 
