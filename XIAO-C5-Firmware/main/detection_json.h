@@ -11,7 +11,7 @@
  * carrying one is uploaded as JSON null, never as the sentinel number — the
  * same rules as the phone parsers (OdidParser.kt / odidParser.ts) and the
  * backend's grounded-aircraft checks (services/groundedState.js). */
-#define DETJSON_STATUS_MAX_VALID    3          /* 4..15 reserved            */
+#define DETJSON_STATUS_MAX_VALID    4          /* 4 = RID system failure (F3411-22a); 5..15 reserved */
 #define DETJSON_ALT_INVALID_MAX_M   (-999.75f) /* raw 0 = -1000 m (alt, height) */
 #define DETJSON_VSPEED_MAX_VALID    62.0f      /* 63 m/s = invalid           */
 
