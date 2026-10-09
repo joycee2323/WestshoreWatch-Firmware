@@ -137,10 +137,11 @@ void cellular_uploader_submit(const odid_detection_t *det)
 }
 
 /* ── JSON serialization ───────────────────────────────────────────────────── */
-/* Drone objects come from upload_batch_format_drone(): the canonical schema
- * routes/nodes.js reads ({id, lat, lon, alt, spd, hdg, op_lat, op_lon}, field
- * names exactly as before — "id" is mandatory or the backend skips the drone)
- * plus two per-frame time fields:
+/* Drone objects come from upload_batch_format_drone(), which wraps
+ * detection_json_format(): the canonical schema routes/nodes.js reads
+ * ({id, lat, lon, alt, spd, hdg, status, height, vspd, op_lat, op_lon} —
+ * "id" is mandatory or the backend skips the drone; invalid ODID values go
+ * out as null) plus two per-frame time fields:
  *   ts     — the drone's own ODID Location timestamp, tenths of a second since
  *            the top of the UTC hour (0..35999); omitted when the drone sends
  *            "unknown" (0xFFFF). The backend's stale gate (routes/nodes.js →

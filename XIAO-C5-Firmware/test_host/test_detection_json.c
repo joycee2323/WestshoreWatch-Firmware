@@ -117,11 +117,26 @@ int main(void)
     expect_contains(buf, ",\"height\":30.0", "height 30");
     expect_contains(buf, ",\"vspd\":-1.5", "vspd -1.5");
 
+    /* 2b. ts: the drone's ODID timestamp, omitted when unknown. */
+    d = skydio(); d.location.timestamp = 18345;
+    fmt(&d, buf, sizeof buf);
+    expect_contains(buf, ",\"ts\":18345", "ts sent");
+    d = skydio(); d.location.timestamp = 0xFFFF;
+    fmt(&d, buf, sizeof buf);
+    expect_absent(buf, "\"ts\"", "ts 0xFFFF unknown → omitted");
+    d = skydio(); d.location.timestamp = 36000;
+    fmt(&d, buf, sizeof buf);
+    expect_absent(buf, "\"ts\"", "ts 36000 out of range → omitted");
+    d = skydio(); d.location.timestamp = 0;
+    fmt(&d, buf, sizeof buf);
+    expect_contains(buf, ",\"ts\":0", "ts 0 (top of the hour) is valid");
+
     /* 3. No Location message: no location fields at all (unchanged behaviour). */
     d = skydio(); d.has_location = false;
     fmt(&d, buf, sizeof buf);
     expect_absent(buf, "\"status\"", "no location → no status");
     expect_absent(buf, "\"lat\"", "no location → no lat");
+    expect_absent(buf, "\"ts\"", "no location → no ts");
 
     /* 4. Small buffer: never writes past sz and stays NUL-terminated. */
     {

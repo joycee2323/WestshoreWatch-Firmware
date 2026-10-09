@@ -1,4 +1,5 @@
 #include "upload_batch.h"
+#include "detection_json.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -75,7 +76,7 @@ int upload_batch_add_spool(upload_frame_t *out, int count, int cap,
 
 bool upload_batch_ts_valid(const odid_detection_t *det)
 {
-    return det->has_location && det->location.timestamp < UPLOAD_ODID_TS_MAX;
+    return detection_json_ts_valid(det);
 }
 
 /* snprintf that never lets the running offset run past the buffer. */
@@ -97,29 +98,16 @@ static int put(char *buf, size_t sz, int n, const char *fmt, ...)
 int upload_batch_format_drone(const upload_frame_t *f, uint32_t now_ms,
                               char *buf, size_t sz)
 {
-    const odid_detection_t *det = &f->det;
-    int n = 0;
+    if (sz == 0) return 0;
+    /* The drone object proper — field names, units and null rules live in one
+     * place (detection_json.c, host-tested in test_detection_json.c). */
+    int n = detection_json_format(&f->det, buf, sz);
+    if (n < 0) { buf[0] = '\0'; return 0; }
+    if ((size_t)n >= sz) return (int)sz - 1;            /* truncated: clamp */
+    if (!f->live) return n;
 
-    /* Canonical schema read by routes/nodes.js (same as 1.2.1-westshore):
-     * id is mandatory; alt = geodetic altitude; spd/hdg as decoded. */
-    n = put(buf, sz, n, "{\"id\":\"%s\"", det->has_basic_id ? det->basic_id.uas_id : "");
-
-    if (det->has_location) {
-        n = put(buf, sz, n, ",\"lat\":%.7f,\"lon\":%.7f,\"alt\":%.1f,\"spd\":%.1f,\"hdg\":%u",
-                (double)det->location.lat, (double)det->location.lon,
-                (double)det->location.alt_geo, (double)det->location.speed_horiz,
-                (unsigned)det->location.heading);
-    }
-    if (det->has_system) {
-        n = put(buf, sz, n, ",\"op_lat\":%.7f,\"op_lon\":%.7f",
-                det->system.operator_lat, det->system.operator_lon);
-    }
-    if (upload_batch_ts_valid(det)) {
-        n = put(buf, sz, n, ",\"ts\":%u", (unsigned)det->location.timestamp);
-    }
-    if (f->live) {
-        n = put(buf, sz, n, ",\"age_ms\":%lu", (unsigned long)(uint32_t)(now_ms - f->rx_ms));
-    }
-    n = put(buf, sz, n, "}");
+    /* Live frame: reopen the object and append age_ms. */
+    if (n > 0 && buf[n - 1] == '}') n--;
+    n = put(buf, sz, n, ",\"age_ms\":%lu}", (unsigned long)(uint32_t)(now_ms - f->rx_ms));
     return n;
 }

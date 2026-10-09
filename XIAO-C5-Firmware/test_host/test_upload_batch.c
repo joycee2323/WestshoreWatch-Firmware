@@ -2,7 +2,7 @@
  * per-drone upload JSON (ts / age_ms).
  *
  *   cd XIAO-C5-Firmware/test_host
- *   gcc -std=c11 -Wall -Wextra -I../main test_upload_batch.c ../main/upload_batch.c -o test_upload_batch
+ *   gcc -std=c11 -Wall -Wextra -I../main test_upload_batch.c ../main/upload_batch.c ../main/detection_json.c -lm -o test_upload_batch
  *   ./test_upload_batch
  */
 #include <stdio.h>
@@ -124,6 +124,44 @@ static void test_json(void)
     f = frame("A", 1, 1, 0xFFFFFF00u);
     upload_batch_format_drone(&f, 0x00000100u, buf, sizeof buf);
     CHECK(strstr(buf, "\"age_ms\":512") != NULL);
+
+    /* 1.2.2 fields and ts/age_ms go out together, in one well-formed object. */
+    f = frame("1581F5FKD229400TEST", 41.4611922f, 18345, 1000);
+    f.det.location.status = (op_status_t)2;
+    f.det.location.height = 30.0f;
+    f.det.location.speed_vert = -1.5f;
+    f.det.location.speed_horiz = 6.5f;
+    upload_batch_format_drone(&f, 1850, buf, sizeof buf);
+    CHECK(strstr(buf, "\"spd\":6.50,\"hdg\":0") != NULL);          /* two-decimal spd */
+    CHECK(strstr(buf, ",\"status\":2") != NULL);
+    CHECK(strstr(buf, ",\"height\":30.0") != NULL);
+    CHECK(strstr(buf, ",\"vspd\":-1.5") != NULL);
+    CHECK(strstr(buf, ",\"ts\":18345") != NULL);
+    CHECK(strstr(buf, ",\"age_ms\":850}") != NULL);                 /* last field, object closed */
+    CHECK(buf[0] == '{' && strchr(buf, '}') == buf + strlen(buf) - 1); /* exactly one closing brace */
+
+    /* Invalid values → null, alongside ts/age_ms. */
+    f.det.location.status = (op_status_t)7;
+    f.det.location.height = -1000.0f;
+    f.det.location.alt_geo = -1000.0f;
+    f.det.location.speed_vert = 63.0f;
+    upload_batch_format_drone(&f, 1850, buf, sizeof buf);
+    CHECK(strstr(buf, ",\"status\":null") != NULL);
+    CHECK(strstr(buf, ",\"height\":null") != NULL);
+    CHECK(strstr(buf, "\"alt\":null") != NULL);
+    CHECK(strstr(buf, ",\"vspd\":null") != NULL);
+    CHECK(strstr(buf, ",\"ts\":18345") != NULL);
+    CHECK(strstr(buf, ",\"age_ms\":850}") != NULL);
+
+    /* Status 4 (RID system failure) is valid. */
+    f.det.location.status = (op_status_t)4;
+    upload_batch_format_drone(&f, 1850, buf, sizeof buf);
+    CHECK(strstr(buf, ",\"status\":4") != NULL);
+
+    /* Spool frame: same fields, no age_ms, object still closed. */
+    f.live = false;
+    upload_batch_format_drone(&f, 1850, buf, sizeof buf);
+    CHECK(strstr(buf, "age_ms") == NULL && buf[strlen(buf) - 1] == '}');
 
     /* Truncation never runs past the buffer. */
     char small[24];

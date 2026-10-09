@@ -35,10 +35,6 @@ typedef struct {
     int spool_skipped;  /* spool frames of a drone already in the batch (dropped) */
 } upload_batch_stats_t;
 
-/* ODID Location timestamp: tenths of a second since the top of the UTC hour,
- * 0..35999. 0xFFFF (and anything >= 36000) means "unknown". */
-#define UPLOAD_ODID_TS_MAX  36000u
-
 /**
  * Collapse `n` frames (FIFO order: in[0] oldest, in[n-1] newest) to at most
  * `cap` frames, one per drone, written to `out` newest drone first.
@@ -67,20 +63,18 @@ int upload_batch_add_spool(upload_frame_t *out, int count, int cap,
                            const odid_detection_t *spooled,
                            upload_batch_stats_t *st);
 
-/** True when `det` carries a usable ODID Location timestamp. */
+/** True when `det` carries a usable ODID Location timestamp (detection_json). */
 bool upload_batch_ts_valid(const odid_detection_t *det);
 
 /**
- * Serialize one drone object for POST /api/nodes/:device_id/detections:
- *   {"id":..,"lat":..,"lon":..,"alt":..,"spd":..,"hdg":..,
- *    "op_lat":..,"op_lon":..,"ts":<0..35999>,"age_ms":<ms>}
- * `ts`     — the drone's own ODID Location timestamp (tenths of a second since
- *            the UTC hour), omitted when unknown. The backend's stale gate
- *            judges frame age with it, exactly as for the phone app.
- * `age_ms` — ms between receive and `now_ms` (payload build time), live
- *            frames only; omitted for spool replays.
- * Returns the number of characters written (snprintf semantics, clamped so
- * the caller can keep appending safely).
+ * Serialize one drone object for POST /api/nodes/:device_id/detections: the
+ * object detection_json_format() builds (id, lat, lon, alt, spd, hdg, status,
+ * height, vspd, ts, op_lat, op_lon — invalid ODID values as null, ts omitted
+ * when unknown) plus
+ *   "age_ms" — ms between receive and `now_ms` (payload build time), live
+ *              frames only; omitted for spool replays.
+ * Returns the number of characters written, clamped to sz - 1 so the caller
+ * can keep appending safely even when the buffer was too small.
  */
 int upload_batch_format_drone(const upload_frame_t *f, uint32_t now_ms,
                               char *buf, size_t sz);

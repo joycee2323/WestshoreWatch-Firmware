@@ -6,10 +6,12 @@ name: upload-batch-tests
 
 on:
   push:
-    paths: ['XIAO-C5-Firmware/main/upload_batch.*', 'XIAO-C5-Firmware/main/odid_decoder.h',
+    paths: ['XIAO-C5-Firmware/main/upload_batch.*', 'XIAO-C5-Firmware/main/detection_json.*',
+            'XIAO-C5-Firmware/main/odid_decoder.h',
             'XIAO-C5-Firmware/test_host/test_upload_batch.c', '.github/workflows/upload-batch-tests.yml']
   pull_request:
-    paths: ['XIAO-C5-Firmware/main/upload_batch.*', 'XIAO-C5-Firmware/main/odid_decoder.h',
+    paths: ['XIAO-C5-Firmware/main/upload_batch.*', 'XIAO-C5-Firmware/main/detection_json.*',
+            'XIAO-C5-Firmware/main/odid_decoder.h',
             'XIAO-C5-Firmware/test_host/test_upload_batch.c', '.github/workflows/upload-batch-tests.yml']
 
 jobs:
@@ -20,5 +22,5 @@ jobs:
       - name: test_upload_batch
         working-directory: XIAO-C5-Firmware/test_host
         run: |
-          gcc -std=c11 -Wall -Wextra -Werror -I../main test_upload_batch.c ../main/upload_batch.c -o test_upload_batch
+          gcc -std=c11 -Wall -Wextra -Werror -I../main test_upload_batch.c ../main/upload_batch.c ../main/detection_json.c -lm -o test_upload_batch
           ./test_upload_batch

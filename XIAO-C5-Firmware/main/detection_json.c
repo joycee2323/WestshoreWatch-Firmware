@@ -21,10 +21,16 @@
  * as null (status 5-15, alt/height -1000 m, |vspd| > 62 m/s); the backend
  * fails open on null.
  *
+ * ts = the drone's own ODID Location timestamp, tenths of a second into the
+ * UTC hour (0..35999), omitted when the drone sends "unknown" (0xFFFF). The
+ * backend's stale gate (services/odidStaleGate.js) judges frame age with it,
+ * as it does for the phone app: older than 5 min → too_old, a repeated ts →
+ * unchanged. It is inside odid_detection_t, so it survives the SPIFFS spool.
+ * Risk: a drone with a wrong clock can make fresh frames look stale.
+ *
  * Fields the backend ignores (id_type, baro alt, rssi, mac, …) are omitted to
- * keep the cellular payload small. `ts` (ODID self-clock) and `nickname` are
- * omitted — the firmware doesn't have them; the backend treats them as null
- * (same as the Sentinel path), so the coalescer/stale gate behaves identically. */
+ * keep the cellular payload small; `nickname` is not sent. The uploader adds
+ * age_ms (receive → payload build) after this object: see upload_batch.c. */
 
 static int put_float_or_null(char *buf, size_t sz, const char *key, float v, int valid)
 {
@@ -36,6 +42,11 @@ static int put_float_or_null(char *buf, size_t sz, const char *key, float v, int
 static size_t rem(size_t sz, int n)
 {
     return (n < 0 || (size_t)n >= sz) ? 0 : sz - (size_t)n;
+}
+
+bool detection_json_ts_valid(const odid_detection_t *det)
+{
+    return det->has_location && det->location.timestamp < DETJSON_TS_MAX;
 }
 
 int detection_json_format(const odid_detection_t *det, char *buf, size_t sz)
@@ -64,6 +75,9 @@ int detection_json_format(const odid_detection_t *det, char *buf, size_t sz)
                                loc->height > DETJSON_ALT_INVALID_MAX_M);
         n += put_float_or_null(buf + n, rem(sz, n), "vspd", loc->speed_vert,
                                fabsf(loc->speed_vert) <= DETJSON_VSPEED_MAX_VALID);
+        if (detection_json_ts_valid(det)) {
+            n += snprintf(buf + n, rem(sz, n), ",\"ts\":%u", (unsigned)loc->timestamp);
+        }
     }
 
     if (det->has_system) {
