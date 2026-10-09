@@ -1,4 +1,5 @@
-# Host unit tests for the pure relay policy (main/relay_policy.c), run with gcc.
+# Host unit tests (gcc): the pure relay policy (main/relay_policy.c) and the
+# Location decode / relay re-encode (WSW-Firmware odid_decoder.c + odid_encoder.c).
 # Every project on the branch that carries a copy is tested, and the copies
 # must stay byte-identical (there is no shared component — see VARIANTS.md).
 name: host-tests
@@ -29,3 +30,11 @@ jobs:
             echo "== $src"
             make -C tests/relay_policy clean run SRC="../../$src" UNITY=/tmp/unity/src
           done
+
+  odid-location:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Location decode + relay re-encode vs opendroneid (WSW-Firmware)
+        run: make -C tests/odid_location clean run SRC=../../WSW-Firmware/main

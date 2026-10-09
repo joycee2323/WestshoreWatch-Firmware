@@ -3,6 +3,7 @@ idf_component_register(
         "main.c"
         "nvs_config.c"
         "odid_decoder.c"
+        "odid_encoder.c"
         "wifi_scanner.c"
         "ble_scanner.c"
         "ble_relay.c"

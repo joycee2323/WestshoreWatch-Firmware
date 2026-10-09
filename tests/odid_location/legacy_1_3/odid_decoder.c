@@ -21,43 +21,23 @@ static void parse_basic_id(const uint8_t *buf, odid_detection_t *out)
 static void parse_location(const uint8_t *buf, odid_detection_t *out)
 {
     odid_location_t *loc = &out->location;
-    /* ASTM F3411 / opendroneid-core-c ODID_Location_encoded, byte 1 (LSb first):
-     *   bit 0 SpeedMult, bit 1 EWDirection, bit 2 HeightType, bit 3 reserved,
-     *   bits 7-4 Status.  Byte 2 = Direction 0..179 (whole byte), byte 3 =
-     *   SpeedHorizontal.  The previous decoder read E/W from bit 0 and the
-     *   multiplier/direction from byte 2, folding heading into 0-89 and reading
-     *   speed 3x high for odd headings. Same fix as Sentinel-Firmware 1.2.0. */
     loc->status        = (op_status_t)((buf[1] >> 4) & 0x0F);
-    uint8_t speed_mult = buf[1] & 0x01;
-    uint8_t ew_dir     = (buf[1] >> 1) & 0x01;
-    loc->height_type   = (buf[1] >> 2) & 0x01;
-    uint8_t dir_raw    = buf[2];
+    uint8_t speed_mult = buf[2] & 0x01;
+    uint8_t ew_dir_seg = buf[1] & 0x01;
     uint8_t speed_raw  = buf[3];
     int8_t  vspeed_raw = (int8_t)buf[4];
-
-    /* Direction: 0..179 plus 180 when EWDirection is set. Byte 2 >= 180 is
-     * outside the encoding; opendroneid writes 361 ("unknown") as 181 + EW. */
-    if (dir_raw >= 180) {
-        loc->heading_valid = false;
-        loc->heading       = 0;
-    } else {
-        loc->heading_valid = true;
-        loc->heading       = (uint16_t)(dir_raw + (ew_dir ? 180 : 0));
-    }
-
-    /* Horizontal speed: mult=0 => raw*0.25, mult=1 => raw*0.75 + 255*0.25.
-     * opendroneid encodes "unknown" (255 m/s) as raw 255 with mult=1. */
-    loc->speed_horiz = speed_mult ? (speed_raw * 0.75f + 63.75f)
+    /* ASTM F3411-22a: mult=0 => v=raw*0.25 m/s, mult=1 => v=raw*0.75 m/s */
+    loc->speed_horiz = speed_mult ? (speed_raw * 0.75f)
                                   : (speed_raw * 0.25f);
-    loc->speed_valid = !(speed_mult && speed_raw == 255);
+    uint8_t dir_raw  = buf[2] >> 1;
+    loc->heading     = (uint16_t)(dir_raw + (ew_dir_seg ? 180 : 0)) % 360;
     loc->speed_vert  = vspeed_raw * 0.5f;
 
     int32_t lat_raw, lon_raw;
     memcpy(&lat_raw, &buf[5], 4);
     memcpy(&lon_raw, &buf[9], 4);
-    /* Same as opendroneid decodeLatLon(): (double)raw / 1e7. */
-    loc->lat = (double)lat_raw / 1e7;
-    loc->lon = (double)lon_raw / 1e7;
+    loc->lat = lat_raw * 1e-7f;
+    loc->lon = lon_raw * 1e-7f;
 
     uint16_t ab, ag, ht, ts;
     memcpy(&ab, &buf[13], 2);
@@ -73,8 +53,6 @@ static void parse_location(const uint8_t *buf, odid_detection_t *out)
     loc->vert_acc  =  buf[19]       & 0x0F;
     loc->baro_acc  = (buf[20] >> 4) & 0x0F;
     loc->speed_acc =  buf[20]       & 0x0F;
-    memcpy(loc->raw, buf, sizeof loc->raw);
-    loc->raw_valid = true;
     out->has_location = true;
 }
 
@@ -94,28 +72,19 @@ static void parse_system(const uint8_t *buf, odid_detection_t *out)
     sys->operator_lat = lat_raw * 1e-7;
     sys->operator_lon = lon_raw * 1e-7;
 
-    /* ASTM F3411 / opendroneid ODID_System_encoded: 10-11 AreaCount,
-     * 12 AreaRadius (uint8, x10 m), 13-14 AreaCeiling, 15-16 AreaFloor,
-     * 17 ClassEU:4 | CategoryEU:4, 18-19 OperatorAltitudeGeo, 20-23 Timestamp.
-     * The previous decoder read AreaRadius as uint16, shifting everything
-     * after it one byte late (same fix as Sentinel-Firmware 1.2.0). */
-    sys->operator_location_type = buf[1] & 0x03;
-    sys->classification_type    = (buf[1] >> 2) & 0x07;
-    uint16_t ac, ceil_raw, floor_raw, op_alt_raw;
-    uint32_t ts;
+    uint16_t ac, ar, ceil_raw, floor_raw, op_alt_raw;
     memcpy(&ac,        &buf[10], 2);
-    memcpy(&ceil_raw,  &buf[13], 2);
-    memcpy(&floor_raw, &buf[15], 2);
-    memcpy(&op_alt_raw,&buf[18], 2);
-    memcpy(&ts,        &buf[20], 4);
+    memcpy(&ar,        &buf[12], 2);
+    memcpy(&ceil_raw,  &buf[14], 2);
+    memcpy(&floor_raw, &buf[16], 2);
+    memcpy(&op_alt_raw,&buf[19], 2);
     sys->area_count       = ac;
-    sys->area_radius      = (uint32_t)buf[12] * 10;
+    sys->area_radius      = ar * 10;
     sys->area_ceiling     = ceil_raw  * 0.5f - 1000.0f;
     sys->area_floor       = floor_raw * 0.5f - 1000.0f;
-    sys->category         = (buf[17] >> 4) & 0x0F;
-    sys->class_value      =  buf[17]       & 0x0F;
+    sys->category         = (buf[18] >> 4) & 0x0F;
+    sys->class_value      =  buf[18]       & 0x0F;
     sys->operator_alt_geo = op_alt_raw * 0.5f - 1000.0f;
-    sys->timestamp        = ts;
     out->has_system = true;
 }
 
@@ -170,12 +139,6 @@ int odid_parse_pack(const uint8_t *buf, uint8_t len, odid_detection_t *out)
              ((buf[1] >> 4) & 0x0F) == ODID_MSG_PACK && buf[2] == 25) {
         p    = buf + 1;
         plen = len - 1;
-    }
-    /* Westshore relay Pack (count in bits 0-4, relay format in bits 5-7,
-     * messages from byte 2 — see odid_encoder.h). Not a spec Pack; ignore it
-     * rather than mis-parse it. */
-    else if (((buf[0] >> 4) & 0x0F) == ODID_MSG_PACK && (buf[1] & 0xE0) != 0) {
-        return 0;
     }
     /* Try offset 0 with any msg_size (fallback) */
     else if (((buf[0] >> 4) & 0x0F) == ODID_MSG_PACK) {
