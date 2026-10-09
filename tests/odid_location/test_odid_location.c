@@ -17,7 +17,17 @@
  *      encodeMessagePack(), parsed with odid_parse_pack(), relayed, and decoded
  *      again with the reference: lat/lon, geodetic + baro altitude, height,
  *      height type, status, direction and speed must round-trip exactly
- *      (to the encoding's own resolution, i.e. identical encoded values). */
+ *      (to the encoding's own resolution, i.e. identical encoded values);
+ *   5. relay format 2 compatibility, against the REAL 1.3-westshore code
+ *      (legacy_1_3/: cddc1df odid_decoder + ble_relay encoders, verbatim):
+ *      - the handle-0 Location and Pack message 2 are byte-identical to 1.3;
+ *      - System bytes 0 and 2-9 (operator lat/lon) are byte-identical to 1.3;
+ *      - a port of the SHIPPED app's parser (app 1.2.4 odidParser.ts, which
+ *        Kotlin and Swift mirror) decodes the new Pack to exactly the values
+ *        it got from the 1.3 Pack;
+ *      - message 4 (type 0xE) is the drone's own Location bytes, and decodes
+ *        per spec to the transmitted values;
+ *      - the Pack fits the extended-advertising data limit. */
 
 #include <math.h>
 #include <stdio.h>
@@ -26,6 +36,7 @@
 #include "opendroneid.h"
 #include "odid_decoder.h"
 #include "odid_encoder.h"
+#include "legacy_1_3/legacy_1_3.h"
 
 static long checks = 0, failures = 0;
 #define CHECK(cond, ...) do { checks++; if (!(cond)) { failures++; if (failures <= 25) { \
@@ -141,6 +152,118 @@ static int encode(uint8_t out[25], int status, int height_type, float dir, float
     return rc;
 }
 
+/* ── Shipped-app parser port (app 1.2.4, src/services/odidParser.ts) ──────
+ * parsePack: count = byte1 & 0x1F, messages from byte 2, later messages
+ * override earlier ones field by field, unknown types contribute nothing. */
+typedef struct {
+    int has_loc, has_sys;
+    double lat, lon, alt_geo, height, speed_h, heading, speed_v;
+    int alt_geo_ok, height_ok, speed_v_ok, status, height_type, ts;
+    double op_lat, op_lon;
+} app_view_t;
+
+static int32_t rd32(const uint8_t *b) { int32_t v; memcpy(&v, b, 4); return v; }
+static uint16_t rd16(const uint8_t *b) { uint16_t v; memcpy(&v, b, 2); return v; }
+
+static void app_parse_message(const uint8_t *m, app_view_t *a)
+{
+    int t = (m[0] >> 4) & 0x0F;
+    if (t == 1) {
+        double lat = rd32(&m[5]) / 1e7, lon = rd32(&m[9]) / 1e7;
+        if (lat == 0 && lon == 0) { a->has_loc = 0; return; }
+        int st = (m[1] >> 4) & 0x0F;
+        int vr = m[4] > 127 ? m[4] - 256 : m[4];
+        double vs = vr * 0.5, ag = rd16(&m[15]) * 0.5 - 1000, ht = rd16(&m[17]) * 0.5 - 1000;
+        a->has_loc = 1; a->lat = lat; a->lon = lon;
+        a->status = st <= 3 ? st : -1;
+        a->height_type = (m[1] >> 2) & 1;
+        a->speed_v = vs; a->speed_v_ok = fabs(vs) <= 62.0;
+        a->alt_geo = ag; a->alt_geo_ok = ag > -999.75;
+        a->height = ht; a->height_ok = ht > -999.75;
+        a->speed_h = (m[2] & 1) ? (m[3] * 0.75 + 63.75) : (m[3] * 0.25);
+        a->heading = ((m[2] >> 1) & 0x7F) + (m[1] & 1) * 180;
+        a->ts = rd16(&m[21]);
+    } else if (t == 4) {
+        double la = rd32(&m[2]) / 1e7, lo = rd32(&m[6]) / 1e7;
+        a->has_sys = !(la == 0 && lo == 0);
+        if (a->has_sys) { a->op_lat = la; a->op_lon = lo; }
+    }
+}
+
+static app_view_t app_parse_pack(const uint8_t *pack, size_t len)
+{
+    app_view_t a;
+    memset(&a, 0, sizeof a);
+    int count = pack[1] & 0x1F;
+    for (int i = 0; i < count; i++) {
+        size_t off = 2 + (size_t)i * 25;
+        if (off + 25 > len) break;
+        app_parse_message(&pack[off], &a);
+    }
+    return a;
+}
+
+static void same_app_view(const app_view_t *o, const app_view_t *n, const char *ctx)
+{
+    CHECK(memcmp(o, n, sizeof *o) == 0,
+          "%s: shipped-app view differs (lat %.7f/%.7f spd %.2f/%.2f hdg %.0f/%.0f)", ctx,
+          o->lat, n->lat, o->speed_h, n->speed_h, o->heading, n->heading);
+}
+
+/* One received drone (Basic ID, Location, System messages) through the 1.3
+ * relay and the 1.4 relay. */
+static void check_relay_compat(const uint8_t basic[25], const uint8_t loc[25], const uint8_t sys[25],
+                               const char *ctx)
+{
+    uint8_t old_pack[77], old_h0[25];
+    legacy13_relay(basic, loc, sys, old_pack, old_h0);
+
+    odid_detection_t d;
+    memset(&d, 0, sizeof d);
+    odid_parse_message(basic, 25, &d);
+    odid_parse_message(loc, 25, &d);
+    odid_parse_message(sys, 25, &d);
+    uint8_t new_sys[25], new_pack[WSD_PACK_PAYLOAD], new_h0[25];
+    odid_encode_system(&d.system, new_sys);
+    odid_build_relay_pack(basic, &d.location, new_sys, new_pack);
+    odid_encode_location_legacy(&d.location, new_h0);
+
+    CHECK(memcmp(old_h0, new_h0, 25) == 0, "%s: handle-0 Location differs from 1.3", ctx);
+    CHECK(memcmp(&old_pack[2], &new_pack[2], 50) == 0, "%s: Pack Basic ID / Location differ from 1.3", ctx);
+    CHECK(old_pack[52] == new_pack[52] && memcmp(&old_pack[54], &new_pack[54], 8) == 0,
+          "%s: System header / operator lat-lon differ from 1.3", ctx);
+    CHECK(new_pack[0] == 0xF2 && new_pack[1] == ((WSD_RELAY_FORMAT << 5) | 4) && (new_pack[1] & 0x1F) == 4,
+          "%s: Pack header", ctx);
+
+    app_view_t ov = app_parse_pack(old_pack, sizeof old_pack);
+    app_view_t nv = app_parse_pack(new_pack, sizeof new_pack);
+    same_app_view(&ov, &nv, ctx);
+
+    /* Message 4: the drone's bytes with only the type nibble changed. */
+    const uint8_t *m4 = &new_pack[77];
+    CHECK((m4[0] >> 4) == WSD_MSG_SPEC_LOCATION, "%s: msg 4 type", ctx);
+    uint8_t restored[25];
+    memcpy(restored, m4, 25);
+    restored[0] = (uint8_t)((ODID_MSG_LOCATION << 4) | (m4[0] & 0x0F));
+    CHECK(memcmp(restored, loc, 25) == 0, "%s: msg 4 is not the drone's Location", ctx);
+
+    /* System, decoded by the reference, matches what the drone sent. */
+    ODID_System_data rs, rn;
+    odid_initSystemData(&rs); odid_initSystemData(&rn);
+    decodeSystemMessage(&rs, (const ODID_System_encoded *)sys);
+    decodeSystemMessage(&rn, (const ODID_System_encoded *)new_sys);
+    CHECK(rs.AreaCount == rn.AreaCount && rs.AreaRadius == rn.AreaRadius &&
+          rs.AreaCeiling == rn.AreaCeiling && rs.AreaFloor == rn.AreaFloor &&
+          rs.CategoryEU == rn.CategoryEU && rs.ClassEU == rn.ClassEU &&
+          rs.ClassificationType == rn.ClassificationType &&
+          rs.OperatorLocationType == rn.OperatorLocationType &&
+          rs.OperatorAltitudeGeo == rn.OperatorAltitudeGeo && rs.Timestamp == rn.Timestamp,
+          "%s: relayed System fields differ from the drone's", ctx);
+    CHECK(fabs(rs.OperatorLatitude - rn.OperatorLatitude) <= 2e-7 &&
+          fabs(rs.OperatorLongitude - rn.OperatorLongitude) <= 2e-7,
+          "%s: relayed operator lat/lon (1.3 float path)", ctx);
+}
+
 int main(void)
 {
     uint8_t msg[25];
@@ -161,6 +284,21 @@ int main(void)
                 }
             }
 
+    /* Fixed Basic ID / System messages for the exhaustive relay comparison. */
+    static uint8_t k_basic[25], k_sys[25];
+    {
+        ODID_BasicID_data b; odid_initBasicIDData(&b);
+        b.IDType = ODID_IDTYPE_SERIAL_NUMBER; b.UAType = ODID_UATYPE_HELICOPTER_OR_MULTIROTOR;
+        strcpy(b.UASID, "1668BR40FA0098ER");
+        encodeBasicIDMessage((ODID_BasicID_encoded *)k_basic, &b);
+        ODID_System_data sd; odid_initSystemData(&sd);
+        sd.OperatorLatitude = 41.4559348; sd.OperatorLongitude = -81.9238019;
+        sd.AreaCount = 1; sd.AreaRadius = 50; sd.AreaCeiling = 150.0f; sd.AreaFloor = 0.0f;
+        sd.ClassificationType = ODID_CLASSIFICATION_TYPE_EU; sd.CategoryEU = ODID_CATEGORY_EU_OPEN;
+        sd.ClassEU = ODID_CLASS_EU_CLASS_1; sd.OperatorAltitudeGeo = 182.5f; sd.Timestamp = 293000000u;
+        encodeSystemMessage((ODID_System_encoded *)k_sys, &sd);
+    }
+
     /* 2. Every byte-1 x byte-2 combination for several byte-3 speeds. */
     const uint8_t raws[] = { 0, 1, 2, 100, 254, 255 };
     encode(msg, 2, 0, 0.0f, 0.0f);
@@ -174,6 +312,7 @@ int main(void)
                 uint8_t out[25];
                 odid_encode_location(&o, out);
                 CHECK(memcmp(out, msg, 25) == 0, "%s: forwarded bytes differ", ctx);
+                check_relay_compat(k_basic, msg, k_sys, ctx);
             }
 
     /* 3. Named cases. */
@@ -214,8 +353,16 @@ int main(void)
         uas.SystemValid = 1;
         uas.System.OperatorLatitude = urand(-90, 90);
         uas.System.OperatorLongitude = urand(-180, 180);
-        uas.System.AreaCount = 1;
+        uas.System.OperatorLocationType = (ODID_operator_location_type_t)(rng() % 3);
+        uas.System.ClassificationType = (ODID_classification_type_t)(rng() % 2);
+        uas.System.CategoryEU = (ODID_category_EU_t)(rng() % 5);
+        uas.System.ClassEU = (ODID_class_EU_t)(rng() % 8);
+        uas.System.AreaCount = (uint16_t)(1 + rng() % 500);
+        uas.System.AreaRadius = (uint16_t)((rng() % 256) * 10);
+        uas.System.AreaCeiling = (float)urand(-1000, 3000);
+        uas.System.AreaFloor = (float)urand(-1000, 3000);
         uas.System.OperatorAltitudeGeo = (float)urand(-1000, 3000);
+        uas.System.Timestamp = 290000000u + rng() % 10000000u;
 
         ODID_MessagePack_data pd;
         odid_initMessagePackData(&pd);
@@ -261,7 +408,26 @@ int main(void)
         CHECK(L->SpeedHorizontal == 255.0f ? back.SpeedHorizontal == 255.0f
                                            : fabsf(back.SpeedHorizontal - L->SpeedHorizontal) <= tol + 1e-3f,
               "%s: speed %.3f vs %.3f", ctx, back.SpeedHorizontal, L->SpeedHorizontal);
+        check_relay_compat((const uint8_t *)&b, orig, (const uint8_t *)&s, ctx);
         packs_ok++;
+    }
+
+    /* 6. Size: the relay Pack must fit the extended advertising data limit
+     *    (CONFIG_BT_NIMBLE_EXT_ADV_MAX_SIZE=251; ble_relay.c also asserts it). */
+    CHECK(1 + 1 + 2 + 2 + WSD_PACK_PAYLOAD <= 251, "Pack AD %d bytes > 251", 1 + 1 + 2 + 2 + WSD_PACK_PAYLOAD);
+    CHECK(WSD_PACK_PAYLOAD == 102, "Pack payload %d", WSD_PACK_PAYLOAD);
+
+    /* 7. A Westshore relay Pack (rf in byte 1 bits 5-7) is never parsed as a
+     *    spec Pack by the 1.4 decoder. */
+    {
+        uint8_t pk[WSD_PACK_PAYLOAD];
+        odid_detection_t d; memset(&d, 0, sizeof d);
+        odid_parse_message(k_basic, 25, &d);
+        encode(msg, 2, 0, 90.0f, 10.0f);
+        odid_parse_message(msg, 25, &d);
+        odid_build_relay_pack(k_basic, &d.location, k_sys, pk);
+        odid_detection_t e; memset(&e, 0, sizeof e);
+        CHECK(odid_parse_pack(pk, sizeof pk, &e) == 0 && !e.has_location, "relay Pack must not parse as spec Pack");
     }
 
     if (failures) {

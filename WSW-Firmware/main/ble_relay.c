@@ -137,10 +137,10 @@ static void encode_basic_id(const odid_detection_t *d, uint8_t *buf)
 
 static void encode_location(const odid_detection_t *d, uint8_t *buf)
 {
-    /* ASTM F3411 layout (relay format 2): the drone's own Location bytes are
-     * forwarded unchanged; see odid_encoder.c. Pre-1.4 relays re-encoded the
-     * legacy-decoded values in a non-spec byte 1-2 layout. */
-    odid_encode_location(&d->location, buf);
+    /* Handle 0 per-message Location: kept in the pre-1.4 layout, byte for byte,
+     * because shipped apps decode it. The spec message travels in the Pack
+     * (odid_build_relay_pack). */
+    odid_encode_location_legacy(&d->location, buf);
 }
 
 static void encode_self_id_signal(const odid_detection_t *d, uint8_t *buf,
@@ -168,24 +168,9 @@ static void encode_self_id_signal(const odid_detection_t *d, uint8_t *buf,
 
 static void encode_system(const odid_detection_t *d, uint8_t *buf)
 {
-    memset(buf, 0, 25);
-    buf[0] = (ODID_MSG_SYSTEM << 4) | 0x02;
-    buf[1] = 0x00; /* operator location type = takeoff */
-    int32_t lat_raw = (int32_t)(d->system.operator_lat * 1e7f);
-    int32_t lon_raw = (int32_t)(d->system.operator_lon * 1e7f);
-    memcpy(&buf[2], &lat_raw, 4);
-    memcpy(&buf[6], &lon_raw, 4);
-    uint16_t ac = (uint16_t)d->system.area_count;
-    uint16_t ar = (uint16_t)(d->system.area_radius / 10);
-    memcpy(&buf[10], &ac, 2);
-    memcpy(&buf[12], &ar, 2);
-    uint16_t ceil_raw  = (uint16_t)((d->system.area_ceiling  + 1000.0f) / 0.5f);
-    uint16_t floor_raw = (uint16_t)((d->system.area_floor    + 1000.0f) / 0.5f);
-    memcpy(&buf[14], &ceil_raw,  2);
-    memcpy(&buf[16], &floor_raw, 2);
-    buf[18] = (uint8_t)((d->system.category << 4) | d->system.class_value);
-    uint16_t op_alt = (uint16_t)((d->system.operator_alt_geo + 1000.0f) / 0.5f);
-    memcpy(&buf[19], &op_alt, 2);
+    /* ASTM layout (pre-1.4 relays shifted everything after AreaRadius one
+     * byte). Shipped apps read only operator lat/lon, which are unchanged. */
+    odid_encode_system(&d->system, buf);
 }
 
 
@@ -255,17 +240,15 @@ static void advertise_odid(const uint8_t *odid_msg_25)
  * extended PDU, so it exceeds the 31-byte legacy cap without breaking handle 0's
  * DroneScout compatibility.
  * ───────────────────────────────────────────────────────────────────────────── */
-#define ODID_PACK_MSG_COUNT  3
-#define ODID_PACK_PAYLOAD    (2 + 25 * ODID_PACK_MSG_COUNT)   /* 77 */
+/* Relay format 2 Pack — layout documented in odid_encoder.h (102 bytes). */
+#define ODID_PACK_PAYLOAD    WSD_PACK_PAYLOAD
 
 static void encode_pack(const odid_detection_t *d, uint8_t *buf)
 {
-    memset(buf, 0, ODID_PACK_PAYLOAD);
-    buf[0] = (ODID_MSG_PACK << 4) | 0x02;
-    buf[1] = ODID_PACK_MSG_COUNT;
-    encode_basic_id(d, &buf[2]);
-    encode_location(d, &buf[2 + 25]);
-    encode_system  (d, &buf[2 + 25 + 25]);
+    uint8_t basic[25], sys[25];
+    encode_basic_id(d, basic);
+    encode_system(d, sys);
+    odid_build_relay_pack(basic, &d->location, sys, buf);
 }
 
 /* Advertise one ODID Message Pack on PACK_ADV_HANDLE.
@@ -283,8 +266,10 @@ static bool advertise_pack(const uint8_t *pack_payload)
 {
     if (!s_pack_adv_configured) return false;
 
-    const size_t ad_len = 1 + 1 + 2 + 2 + ODID_PACK_PAYLOAD;  /* 83 */
-    uint8_t adv_raw[83];
+    const size_t ad_len = 1 + 1 + 2 + 2 + ODID_PACK_PAYLOAD;  /* 108 */
+    _Static_assert(1 + 1 + 2 + 2 + ODID_PACK_PAYLOAD <= CONFIG_BT_NIMBLE_EXT_ADV_MAX_SIZE,
+                   "relay Pack exceeds the extended advertising data limit");
+    uint8_t adv_raw[1 + 1 + 2 + 2 + ODID_PACK_PAYLOAD];
     adv_raw[0] = (uint8_t)(ad_len - 1);  /* length field excludes itself */
     adv_raw[1] = 0x16;
     adv_raw[2] = 0xFA;
@@ -414,10 +399,11 @@ static const rp_radio_limits_t k_pack_radio_limits = {
     .reconfig_retry_ticks = pdMS_TO_TICKS(PACK_RECONFIG_RETRY_MS),
 };
 
+/* float casts keep the pre-1.4 behaviour exactly (lat/lon were float). */
 #define LOC_VALID(d) ((d).has_location && \
-                      (d).location.lat >= -90.0f && (d).location.lat <= 90.0f && \
-                      (d).location.lon >= -180.0f && (d).location.lon <= 180.0f && \
-                      ((d).location.lat != 0.0f || (d).location.lon != 0.0f))
+                      (float)(d).location.lat >= -90.0f && (float)(d).location.lat <= 90.0f && \
+                      (float)(d).location.lon >= -180.0f && (float)(d).location.lon <= 180.0f && \
+                      ((float)(d).location.lat != 0.0f || (float)(d).location.lon != 0.0f))
 
 /* [diag] TEMPORARY — revert after triage. Scan all live slots and log if any
  * two share the same src_mac, which would make MAC-fallback attribution
@@ -578,8 +564,9 @@ static void merge_into_slot(drone_slot_t *s, const odid_detection_t *det,
     if (!s->sys_saved_ok && s->acc.has_basic_id && LOC_VALID(s->acc) &&
         s->acc.has_location && s->acc.location.status == OP_STATUS_AIRBORNE) {
         s->sys_saved = s->acc.system;
-        s->sys_saved.operator_lat = s->acc.location.lat;
-        s->sys_saved.operator_lon = s->acc.location.lon;
+        /* (float): same operator bytes as pre-1.4, when lat/lon were float. */
+        s->sys_saved.operator_lat = (float)s->acc.location.lat;
+        s->sys_saved.operator_lon = (float)s->acc.location.lon;
         s->sys_saved_ok = true;
         ESP_LOGI(TAG, "Operator location fallback — drone pos (uas_id=%s): lat=%.6f lon=%.6f",
                  s->uas_id, (double)s->acc.location.lat, (double)s->acc.location.lon);
