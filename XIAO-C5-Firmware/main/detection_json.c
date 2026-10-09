@@ -52,7 +52,7 @@ int detection_json_format(const odid_detection_t *det, char *buf, size_t sz)
                       (double)loc->lat, (double)loc->lon);
         n += put_float_or_null(buf + n, rem(sz, n), "alt", loc->alt_geo,
                                loc->alt_geo > DETJSON_ALT_INVALID_MAX_M);
-        n += snprintf(buf + n, rem(sz, n), ",\"spd\":%.1f,\"hdg\":%u",
+        n += snprintf(buf + n, rem(sz, n), ",\"spd\":%.2f,\"hdg\":%u",
                       (double)loc->speed_horiz,  /* spd = horizontal speed */
                       (unsigned)loc->heading);   /* hdg */
         if ((int)loc->status <= DETJSON_STATUS_MAX_VALID) {
