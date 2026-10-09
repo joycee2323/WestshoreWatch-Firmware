@@ -99,6 +99,10 @@ int main(void)
     fmt(&d, buf, sizeof buf);
     expect_contains(buf, ",\"vspd\":62.0", "vspd 62 valid");
 
+    d = skydio(); d.location.status = (op_status_t)4;
+    fmt(&d, buf, sizeof buf);
+    expect_contains(buf, ",\"status\":4", "status 4 RID system failure is valid");
+
     d = skydio(); d.location.status = (op_status_t)5;
     fmt(&d, buf, sizeof buf);
     expect_contains(buf, ",\"status\":null", "status 5 reserved");

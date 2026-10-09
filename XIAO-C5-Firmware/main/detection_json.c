@@ -16,9 +16,9 @@
  *
  * status / height / vspd feed the backend's grounded-aircraft state, with the
  * same names and units as the Sentinel-Pi upload (translator.py) and the
- * phone relay: status = ODID operational status 0-3, height = metres,
+ * phone relay: status = ODID operational status 0-4, height = metres,
  * vspd = vertical speed m/s (positive up). Invalid / unknown values are sent
- * as null (status 4-15, alt/height -1000 m, |vspd| > 62 m/s); the backend
+ * as null (status 5-15, alt/height -1000 m, |vspd| > 62 m/s); the backend
  * fails open on null.
  *
  * Fields the backend ignores (id_type, baro alt, rssi, mac, …) are omitted to
