@@ -18,3 +18,8 @@ jobs:
         run: |
           gcc -std=c11 -Wall -Wextra -I../main test_detection_json.c ../main/detection_json.c -lm -o test_detection_json
           ./test_detection_json
+      - name: test_odid_location (cellular decode + upload JSON vs opendroneid)
+        working-directory: XIAO-C5-Firmware/test_host
+        run: |
+          gcc -std=c11 -Wall -Wextra -I../main -Istubs -Ithird_party/opendroneid               test_odid_location.c ../main/odid_decoder.c ../main/detection_json.c               third_party/opendroneid/opendroneid.c -lm -o test_odid_location
+          ./test_odid_location

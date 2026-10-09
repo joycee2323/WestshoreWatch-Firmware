@@ -52,9 +52,15 @@ int detection_json_format(const odid_detection_t *det, char *buf, size_t sz)
                       (double)loc->lat, (double)loc->lon);
         n += put_float_or_null(buf + n, rem(sz, n), "alt", loc->alt_geo,
                                loc->alt_geo > DETJSON_ALT_INVALID_MAX_M);
-        n += snprintf(buf + n, rem(sz, n), ",\"spd\":%.2f,\"hdg\":%u",
-                      (double)loc->speed_horiz,  /* spd = horizontal speed */
-                      (unsigned)loc->heading);   /* hdg */
+        /* spd / hdg: null when the drone sent "unknown" (255 m/s / 361°). */
+        if (loc->speed_valid)
+            n += snprintf(buf + n, rem(sz, n), ",\"spd\":%.2f", (double)loc->speed_horiz);
+        else
+            n += snprintf(buf + n, rem(sz, n), ",\"spd\":null");
+        if (loc->heading_valid)
+            n += snprintf(buf + n, rem(sz, n), ",\"hdg\":%u", (unsigned)loc->heading);
+        else
+            n += snprintf(buf + n, rem(sz, n), ",\"hdg\":null");
         if ((int)loc->status <= DETJSON_STATUS_MAX_VALID) {
             n += snprintf(buf + n, rem(sz, n), ",\"status\":%d", (int)loc->status);
         } else {
@@ -64,6 +70,15 @@ int detection_json_format(const odid_detection_t *det, char *buf, size_t sz)
                                loc->height > DETJSON_ALT_INVALID_MAX_M);
         n += put_float_or_null(buf + n, rem(sz, n), "vspd", loc->speed_vert,
                                fabsf(loc->speed_vert) <= DETJSON_VSPEED_MAX_VALID);
+        /* The Location message as received + which decoder produced spd/hdg:
+         * the backend stores loc_raw and marks speed/heading reliable for a
+         * known decoder (routes/nodes.js via services/rawLocation.js). */
+        if (loc->raw_valid) {
+            n += snprintf(buf + n, rem(sz, n), ",\"loc_raw\":\"");
+            for (size_t i = 0; i < sizeof loc->raw; i++)
+                n += snprintf(buf + n, rem(sz, n), "%02x", loc->raw[i]);
+            n += snprintf(buf + n, rem(sz, n), "\",\"decoder\":\"%s\"", ODID_DECODER_VERSION);
+        }
     }
 
     if (det->has_system) {

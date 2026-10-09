@@ -84,20 +84,32 @@ typedef struct {
 
 typedef struct {
     op_status_t status;
-    float       lat;            // degrees
-    float       lon;            // degrees
+    double      lat;            // degrees; double so %.7f reproduces the encoded 1e-7 integer
+    double      lon;            // degrees
     float       alt_baro;       // metres MSL
     float       alt_geo;        // metres WGS84
     float       height;         // metres AGL
-    float       speed_horiz;    // m/s
+    float       speed_horiz;    // m/s; meaningful only when speed_valid
     float       speed_vert;     // m/s  (+ = up)
-    uint16_t    heading;        // degrees true (0..359)
+    uint16_t    heading;        // degrees true (0..359); meaningful only when heading_valid
     uint32_t    timestamp;      // tenths of second since hour
     uint8_t     horiz_acc;      // encoded horizontal accuracy
     uint8_t     vert_acc;       // encoded vertical accuracy
     uint8_t     baro_acc;       // encoded baro accuracy
     uint8_t     speed_acc;      // encoded speed accuracy
+    // ASTM F3411 / opendroneid Location byte 1-2 fields (see parse_location):
+    bool        heading_valid;  // false when direction is "unknown" (encoded 361)
+    bool        speed_valid;    // false when speed is "unknown" (encoded 255 m/s)
+    uint8_t     height_type;    // byte 1 bit 2: 0 = above takeoff, 1 = above ground
+    // The 25-byte Location message exactly as received (uploaded as loc_raw).
+    bool        raw_valid;
+    uint8_t     raw[25];
 } odid_location_t;
+
+// Tag for uploads whose speed/heading come from the spec-correct decode in
+// parse_location. The backend marks speed/heading reliable only for a known
+// tag (WestshoreWatch-Backend services/rawLocation.js SPEC_DECODERS).
+#define ODID_DECODER_VERSION "odid-spec-1"
 
 typedef struct {
     char        description[24];

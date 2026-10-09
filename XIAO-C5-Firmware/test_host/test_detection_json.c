@@ -45,8 +45,10 @@ static odid_detection_t skydio(void)
     d.location.alt_geo = 179.0f;
     d.location.height = -1.0f;
     d.location.speed_horiz = 0.0f;
+    d.location.speed_valid = true;
     d.location.speed_vert = 0.0f;
     d.location.heading = 0;
+    d.location.heading_valid = true;
     d.has_system = true;
     d.system.operator_lat = 41.4559348f;
     d.system.operator_lon = -81.9238019f;
@@ -118,6 +120,18 @@ int main(void)
     expect_contains(buf, ",\"vspd\":-1.5", "vspd -1.5");
 
     /* 3. No Location message: no location fields at all (unchanged behaviour). */
+    d = skydio(); d.location.speed_valid = false; d.location.heading_valid = false;
+    fmt(&d, buf, sizeof buf);
+    expect_contains(buf, ",\"spd\":null,\"hdg\":null", "unknown speed/heading are null");
+
+    d = skydio();
+    fmt(&d, buf, sizeof buf);
+    expect_absent(buf, "loc_raw", "no raw bytes -> no loc_raw/decoder");
+    d.location.raw_valid = true;
+    for (int i = 0; i < 25; i++) d.location.raw[i] = (unsigned char)(0x10 + i);
+    fmt(&d, buf, sizeof buf);
+    expect_contains(buf, ",\"loc_raw\":\"101112131415161718191a1b1c1d1e1f202122232425262728\",\"decoder\":\"odid-spec-1\"", "loc_raw + decoder");
+
     d = skydio(); d.has_location = false;
     fmt(&d, buf, sizeof buf);
     expect_absent(buf, "\"status\"", "no location → no status");
