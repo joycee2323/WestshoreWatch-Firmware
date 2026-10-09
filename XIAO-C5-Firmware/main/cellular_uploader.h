@@ -3,6 +3,7 @@
 #include "esp_err.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
+#include "odid_decoder.h"
 
 /**
  * HTTPS detection uploader over the cellular link.
@@ -17,8 +18,22 @@
  */
 
 /**
+ * Create the uploader's RAM queue (items are upload_frame_t: a detection plus
+ * its receive time). Call once, before the distributor task runs.
+ * @return the queue, or NULL on allocation failure
+ */
+QueueHandle_t cellular_uploader_create_queue(int depth);
+
+/**
+ * Hand one detection to the uploader (distributor task only — not
+ * reentrant). Stamps the receive time; if the queue is full the OLDEST queued
+ * frame is dropped so the newest one is never the one lost.
+ */
+void cellular_uploader_submit(const odid_detection_t *det);
+
+/**
  * Start the uploader task.
- * @param detect_queue  FreeRTOS queue of odid_detection_t from distributor
+ * @param detect_queue  the queue returned by cellular_uploader_create_queue()
  */
 esp_err_t cellular_uploader_start(QueueHandle_t detect_queue);
 

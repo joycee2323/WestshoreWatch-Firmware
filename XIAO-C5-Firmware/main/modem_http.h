@@ -3,6 +3,7 @@
 #include "esp_err.h"
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 /**
  * Native SIM7600 AT HTTP(S) POST.
@@ -24,7 +25,22 @@ typedef struct {
     int  http_status;   /* parsed HTTP status (e.g. 200), or -1 if none */
     int  modem_err;     /* modem-side error code >=700 (715=TLS fail, …), else 0 */
     int  resp_len;      /* response body length from +HTTPACTION, or -1 */
+    const char *stage;  /* last stage reached: "init", "para", "data", "data_ok",
+                         * "action", "urc", "parse", "budget" or "done" */
+    uint32_t elapsed_ms;/* wall time of the transaction, HTTPTERM included */
 } modem_http_result_t;
+
+/* Per-call timing. budget_ms = 0 keeps the per-step timeouts below as the only
+ * limits (the classic modem_http_post behaviour). With budget_ms > 0 every
+ * wait is capped to what is left of the budget and the POST gives up (stage
+ * "budget") once it is spent; the closing AT+HTTPTERM still runs, with a
+ * short timeout, so the next transaction starts clean. */
+typedef struct {
+    uint32_t short_ms;      /* HTTPINIT / HTTPPARA / HTTPDATA prompt / HTTPACTION OK */
+    uint32_t data_ok_ms;    /* OK after the body is written                         */
+    uint32_t urc_ms;        /* +HTTPACTION result URC                               */
+    uint32_t budget_ms;     /* whole transaction, 0 = unlimited                     */
+} modem_http_opts_t;
 
 /**
  * POST a body over HTTPS via the modem's native AT HTTP stack.
@@ -46,3 +62,10 @@ typedef struct {
 esp_err_t modem_http_post(const char *url, const char *headers,
                           const char *body, int body_len,
                           modem_http_result_t *out);
+
+/** modem_http_post with explicit timing (see modem_http_opts_t). NULL opts =
+ *  the classic timeouts, identical to modem_http_post. */
+esp_err_t modem_http_post_opts(const char *url, const char *headers,
+                               const char *body, int body_len,
+                               modem_http_result_t *out,
+                               const modem_http_opts_t *opts);

@@ -17,6 +17,7 @@ idf_component_register(
         "modem_http.c"            # native SIM7600 AT HTTP(S) POST transport
         "detection_queue.c"
         "cellular_uploader.c"
+        "upload_batch.c"          # newest-frame-per-drone batching + drone JSON (pure C, host-tested)
         "gnss_reader.c"
         "display_emit.c"           # WSD_DISPLAY_EMIT — status-screen UART tee (GPIO11/D6, TX-only)
         # modem_data_resume.cpp — PPP-only esp_modem shim; not built on the
