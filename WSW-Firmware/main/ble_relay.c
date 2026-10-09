@@ -13,6 +13,7 @@
 #include "freertos/task.h"
 #include "led.h"
 #include "relay_policy.h"
+#include "odid_encoder.h"
 #include "esp_system.h"
 #include "esp_app_desc.h"
 #include <string.h>
@@ -103,8 +104,10 @@ static uint8_t       s_counter      = 0;
 #define ID_API_KEY_MAX  64
 
 /* Firmware identity appended after the api_key, behind a 0x00 separator:
- *   "fw=<PROJECT_VER>+<first 8 hex of the app ELF SHA-256>"
- * e.g. "fw=1.3-westshore+1a2b3c4d". Lets the phone report firmware_version in
+ *   "fw=<PROJECT_VER>+<first 8 hex of the app ELF SHA-256>;rf=<WSD_RELAY_FORMAT>"
+ * e.g. "fw=1.4-westshore+1a2b3c4d;rf=2". rf tells the phone how relayed
+ * Location messages are laid out (odid_encoder.h); absent = legacy (rf=1).
+ * Lets the phone report firmware_version in
  * its relayed heartbeat (the backend already stores it) so fielded units can
  * be told apart without the portal. Parsers that only read the MAC are
  * unaffected. */
@@ -134,45 +137,10 @@ static void encode_basic_id(const odid_detection_t *d, uint8_t *buf)
 
 static void encode_location(const odid_detection_t *d, uint8_t *buf)
 {
-    memset(buf, 0, 25);
-    const odid_location_t *loc = &d->location;
-    buf[0] = (ODID_MSG_LOCATION << 4) | 0x02;
-
-    /* buf[1]: status (4 bits) | ew_dir_segment (1 bit) — 0=0..179, 1=180..359 */
-    uint8_t ew_seg = (loc->heading >= 180) ? 1 : 0;
-    buf[1] = (uint8_t)((loc->status << 4) | ew_seg);
-
-    /* buf[2]: direction_mod180 (7 bits) | speed_multiplier (1 bit)
-     * speed_mult=0: speed = raw * 0.25 m/s  (0..63.75 m/s)
-     * speed_mult=1: speed = raw * 0.75 + 63.75 m/s (63.75..254.25 m/s) */
-    uint8_t dir_mod = (uint8_t)(loc->heading % 180);
-    bool use_mult = (loc->speed_horiz > 63.75f);
-    buf[2] = (uint8_t)((dir_mod << 1) | (use_mult ? 1 : 0));
-
-    /* buf[3]: horizontal speed raw
-     * mult=0: v = raw * 0.25 m/s (0..63.75)
-     * mult=1: v = raw * 0.75 m/s (0..191.25) */
-    float spd = use_mult ? (loc->speed_horiz / 0.75f)
-                         : (loc->speed_horiz / 0.25f);
-    if (spd < 0.0f) spd = 0.0f;
-    if (spd > 254.0f) spd = 254.0f;
-    buf[3] = (uint8_t)spd;
-
-    buf[4] = (uint8_t)((int8_t)(loc->speed_vert / 0.5f));
-    int32_t lat_raw = (int32_t)(loc->lat * 1e7f);
-    int32_t lon_raw = (int32_t)(loc->lon * 1e7f);
-    memcpy(&buf[5],  &lat_raw, 4);
-    memcpy(&buf[9],  &lon_raw, 4);
-    uint16_t ab = (uint16_t)((loc->alt_baro + 1000.0f) / 0.5f);
-    uint16_t ag = (uint16_t)((loc->alt_geo  + 1000.0f) / 0.5f);
-    uint16_t ht = (uint16_t)((loc->height   + 1000.0f) / 0.5f);
-    memcpy(&buf[13], &ab, 2);
-    memcpy(&buf[15], &ag, 2);
-    memcpy(&buf[17], &ht, 2);
-    buf[19] = (loc->horiz_acc << 4) | loc->vert_acc;
-    buf[20] = (loc->baro_acc  << 4) | loc->speed_acc;
-    uint16_t ts = (uint16_t)loc->timestamp;
-    memcpy(&buf[21], &ts, 2);
+    /* ASTM F3411 layout (relay format 2): the drone's own Location bytes are
+     * forwarded unchanged; see odid_encoder.c. Pre-1.4 relays re-encoded the
+     * legacy-decoded values in a non-spec byte 1-2 layout. */
+    odid_encode_location(&d->location, buf);
 }
 
 static void encode_self_id_signal(const odid_detection_t *d, uint8_t *buf,
@@ -1018,8 +986,8 @@ static int configure_id_advertiser(void)
     char fw_tag[ID_FW_TAG_MAX];
     char sha[9] = {0};
     esp_app_get_elf_sha256(sha, sizeof(sha));
-    int fw_len = snprintf(fw_tag, sizeof(fw_tag), "fw=%s+%s",
-                          esp_app_get_description()->version, sha);
+    int fw_len = snprintf(fw_tag, sizeof(fw_tag), "fw=%s+%s;rf=%d",
+                          esp_app_get_description()->version, sha, WSD_RELAY_FORMAT);
     if (fw_len < 0) fw_len = 0;
     if (fw_len >= (int)sizeof(fw_tag)) fw_len = sizeof(fw_tag) - 1;
 

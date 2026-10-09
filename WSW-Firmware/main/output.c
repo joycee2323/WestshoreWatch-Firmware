@@ -238,9 +238,17 @@ static int format_json_compact(const odid_detection_t *d, char *buf, int max_len
     }
 
     n += snprintf(buf + n, max_len - n,
-        "\"lat\":%.7f,\"lon\":%.7f,\"alt\":%.1f,\"spd\":%.2f,\"hdg\":%d",
-        d->location.lat, d->location.lon, d->location.alt_geo,
-        d->location.speed_horiz, (int)d->location.heading);
+        "\"lat\":%.7f,\"lon\":%.7f,\"alt\":%.1f",
+        d->location.lat, d->location.lon, d->location.alt_geo);
+    /* Unknown heading / speed are JSON null, never a sentinel number. */
+    if (d->location.speed_valid)
+        n += snprintf(buf + n, max_len - n, ",\"spd\":%.2f", (double)d->location.speed_horiz);
+    else
+        n += snprintf(buf + n, max_len - n, ",\"spd\":null");
+    if (d->location.heading_valid)
+        n += snprintf(buf + n, max_len - n, ",\"hdg\":%d", (int)d->location.heading);
+    else
+        n += snprintf(buf + n, max_len - n, ",\"hdg\":null");
 
     if (d->has_system) {
         n += snprintf(buf + n, max_len - n,
