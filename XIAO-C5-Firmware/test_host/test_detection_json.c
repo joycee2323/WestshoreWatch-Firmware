@@ -72,7 +72,7 @@ int main(void)
     fmt(&d, buf, sizeof buf);
     expect_contains(buf, "{\"id\":\"1668BR40FA0098ER\"", "skydio id");
     expect_contains(buf, "\"alt\":179.0,", "skydio alt");
-    expect_contains(buf, "\"spd\":0.0,\"hdg\":0", "skydio spd/hdg unchanged");
+    expect_contains(buf, "\"spd\":0.00,\"hdg\":0", "skydio spd/hdg unchanged");
     expect_contains(buf, ",\"status\":1", "skydio status");
     expect_contains(buf, ",\"height\":-1.0", "skydio height -1.0 is valid");
     expect_contains(buf, ",\"vspd\":0.0", "skydio vspd");
