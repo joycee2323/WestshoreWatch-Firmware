@@ -1,0 +1,20 @@
+# Host-side unit tests for code that has no ESP-IDF dependency. Runs on a
+# GitHub Linux runner (gcc); nothing here touches hardware.
+name: host-tests
+
+on:
+  push:
+    paths: ['XIAO-C5-Firmware/main/**', 'XIAO-C5-Firmware/test_host/**', '.github/workflows/host-tests.yml']
+  pull_request:
+    paths: ['XIAO-C5-Firmware/main/**', 'XIAO-C5-Firmware/test_host/**', '.github/workflows/host-tests.yml']
+
+jobs:
+  host-c:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: test_detection_json (cellular upload JSON)
+        working-directory: XIAO-C5-Firmware/test_host
+        run: |
+          gcc -std=c11 -Wall -Wextra -I../main test_detection_json.c ../main/detection_json.c -lm -o test_detection_json
+          ./test_detection_json

@@ -26,13 +26,69 @@ static const char *TAG = "MODEM_HTTP";
 /* AT+HTTPACTION=1 → POST */
 #define HTTP_METHOD_POST     1
 
+/* HTTPTERM after a budget-limited POST: short, so a failed heartbeat still
+ * finishes inside ~budget + 2 s. */
+#define HTTPTERM_AFTER_BUDGET_MS 2000
+
+static const modem_http_opts_t DEFAULT_OPTS = {
+    .short_ms   = AT_SHORT_MS,
+    .data_ok_ms = HTTPDATA_OK_MS,
+    .urc_ms     = HTTPACTION_URC_MS,
+    .budget_ms  = 0,
+};
+
+/* Deadline helper: the wait to use for a step, or 0 when the budget is spent. */
+typedef struct {
+    TickType_t start;
+    uint32_t   budget_ms;
+} deadline_t;
+
+static uint32_t elapsed_ms(const deadline_t *d)
+{
+    return (uint32_t)((xTaskGetTickCount() - d->start) * portTICK_PERIOD_MS);
+}
+
+static uint32_t step_ms(const deadline_t *d, uint32_t want)
+{
+    if (d->budget_ms == 0) return want;
+    uint32_t used = elapsed_ms(d);
+    if (used >= d->budget_ms) return 0;
+    uint32_t left = d->budget_ms - used;
+    return want < left ? want : left;
+}
+
 esp_err_t modem_http_post(const char *url, const char *headers,
                           const char *body, int body_len,
                           modem_http_result_t *out)
 {
+    return modem_http_post_opts(url, headers, body, body_len, out, NULL);
+}
+
+/* Budget check before a step: give up (to term_out) when nothing is left. */
+#define STEP(var, want)                                                     \
+    do {                                                                    \
+        (var) = step_ms(&dl, (want));                                       \
+        if ((var) == 0) {                                                   \
+            ESP_LOGW(TAG, "POST budget %lums spent at stage %s",            \
+                     (unsigned long)o->budget_ms, res.stage);               \
+            res.stage = "budget";                                           \
+            ret = ESP_ERR_TIMEOUT;                                          \
+            goto term_out;                                                  \
+        }                                                                   \
+    } while (0)
+
+esp_err_t modem_http_post_opts(const char *url, const char *headers,
+                               const char *body, int body_len,
+                               modem_http_result_t *out,
+                               const modem_http_opts_t *opts)
+{
     if (!url || !body || body_len <= 0) return ESP_ERR_INVALID_ARG;
 
-    modem_http_result_t res = { .http_status = -1, .modem_err = 0, .resp_len = -1 };
+    const modem_http_opts_t *o = opts ? opts : &DEFAULT_OPTS;
+    deadline_t dl = { .start = xTaskGetTickCount(), .budget_ms = o->budget_ms };
+    uint32_t t = 0;
+    modem_http_result_t res = { .http_status = -1, .modem_err = 0, .resp_len = -1,
+                                .stage = "init", .elapsed_ms = 0 };
     char line[LINE_BUF_SIZE];
     char resp[RESP_BUF_SIZE];
     char tail[64] = {0};
@@ -48,12 +104,18 @@ esp_err_t modem_http_post(const char *url, const char *headers,
     /* ── HTTPINIT ──────────────────────────────────────────────────────────
      * Errors if a prior HTTP service was left started (e.g. a POST that died
      * mid-sequence) — clear it with HTTPTERM and retry once. */
-    if (cellular_uart_send_at("AT+HTTPINIT", resp, sizeof(resp), AT_SHORT_MS) != ESP_OK) {
+    /* HTTPINIT runs before any budget check can jump to term_out, so a spent
+     * budget here unlocks and returns directly (nothing to HTTPTERM yet). */
+    t = step_ms(&dl, o->short_ms);
+    if (cellular_uart_send_at("AT+HTTPINIT", resp, sizeof(resp), t) != ESP_OK) {
         ESP_LOGW(TAG, "HTTPINIT failed — clearing stale session and retrying");
-        cellular_uart_send_at("AT+HTTPTERM", resp, sizeof(resp), AT_SHORT_MS);
-        if (cellular_uart_send_at("AT+HTTPINIT", resp, sizeof(resp), AT_SHORT_MS) != ESP_OK) {
+        t = step_ms(&dl, o->short_ms);
+        if (t) cellular_uart_send_at("AT+HTTPTERM", resp, sizeof(resp), t);
+        t = step_ms(&dl, o->short_ms);
+        if (t == 0 || cellular_uart_send_at("AT+HTTPINIT", resp, sizeof(resp), t) != ESP_OK) {
             ESP_LOGE(TAG, "HTTPINIT failed twice — aborting POST");
             cellular_uart_unlock();
+            res.elapsed_ms = elapsed_ms(&dl);
             if (out) *out = res;
             return ESP_FAIL;
         }
@@ -61,25 +123,30 @@ esp_err_t modem_http_post(const char *url, const char *headers,
     /* From here on, every exit must HTTPTERM (label term_out). */
 
     /* ── HTTPPARA: URL / SSLCFG / CONTENT / USERDATA ───────────────────────── */
+    res.stage = "para";
     snprintf(line, sizeof(line), "AT+HTTPPARA=\"URL\",\"%s\"", url);
-    if (cellular_uart_send_at(line, resp, sizeof(resp), AT_SHORT_MS) != ESP_OK) {
+    STEP(t, o->short_ms);
+    if (cellular_uart_send_at(line, resp, sizeof(resp), t) != ESP_OK) {
         ESP_LOGE(TAG, "HTTPPARA URL failed"); goto term_out;
     }
 
     /* Bind SSL context 0 (configured once at NETOPEN: sslversion/authmode/
      * enableSNI/ignorelocaltime). REQUIRED for the https:// endpoint. */
-    if (cellular_uart_send_at("AT+HTTPPARA=\"SSLCFG\",0", resp, sizeof(resp), AT_SHORT_MS) != ESP_OK) {
+    STEP(t, o->short_ms);
+    if (cellular_uart_send_at("AT+HTTPPARA=\"SSLCFG\",0", resp, sizeof(resp), t) != ESP_OK) {
         ESP_LOGE(TAG, "HTTPPARA SSLCFG failed"); goto term_out;
     }
 
+    STEP(t, o->short_ms);
     if (cellular_uart_send_at("AT+HTTPPARA=\"CONTENT\",\"application/json\"",
-                              resp, sizeof(resp), AT_SHORT_MS) != ESP_OK) {
+                              resp, sizeof(resp), t) != ESP_OK) {
         ESP_LOGE(TAG, "HTTPPARA CONTENT failed"); goto term_out;
     }
 
     if (headers && headers[0]) {
         snprintf(line, sizeof(line), "AT+HTTPPARA=\"USERDATA\",\"%s\"", headers);
-        if (cellular_uart_send_at(line, resp, sizeof(resp), AT_SHORT_MS) != ESP_OK) {
+        STEP(t, o->short_ms);
+        if (cellular_uart_send_at(line, resp, sizeof(resp), t) != ESP_OK) {
             ESP_LOGE(TAG, "HTTPPARA USERDATA failed"); goto term_out;
         }
     }
@@ -95,9 +162,11 @@ esp_err_t modem_http_post(const char *url, const char *headers,
         ESP_LOGW(TAG, "HTTPDATA byte-count mismatch: HTTPDATA=%d but strlen(body)=%d",
                  body_len, slen);
     }
+    res.stage = "data";
     snprintf(line, sizeof(line), "AT+HTTPDATA=%d,%d", body_len, HTTPDATA_SEND_MS);
+    STEP(t, o->short_ms);
     if (cellular_uart_send_expect(line, "DOWNLOAD", "ERROR",
-                                  resp, sizeof(resp), AT_SHORT_MS) != ESP_OK) {
+                                  resp, sizeof(resp), t) != ESP_OK) {
         ESP_LOGE(TAG, "HTTPDATA: no DOWNLOAD prompt"); goto term_out;
     }
     /* Settle: some SIM7600 builds drop the leading payload bytes if data is
@@ -111,7 +180,9 @@ esp_err_t modem_http_post(const char *url, const char *headers,
      * (worked for a 67-byte heartbeat, failed for a 2471-byte detection). Drain
      * with a rolling window that finds OK after any amount of echoed preamble;
      * watch ERROR too so a reject fails fast. drained tells us the echo size. */
-    dr = cellular_uart_drain_until("OK", "ERROR", HTTPDATA_OK_MS, &drained);
+    res.stage = "data_ok";
+    STEP(t, o->data_ok_ms);
+    dr = cellular_uart_drain_until("OK", "ERROR", t, &drained);
     if (dr != ESP_OK) {
         ESP_LOGE(TAG, "HTTPDATA: %s after %d-byte body (drained %d bytes)",
                  dr == ESP_FAIL ? "ERROR reply" : "no OK (timeout)",
@@ -123,23 +194,30 @@ esp_err_t modem_http_post(const char *url, const char *headers,
     /* ── HTTPACTION=1 (POST) — OK is immediate; the result arrives later as a
      * +HTTPACTION: 1,<status>,<len> URC.  Do NOT flush between the OK and the
      * URC (cellular_uart_collect doesn't), so a fast URC is never dropped. ── */
-    if (cellular_uart_send_at("AT+HTTPACTION=1", resp, sizeof(resp), AT_SHORT_MS) != ESP_OK) {
+    res.stage = "action";
+    STEP(t, o->short_ms);
+    if (cellular_uart_send_at("AT+HTTPACTION=1", resp, sizeof(resp), t) != ESP_OK) {
         ESP_LOGE(TAG, "HTTPACTION send failed"); goto term_out;
     }
-    if (cellular_uart_collect("+HTTPACTION:", resp, sizeof(resp), HTTPACTION_URC_MS) != ESP_OK) {
+    res.stage = "urc";
+    STEP(t, o->urc_ms);
+    if (cellular_uart_collect("+HTTPACTION:", resp, sizeof(resp), t) != ESP_OK) {
         /* No URC at all → transport is dead (not an HTTP-level failure). */
-        ESP_LOGE(TAG, "HTTPACTION: no result URC in %dms", HTTPACTION_URC_MS);
+        ESP_LOGE(TAG, "HTTPACTION: no result URC in %lums", (unsigned long)t);
         ret = ESP_ERR_TIMEOUT;
         goto term_out;
     }
     /* The numeric tail (" 1,<status>,<len>\r\n") follows the marker we just
      * matched; read the rest of that line and parse it. */
-    cellular_uart_collect("\n", tail, sizeof(tail), AT_SHORT_MS);
+    res.stage = "parse";
+    STEP(t, o->short_ms);
+    cellular_uart_collect("\n", tail, sizeof(tail), t);
     if (sscanf(tail, " %d,%d,%d", &method, &status, &dlen) < 2) {
         ESP_LOGE(TAG, "HTTPACTION: unparseable URC tail '%s'", tail);
         goto term_out;
     }
 
+    res.stage = "done";
     if (status >= MODEM_ERR_FLOOR) {
         res.modem_err = status;          /* 7xx — modem/TLS-side, not HTTP */
         ESP_LOGE(TAG, "HTTPACTION modem error %d (e.g. 715=TLS fail)", status);
@@ -151,8 +229,12 @@ esp_err_t modem_http_post(const char *url, const char *headers,
     }
 
 term_out:
-    cellular_uart_send_at("AT+HTTPTERM", resp, sizeof(resp), AT_SHORT_MS);
+    cellular_uart_send_at("AT+HTTPTERM", resp, sizeof(resp),
+                          o->budget_ms ? HTTPTERM_AFTER_BUDGET_MS : AT_SHORT_MS);
     cellular_uart_unlock();
+    res.elapsed_ms = elapsed_ms(&dl);
     if (out) *out = res;
     return ret;
 }
+
+#undef STEP

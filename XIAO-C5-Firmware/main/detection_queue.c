@@ -178,6 +178,33 @@ esp_err_t detection_queue_pop(odid_detection_t *det)
     return ESP_OK;
 }
 
+/* Newest item (the slot just before tail). Same on-disk layout as pop(): only
+ * the header's tail/count move, so a spool written by 1.2.1-westshore resumes
+ * unchanged and replays newest first. */
+esp_err_t detection_queue_pop_newest(odid_detection_t *det)
+{
+    if (!det) return ESP_ERR_INVALID_ARG;
+    xSemaphoreTake(s_mutex, portMAX_DELAY);
+
+    if (s_hdr.count == 0) {
+        xSemaphoreGive(s_mutex);
+        return ESP_ERR_NOT_FOUND;
+    }
+
+    uint32_t idx = (s_hdr.tail + s_hdr.capacity - 1) % s_hdr.capacity;
+    if (!read_slot(idx, det)) {
+        xSemaphoreGive(s_mutex);
+        return ESP_FAIL;
+    }
+
+    s_hdr.tail = idx;
+    s_hdr.count--;
+    write_header();
+
+    xSemaphoreGive(s_mutex);
+    return ESP_OK;
+}
+
 int detection_queue_count(void)
 {
     return (int)s_hdr.count;

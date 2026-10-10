@@ -1,0 +1,26 @@
+# Host-side unit test for the Cellular X1 upload batching (main/upload_batch.c).
+# No ESP-IDF dependency; runs with the runner's gcc. Kept as its own workflow so
+# it does not collide with host-tests.yml from the 1.3.0 line; fold it into that
+# file when the branches are merged.
+name: upload-batch-tests
+
+on:
+  push:
+    paths: ['XIAO-C5-Firmware/main/upload_batch.*', 'XIAO-C5-Firmware/main/detection_json.*',
+            'XIAO-C5-Firmware/main/odid_decoder.h',
+            'XIAO-C5-Firmware/test_host/test_upload_batch.c', '.github/workflows/upload-batch-tests.yml']
+  pull_request:
+    paths: ['XIAO-C5-Firmware/main/upload_batch.*', 'XIAO-C5-Firmware/main/detection_json.*',
+            'XIAO-C5-Firmware/main/odid_decoder.h',
+            'XIAO-C5-Firmware/test_host/test_upload_batch.c', '.github/workflows/upload-batch-tests.yml']
+
+jobs:
+  host-c:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: test_upload_batch
+        working-directory: XIAO-C5-Firmware/test_host
+        run: |
+          gcc -std=c11 -Wall -Wextra -Werror -I../main test_upload_batch.c ../main/upload_batch.c ../main/detection_json.c -lm -o test_upload_batch
+          ./test_upload_batch

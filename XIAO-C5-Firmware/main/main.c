@@ -65,7 +65,9 @@ static void distributor_task(void *arg)
     odid_detection_t det;
     while (true) {
         if (xQueueReceive(raw_queue, &det, portMAX_DELAY) == pdTRUE) {
-            xQueueSend(detect_queue, &det, 0);
+            /* Stamps the receive time; when the uploader queue is full the
+             * OLDEST frame is dropped so the newest always gets through. */
+            cellular_uploader_submit(&det);
 
             /* Best-effort tee to the status-screen UART emitter. Copies
              * only the fields it needs into its own bounded queue and
@@ -125,7 +127,7 @@ void app_main(void)
 
     /* Create detection queues */
     raw_queue    = xQueueCreate(WSD_DETECT_QUEUE_DEPTH, sizeof(odid_detection_t));
-    detect_queue = xQueueCreate(WSD_DETECT_QUEUE_DEPTH, sizeof(odid_detection_t));
+    detect_queue = cellular_uploader_create_queue(WSD_DETECT_QUEUE_DEPTH);
 
     if (!raw_queue || !detect_queue) {
         ESP_LOGE(TAG, "Queue creation failed — halting");
