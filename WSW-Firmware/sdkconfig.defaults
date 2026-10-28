@@ -12,6 +12,12 @@ CONFIG_PARTITION_TABLE_CUSTOM=y
 # If we crash before that fires, bootloader reverts to previous slot.
 CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
 
+# Cold-boot resilience — see firmware-audit-2026-05-11.md
+# Make task WDT timeout trigger a reset instead of just logging
+CONFIG_ESP_TASK_WDT_PANIC=y
+# Explicit assertion that bootloader WDT stays armed until app_main reaches a safe point
+CONFIG_BOOTLOADER_WDT_DISABLE_IN_USER_CODE=n
+
 # ── FreeRTOS ─────────────────────────────────────────────────────────────────
 CONFIG_FREERTOS_HZ=1000
 CONFIG_FREERTOS_UNICORE=n

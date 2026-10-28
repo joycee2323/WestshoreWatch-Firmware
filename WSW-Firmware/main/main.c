@@ -7,6 +7,7 @@
 #include "esp_app_desc.h"
 #include "esp_ota_ops.h"
 #include "esp_timer.h"
+#include "esp_task_wdt.h"
 #include "nvs_flash.h"
 
 #include "config.h"
@@ -120,9 +121,27 @@ void app_main(void)
     ESP_LOGI(TAG, "boot: starting wifi_scanner");
     err = wifi_scanner_start(raw_queue);
     if (err != ESP_OK) {
-        ESP_LOGE(TAG, "Wi-Fi scanner failed: %d — halting", err);
+        ESP_LOGE(TAG, "Wi-Fi scanner failed: %d — will retry then restart", err);
         led_set_pattern(LED_PATTERN_ERROR);
-        while (true) vTaskDelay(pdMS_TO_TICKS(1000));
+        // Retry up to 3 times with 2s spacing — covers transient RF cal
+        // failures (brownout still settling, PHY cal not ready). If all
+        // retries fail, restart the chip rather than halt forever — the
+        // bootloader's rollback gate still protects us from a bad image
+        // because the OTA-validate timer hasn't fired yet at this point.
+        for (int retry = 0; retry < 3; retry++) {
+            vTaskDelay(pdMS_TO_TICKS(2000));
+            err = wifi_scanner_start(raw_queue);
+            if (err == ESP_OK) {
+                ESP_LOGW(TAG, "Wi-Fi scanner recovered on retry %d", retry + 1);
+                break;
+            }
+            ESP_LOGE(TAG, "Wi-Fi scanner retry %d failed: %d", retry + 1, err);
+        }
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Wi-Fi scanner failed after retries — restarting chip");
+            vTaskDelay(pdMS_TO_TICKS(500)); // let log flush over USB-CDC / UART
+            esp_restart();
+        }
     }
     ESP_LOGI(TAG, "boot: wifi_scanner up");
 
@@ -173,7 +192,13 @@ void app_main(void)
         ESP_LOGW(TAG, "OTA: failed to arm validate timer");
     }
 
+    // Register the main task with the task WDT. With ESP_TASK_WDT_PANIC=y,
+    // if the loop ever stops feeding (e.g. main task gets stuck in a syscall),
+    // the chip resets instead of sitting silent forever. 3000 ms feed inside
+    // the 5000 ms timeout gives ~2 s margin.
+    esp_task_wdt_add(NULL);
     while (true) {
-        vTaskDelay(pdMS_TO_TICKS(5000));
+        esp_task_wdt_reset();
+        vTaskDelay(pdMS_TO_TICKS(3000));
     }
 }
