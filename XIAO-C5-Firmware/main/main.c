@@ -16,6 +16,7 @@
 #include "output.h"
 #include "led.h"
 #include "ble_relay.h"
+#include "field_test_5ghz_log.h"  /* TEMPORARY field-test instrumentation, see header */
 
 static const char *TAG = "MAIN";
 
@@ -122,6 +123,12 @@ void app_main(void)
     err = output_task_start(output_queue);
     if (err != ESP_OK)
         ESP_LOGW(TAG, "Output task failed: %d", err);
+
+    /* TEMPORARY field-test instrumentation — see field_test_5ghz_log.h.
+     * Must run before wifi_scanner_start() so the log is mounted before any
+     * detection (and therefore any field_test_5ghz_log_record() call) can
+     * happen. */
+    field_test_5ghz_log_init();
 
     /* WiFi scanner — also starts the always-on config AP and HTTP server */
     ESP_LOGI(TAG, "boot: starting wifi_scanner");

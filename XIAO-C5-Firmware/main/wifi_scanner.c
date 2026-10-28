@@ -5,6 +5,7 @@
 #include "nvs_config.h"
 #include "odid_decoder.h"
 #include "led.h"
+#include "field_test_5ghz_log.h"  /* TEMPORARY field-test instrumentation, see header */
 #include "esp_log.h"
 #include "esp_wifi.h"
 #include "esp_event.h"
@@ -259,6 +260,9 @@ static void promiscuous_cb(void *buf, wifi_promiscuous_pkt_type_t type)
         if (ppkt->rx_ctrl.channel > 14) {
             s_5g_active_channel = ppkt->rx_ctrl.channel;
             s_5g_last_seen_tick = xTaskGetTickCount();
+            /* TEMPORARY field-test instrumentation — see field_test_5ghz_log.h.
+             * Strip this call when the field test is done. */
+            field_test_5ghz_log_record(ppkt->rx_ctrl.channel, &det);
         }
 #endif
     } else {
