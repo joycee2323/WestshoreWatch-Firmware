@@ -299,6 +299,70 @@ static void test_radio_single_failure_then_success_is_fine(void)
     TEST_ASSERT_EQUAL(RP_RADIO_OK, rp_radio_check(&h, true, S(100), &RLIM));
 }
 
+/* ── One transmitter, several Basic IDs ─────────────────────────────────── */
+
+void test_alias_registration_folds_into_the_serial_slot(void)
+{
+    const uint8_t types[] = { RP_ID_TYPE_SERIAL };
+    int idx = -1;
+    TEST_ASSERT_EQUAL(RP_ALIAS_INTO, rp_basic_id_alias(RP_ID_TYPE_CAA_REG, types, 1, &idx));
+    TEST_ASSERT_EQUAL_INT(0, idx);
+}
+
+void test_alias_serial_rekeys_the_registration_only_slot(void)
+{
+    const uint8_t types[] = { RP_ID_TYPE_CAA_REG };
+    int idx = -1;
+    TEST_ASSERT_EQUAL(RP_ALIAS_RENAME, rp_basic_id_alias(RP_ID_TYPE_SERIAL, types, 1, &idx));
+    TEST_ASSERT_EQUAL_INT(0, idx);
+}
+
+void test_alias_picks_the_right_candidate_among_several(void)
+{
+    const uint8_t types[] = { 3, RP_ID_TYPE_SERIAL, 4 };
+    int idx = -1;
+    TEST_ASSERT_EQUAL(RP_ALIAS_INTO, rp_basic_id_alias(RP_ID_TYPE_CAA_REG, types, 3, &idx));
+    TEST_ASSERT_EQUAL_INT(1, idx);
+}
+
+void test_alias_no_candidates_means_own_slot(void)
+{
+    int idx = -1;
+    TEST_ASSERT_EQUAL(RP_ALIAS_NONE, rp_basic_id_alias(RP_ID_TYPE_CAA_REG, NULL, 0, &idx));
+    TEST_ASSERT_EQUAL(RP_ALIAS_NONE, rp_basic_id_alias(RP_ID_TYPE_SERIAL, NULL, 0, &idx));
+}
+
+void test_alias_two_serial_slots_on_one_mac_is_ambiguous(void)
+{
+    /* e.g. a bridge relaying two drones behind one MAC */
+    const uint8_t types[] = { RP_ID_TYPE_SERIAL, RP_ID_TYPE_SERIAL };
+    int idx = -1;
+    TEST_ASSERT_EQUAL(RP_ALIAS_NONE, rp_basic_id_alias(RP_ID_TYPE_CAA_REG, types, 2, &idx));
+}
+
+void test_alias_two_registration_slots_is_ambiguous(void)
+{
+    const uint8_t types[] = { RP_ID_TYPE_CAA_REG, RP_ID_TYPE_CAA_REG };
+    int idx = -1;
+    TEST_ASSERT_EQUAL(RP_ALIAS_NONE, rp_basic_id_alias(RP_ID_TYPE_SERIAL, types, 2, &idx));
+}
+
+void test_alias_new_serial_next_to_an_existing_serial_is_never_merged(void)
+{
+    const uint8_t types[] = { RP_ID_TYPE_SERIAL, RP_ID_TYPE_CAA_REG };
+    int idx = -1;
+    TEST_ASSERT_EQUAL(RP_ALIAS_NONE, rp_basic_id_alias(RP_ID_TYPE_SERIAL, types, 2, &idx));
+}
+
+void test_alias_other_id_types_are_never_merged(void)
+{
+    const uint8_t types[] = { RP_ID_TYPE_SERIAL };
+    int idx = -1;
+    TEST_ASSERT_EQUAL(RP_ALIAS_NONE, rp_basic_id_alias(3, types, 1, &idx));
+    TEST_ASSERT_EQUAL(RP_ALIAS_NONE, rp_basic_id_alias(4, types, 1, &idx));
+    TEST_ASSERT_EQUAL(RP_ALIAS_NONE, rp_basic_id_alias(0, types, 1, &idx));
+}
+
 int main(void)
 {
     UNITY_BEGIN();
@@ -325,5 +389,13 @@ int main(void)
     RUN_TEST(test_radio_recovers_when_reconfigure_works);
     RUN_TEST(test_radio_failed_writes_for_30s_reconfigure_then_restart);
     RUN_TEST(test_radio_single_failure_then_success_is_fine);
+    RUN_TEST(test_alias_registration_folds_into_the_serial_slot);
+    RUN_TEST(test_alias_serial_rekeys_the_registration_only_slot);
+    RUN_TEST(test_alias_picks_the_right_candidate_among_several);
+    RUN_TEST(test_alias_no_candidates_means_own_slot);
+    RUN_TEST(test_alias_two_serial_slots_on_one_mac_is_ambiguous);
+    RUN_TEST(test_alias_two_registration_slots_is_ambiguous);
+    RUN_TEST(test_alias_new_serial_next_to_an_existing_serial_is_never_merged);
+    RUN_TEST(test_alias_other_id_types_are_never_merged);
     return UNITY_END();
 }

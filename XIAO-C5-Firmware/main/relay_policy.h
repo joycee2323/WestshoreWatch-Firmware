@@ -138,6 +138,32 @@ rp_radio_action_t rp_radio_check(rp_radio_health_t *h, bool configured, rp_tick_
 /* Call after acting on RP_RADIO_RECONFIGURE. */
 void rp_radio_note_reconfigure(rp_radio_health_t *h, rp_tick_t now);
 
+/* ── One transmitter, several Basic IDs ───────────────────────────────────────
+ * A Remote ID module can broadcast both a serial number (ID type 1) and the
+ * owner's registration (ID type 2, e.g. an FAA number) as separate Basic IDs.
+ * Slots are keyed on uas_id, so each used to claim its own slot and one module
+ * showed as two drones. Candidates are the live slots whose source MAC equals
+ * the incoming frame's. Exactly-one pairings only: anything ambiguous (a bridge
+ * relaying several drones behind one MAC) returns NONE and keeps the old
+ * one-slot-per-ID behaviour.
+ *   registration arrives, exactly one serial slot on that MAC  -> INTO it
+ *   serial arrives, exactly one registration slot on that MAC and no other
+ *   serial slot on it                                          -> RENAME it
+ */
+#define RP_ID_TYPE_SERIAL   1
+#define RP_ID_TYPE_CAA_REG  2
+
+typedef enum {
+    RP_ALIAS_NONE = 0,   /* claim / use a slot of its own, as before */
+    RP_ALIAS_INTO,       /* fold the frame into candidate[*idx_out] */
+    RP_ALIAS_RENAME,     /* candidate[*idx_out] becomes this serial's slot */
+} rp_alias_t;
+
+/* id_types[i] = Basic ID type currently held by candidate slot i (same-MAC live
+ * slots only; the caller has already excluded an exact uas_id match). */
+rp_alias_t rp_basic_id_alias(uint8_t incoming_id_type, const uint8_t *id_types,
+                             int n, int *idx_out);
+
 #ifdef __cplusplus
 }
 #endif

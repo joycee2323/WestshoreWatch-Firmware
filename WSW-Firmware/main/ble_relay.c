@@ -456,6 +456,37 @@ static drone_slot_t *resolve_slot(const odid_detection_t *det, TickType_t now)
                 return &s_slots[i];
             }
         }
+        /* One transmitter, several Basic IDs (serial + registration): fold into
+         * the slot already tracking this MAC instead of claiming a second one.
+         * Pure rule in relay_policy.c (rp_basic_id_alias). */
+        {
+            drone_slot_t *cand[MAX_CONCURRENT_DRONES];
+            uint8_t       cand_type[MAX_CONCURRENT_DRONES];
+            int           n = 0;
+            for (int i = 0; i < MAX_CONCURRENT_DRONES; i++) {
+                if (s_slots[i].uas_id[0] == '\0' || !s_slots[i].mac_known ||
+                    !s_slots[i].acc.has_basic_id) continue;
+                if (memcmp(s_slots[i].src_mac, det->mac, 6) != 0) continue;
+                cand[n]      = &s_slots[i];
+                cand_type[n] = (uint8_t)s_slots[i].acc.basic_id.id_type;
+                n++;
+            }
+            int pick = -1;
+            rp_alias_t a = rp_basic_id_alias((uint8_t)det->basic_id.id_type,
+                                             cand_type, n, &pick);
+            if (a == RP_ALIAS_INTO) {
+                ESP_LOGI(TAG, "Basic ID %s folded into slot %s (same transmitter)",
+                         det->basic_id.uas_id, cand[pick]->uas_id);
+                return cand[pick];
+            }
+            if (a == RP_ALIAS_RENAME) {
+                ESP_LOGI(TAG, "Slot %s re-keyed to serial %s (same transmitter)",
+                         cand[pick]->uas_id, det->basic_id.uas_id);
+                strlcpy(cand[pick]->uas_id, det->basic_id.uas_id,
+                        sizeof(cand[pick]->uas_id));
+                return cand[pick];
+            }
+        }
         drone_slot_t *claim = NULL;
         for (int i = 0; i < MAX_CONCURRENT_DRONES; i++) {
             if (s_slots[i].uas_id[0] == '\0') { claim = &s_slots[i]; break; }
@@ -525,7 +556,13 @@ static void merge_into_slot(drone_slot_t *s, const odid_detection_t *det,
 {
     s->acc.rssi   = det->rssi;
     s->acc.source = det->source;
-    if (det->has_basic_id) { s->acc.basic_id = det->basic_id; s->acc.has_basic_id = true; }
+    /* A Basic ID folded in from the same transmitter (e.g. the registration
+     * number next to the slot's serial) must not replace the slot's own ID. */
+    if (det->has_basic_id &&
+        (!s->acc.has_basic_id ||
+         strncmp(det->basic_id.uas_id, s->uas_id, ODID_STR_LEN) == 0)) {
+        s->acc.basic_id = det->basic_id; s->acc.has_basic_id = true;
+    }
     if (LOC_VALID(*det))   { s->acc.location = det->location; s->acc.has_location = true; }
     if (det->has_system)   { s->acc.system   = det->system;   s->acc.has_system   = true; }
     if (det->has_self_id)  { s->acc.self_id  = det->self_id;  s->acc.has_self_id  = true; }
