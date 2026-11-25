@@ -165,3 +165,22 @@ void rp_radio_note_reconfigure(rp_radio_health_t *h, rp_tick_t now)
     h->has_reconfig     = true;
     h->last_reconfig_at = now;
 }
+
+rp_alias_t rp_basic_id_alias(uint8_t incoming_id_type, const uint8_t *id_types,
+                             int n, int *idx_out)
+{
+    int serial_n = 0, reg_n = 0, serial_i = -1, reg_i = -1;
+    for (int i = 0; i < n; i++) {
+        if (id_types[i] == RP_ID_TYPE_SERIAL)       { serial_n++; serial_i = i; }
+        else if (id_types[i] == RP_ID_TYPE_CAA_REG) { reg_n++;    reg_i    = i; }
+    }
+    if (incoming_id_type == RP_ID_TYPE_CAA_REG && serial_n == 1) {
+        if (idx_out) *idx_out = serial_i;
+        return RP_ALIAS_INTO;
+    }
+    if (incoming_id_type == RP_ID_TYPE_SERIAL && reg_n == 1 && serial_n == 0) {
+        if (idx_out) *idx_out = reg_i;
+        return RP_ALIAS_RENAME;
+    }
+    return RP_ALIAS_NONE;
+}
